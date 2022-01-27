@@ -7,4 +7,4 @@ services :
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: database
+      POSTGRES_DB: kotc

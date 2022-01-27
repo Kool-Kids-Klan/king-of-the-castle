@@ -1,19 +1,6 @@
-[package]
-name = "king-of-the-castle"
-version = "0.1.0"
-edition = "2021"
-readme = "README.md"
-repository = "https://github.com/Kool-Kids-Klan/king-of-the-castle"
-license = "MIT"
-
-[[bin]]
-name = "server"
-path = "./server/src/main.rs"
-
-[[bin]]
-name = "client"
-path = "./client/src/main.rs"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
+[workspace]
+members = [
+    "server",
+    "server/kotc_database",
+    "client",
+]
