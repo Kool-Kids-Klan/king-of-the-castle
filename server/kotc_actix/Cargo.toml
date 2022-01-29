@@ -1,5 +1,5 @@
 [package]
-name = "server"
+name = "kotc_actix"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,9 @@ edition = "2021"
 
 [dependencies]
 actix-web = "3.2.0"
-anyhow = "1.0.8"
-chrono = { version = "0.4.19", features = ["serde"] }
-kotc_database = { path = "kotc_database" }
-kotc_actix = { path = "kotc_actix" }
+actix = "0.10.0"
+actix-web-actors = "3"
+kotc_database = { path = "../kotc_database" }
+serde = "1.0.136"
+pwhash = "1.0.0"
+rand = "0.8.4"
