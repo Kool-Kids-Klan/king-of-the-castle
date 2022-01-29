@@ -1843,6 +1843,7 @@ dependencies = [
  "chrono",
  "kotc_actix",
  "kotc_database",
+ "rand 0.8.4",
 ]
 
 [[package]]
