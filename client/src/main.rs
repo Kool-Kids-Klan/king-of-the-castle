@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use kotc_reqwasm::connect_websocket;
 
 #[function_component(App)]
 fn app() -> Html {
@@ -8,5 +9,6 @@ fn app() -> Html {
 }
 
 fn main() {
+    connect_websocket();
     yew::start_app::<App>();
 }
