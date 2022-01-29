@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use kotc_actix::start_actix_server;
 
 use kotc_database::{
     establish_connection,
@@ -47,6 +48,8 @@ async fn main() -> anyhow::Result<()> {
         .await?;
     game_repo.delete_game(game_id).await?;
     user_repo.delete_user(user_id).await?;
+
+    start_actix_server().await?;
 
     Ok(())
 }
