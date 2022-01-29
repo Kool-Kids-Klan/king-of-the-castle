@@ -1,5 +1,10 @@
-use kotc_actix::start_actix_server;
+mod game;
+
 use std::sync::Arc;
+
+use kotc_actix::start_actix_server;
+use crate::game::Game;
+
 
 use kotc_database::{
     establish_connection,
@@ -23,6 +28,11 @@ async fn main() -> anyhow::Result<()> {
         .await?;
     let user = user_repo.get_user(user_id).await?;
     println!("{:?}", user);
+    let user2_id = user_repo
+        .create_user("Dante", "d@gmail.com", "bab", "dgfvbzsd<a")
+        .await?;
+    let user2 = user_repo.get_user(user2_id).await?;
+    println!("{:?}", user2);
 
     let game_id = game_repo.create_game().await?;
     let game = game_repo.get_game(game_id).await?;
@@ -50,6 +60,9 @@ async fn main() -> anyhow::Result<()> {
     user_repo.delete_user(user_id).await?;
 
     start_actix_server().await?;
+
+    let mut game = Game::new(vec![&user, &user2]);
+    game.print_players();
 
     Ok(())
 }
