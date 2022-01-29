@@ -7,7 +7,6 @@ use serde::{Deserialize, Serialize};
 pub struct NewUser<'a> {
     pub username: &'a str,
     pub email: &'a str,
-    pub salt: &'a str,
     pub passhash: &'a str,
 }
 
@@ -16,7 +15,6 @@ pub struct User {
     pub id: i32,
     pub username: String,
     pub email: String,
-    pub salt: String,
     pub passhash: String,
     pub games_played: i32,
     pub games_won: i32,

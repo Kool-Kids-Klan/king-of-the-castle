@@ -1,3 +1,4 @@
+use kotc_actix::start_actix_server;
 use std::sync::Arc;
 
 use kotc_database::{
@@ -9,7 +10,7 @@ use kotc_database::{
     },
 };
 
-#[tokio::main]
+#[actix_web::main]
 async fn main() -> anyhow::Result<()> {
     let conn_pool = Arc::new(establish_connection().await);
 
@@ -18,7 +19,7 @@ async fn main() -> anyhow::Result<()> {
     let participation_repo = Arc::new(PostgresParticipationRepo::new(conn_pool.clone()));
 
     let user_id = user_repo
-        .create_user("Puckoland", "k@gmail.com", "aba", "asdfjkn")
+        .create_user("Puckoland", "k@gmail.com", "asdfjkn")
         .await?;
     let user = user_repo.get_user(user_id).await?;
     println!("{:?}", user);
@@ -38,7 +39,7 @@ async fn main() -> anyhow::Result<()> {
     let won_game = game_repo.update_game_winner(game_id, user_id).await?;
     println!("{:?}", won_game);
     let user = user_repo
-        .update_user(user_id, Some("new name"), None, None, Some("password"))
+        .update_user(user_id, Some("new name"), None, Some("password"))
         .await?;
     println!("{:?}", user);
 
@@ -47,6 +48,8 @@ async fn main() -> anyhow::Result<()> {
         .await?;
     game_repo.delete_game(game_id).await?;
     user_repo.delete_user(user_id).await?;
+
+    start_actix_server().await?;
 
     Ok(())
 }
