@@ -2,5 +2,7 @@
 members = [
     "server",
     "server/kotc_database",
+    "server/kotc_actix",
     "client",
+    "client/kotc_reqwasm",
 ]
