@@ -1,18 +1,23 @@
+use std::rc::Rc;
+
 use super::player::Player;
 use super::Character;
 
-pub struct Card<'a> {
-    owner: &'a Player<'a>, // or just str?
+#[derive(Clone, Debug)]
+pub struct Card {
+    owner: String,
     character: Character,
     strength: f32,
+    revealed: bool
 }
 
-impl Card<'_> {
-    pub fn new(owner: &Player, character: Character, strength: f32) -> Card {
+impl Card {
+    pub fn new(owner: String, character: Character, strength: f32) -> Card {
         Card {
             owner,
             strength,
             character,
+            revealed: false
         }
     }
 }
