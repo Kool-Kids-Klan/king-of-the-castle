@@ -1,16 +1,28 @@
 use super::card::Card;
-use super::token::Token;
+use crate::game::Token;
 
-pub struct Column<'a> {
-    token: &'a Token,
-    cards: Vec<Card<'a>>,
+#[derive(Clone, Debug)]
+pub struct Column {
+    token: Token,
+    blocked: bool,  // Bouře
+    cards: Vec<Card>,
 }
 
-impl Column<'_> {
-    pub fn new(token: &Token) -> Column {
+impl Column {
+    pub fn new(token: Token) -> Column {
         Column {
             token,
-            cards: Vec::new(),
+            blocked: false,
+            cards: vec![],
         }
+    }
+
+    pub fn get_points(&self) -> u8 {
+        // TODO
+        0
+    }
+
+    pub fn is_completed(&self) -> bool {
+        self.cards.len() as u8 >= self.get_points() || self.blocked
     }
 }

@@ -8,3 +8,4 @@ services :
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: kotc
+    restart: always
