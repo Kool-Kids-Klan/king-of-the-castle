@@ -1,3 +1,5 @@
+extern crate core;
+
 mod game;
 
 use std::sync::Arc;
@@ -59,6 +61,7 @@ async fn main() -> anyhow::Result<()> {
 
     let mut game = Game::new(vec![&user, &user2]);
     game.print_players();
+    game.start_game().await;
 
     Ok(())
 }

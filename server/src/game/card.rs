@@ -1,14 +1,42 @@
 use std::rc::Rc;
 
 use super::player::Player;
-use super::Character;
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum Character {
+    Kral,
+    Kralovna,
+    Julie,
+    Alchymista,
+    Sermir,
+    Statkar,
+    Kupec,
+    Kardinal,
+    Trubadur,
+    Objevitel,
+    Mordyr,
+    Boure,
+    Prevlek,
+    Zradca,
+    Musketyri,
+    Mag,
+    Carodejnice,
+    Princ,
+    Panos,
+    Poustevnik,
+    Palecek,
+    Dvojnik,
+    Drak,
+    Romeo,
+    Zebrak,
+}
 
 #[derive(Clone, Debug)]
 pub struct Card {
     owner: String,
-    character: Character,
+    pub character: Character,
     strength: f32,
-    revealed: bool
+    pub revealed: bool
 }
 
 impl Card {
