@@ -19,7 +19,7 @@ async fn main() -> anyhow::Result<()> {
     let participation_repo = Arc::new(PostgresParticipationRepo::new(conn_pool.clone()));
 
     let user_id = user_repo
-        .create_user("Puckoland", "k@gmail.com", "aba", "asdfjkn")
+        .create_user("Puckoland", "k@gmail.com", "asdfjkn")
         .await?;
     let user = user_repo.get_user(user_id).await?;
     println!("{:?}", user);
@@ -39,7 +39,7 @@ async fn main() -> anyhow::Result<()> {
     let won_game = game_repo.update_game_winner(game_id, user_id).await?;
     println!("{:?}", won_game);
     let user = user_repo
-        .update_user(user_id, Some("new name"), None, None, Some("password"))
+        .update_user(user_id, Some("new name"), None, Some("password"))
         .await?;
     println!("{:?}", user);
 

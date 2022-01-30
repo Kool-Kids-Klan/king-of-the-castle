@@ -16,9 +16,9 @@ pub trait UserRepo {
         &self,
         username: &str,
         email: &str,
-        salt: &str,
         passhash: &str,
     ) -> Result<i32>;
+    async fn list_users(&self) -> Result<Vec<User>>;
     async fn get_user(&self, user_id: i32) -> Result<User>;
     async fn delete_user(&self, user_id: i32) -> Result<()>;
     async fn update_user(
@@ -26,7 +26,6 @@ pub trait UserRepo {
         user_id: i32,
         new_username: Option<&str>,
         new_email: Option<&str>,
-        new_salt: Option<&str>,
         new_passhash: Option<&str>,
     ) -> Result<User>;
     async fn add_played_game(&self, user_id: i32) -> Result<User>;
@@ -49,13 +48,11 @@ impl UserRepo for PostgresUserRepo {
         &self,
         new_username: &str,
         new_email: &str,
-        new_salt: &str,
         new_passhash: &str,
     ) -> Result<i32> {
         let new_user = NewUser {
             username: new_username,
             email: new_email,
-            salt: new_salt,
             passhash: new_passhash,
         };
 
@@ -67,17 +64,20 @@ impl UserRepo for PostgresUserRepo {
         Ok(rec.id)
     }
 
+    async fn list_users(&self) -> Result<Vec<User>> {
+        Ok(users.load::<User>(&self.pg_pool.get()?)?)
+    }
+
     async fn get_user(&self, user_id: i32) -> Result<User> {
-        Ok(users
-            .filter(id.eq(user_id))
-            .first(&self.pg_pool.get()?)
-            .expect("Error loading user"))
+        Ok(
+            users
+                .filter(id.eq(user_id))
+                .first(&self.pg_pool.get()?)?
+        )
     }
 
     async fn delete_user(&self, user_id: i32) -> Result<()> {
-        diesel::delete(users.filter(id.eq(user_id)))
-            .execute(&self.pg_pool.get()?)
-            .expect("Error deleting user");
+        diesel::delete(users.filter(id.eq(user_id))).execute(&self.pg_pool.get()?)?;
 
         Ok(())
     }
@@ -87,7 +87,6 @@ impl UserRepo for PostgresUserRepo {
         user_id: i32,
         new_username: Option<&str>,
         new_email: Option<&str>,
-        new_salt: Option<&str>,
         new_passhash: Option<&str>,
     ) -> Result<User> {
         let user = self.get_user(user_id).await?;
@@ -99,10 +98,6 @@ impl UserRepo for PostgresUserRepo {
             Some(e) => e,
             None => &user.email,
         };
-        let new_salt = match new_salt {
-            Some(s) => s,
-            None => &user.salt,
-        };
         let new_passhash = match new_passhash {
             Some(p) => p,
             None => &user.passhash,
@@ -112,11 +107,9 @@ impl UserRepo for PostgresUserRepo {
             .set((
                 username.eq(new_username),
                 email.eq(new_email),
-                salt.eq(new_salt),
                 passhash.eq(new_passhash),
             ))
-            .get_result(&self.pg_pool.get()?)
-            .expect("Error updating user");
+            .get_result(&self.pg_pool.get()?)?;
 
         Ok(user)
     }
@@ -124,8 +117,7 @@ impl UserRepo for PostgresUserRepo {
     async fn add_played_game(&self, user_id: i32) -> Result<User> {
         let user: User = diesel::update(users.filter(id.eq(user_id)))
             .set(games_played.eq(games_played + 1))
-            .get_result(&self.pg_pool.get()?)
-            .expect("Error updating user");
+            .get_result(&self.pg_pool.get()?)?;
 
         Ok(user)
     }
@@ -133,8 +125,7 @@ impl UserRepo for PostgresUserRepo {
     async fn add_won_game(&self, user_id: i32) -> Result<User> {
         let user: User = diesel::update(users.filter(id.eq(user_id)))
             .set(games_won.eq(games_won + 1))
-            .get_result(&self.pg_pool.get()?)
-            .expect("Error updating user");
+            .get_result(&self.pg_pool.get()?)?;
 
         Ok(user)
     }

@@ -1,0 +1,67 @@
+use actix_web::{get, post, web, HttpResponse, Responder};
+use serde::Deserialize;
+use std::sync::Arc;
+
+use pwhash::sha512_crypt::{hash, verify};
+
+use kotc_database::repo::user_repo::*;
+
+#[derive(Debug, Deserialize)]
+pub struct UserData {
+    username: String,
+    email: String,
+    password: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PasswordData {
+    password: String,
+}
+
+#[get("/users")]
+pub async fn get_users(data: web::Data<Arc<PostgresUserRepo>>) -> impl Responder {
+    let users = data.list_users().await.unwrap_or_default();
+
+    HttpResponse::Ok().json(users)
+}
+
+#[get("/users/{user_id}")]
+pub async fn get_user(path: web::Path<i32>, data: web::Data<Arc<PostgresUserRepo>>) -> impl Responder {
+    let id = path.into_inner();
+    let result = data.get_user(id).await;
+
+    match result {
+        Ok(user) => HttpResponse::Ok().json(user),
+        Err(_) => HttpResponse::NotFound().json(""),
+    }
+}
+
+#[post("/users/{user_id}/login")]
+pub async fn verify_user(path: web::Path<i32>, data: web::Data<Arc<PostgresUserRepo>>, body: web::Json<PasswordData>) -> impl Responder {
+    let id = path.into_inner();
+    let result = data.get_user(id).await;
+
+    match result {
+        Ok(user) => {
+            let verified = verify(&body.password, &user.passhash);
+            HttpResponse::Ok().json(verified)
+        },
+        Err(_) => HttpResponse::NotFound().json(""),
+    }
+}
+
+#[post("/users")]
+pub async fn create_user(
+    data: web::Data<Arc<PostgresUserRepo>>,
+    user_body: web::Json<UserData>,
+) -> impl Responder {
+    println!("{:?}", user_body);
+    let result = data
+        .create_user(&user_body.username, &user_body.email, &hash(&user_body.password).unwrap())
+        .await;
+
+    match result {
+        Ok(_) => HttpResponse::Created(),
+        Err(_) => HttpResponse::InternalServerError(),
+    }
+}

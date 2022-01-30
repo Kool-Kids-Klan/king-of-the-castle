@@ -1,6 +1,15 @@
+mod handlers;
+
+use std::sync::Arc;
+
 use actix::{Actor, StreamHandler};
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web_actors::ws;
+
+use kotc_database::repo::user_repo::{
+    PostgresUserRepo,
+};
+use kotc_database::establish_connection;
 
 struct KotcWs;
 
@@ -31,7 +40,19 @@ async fn index(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, E
 
 // #[actix_web::main]
 pub async fn start_actix_server() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().route("/ws/", web::get().to(index)))
+    let conn_pool = Arc::new(establish_connection().await);
+
+    let user_repo = Arc::new(PostgresUserRepo::new(conn_pool.clone()));
+
+    HttpServer::new(move || {
+        App::new()
+            .route("/ws/", web::get().to(index))
+            .app_data(web::Data::new(user_repo.clone()))
+            .service(handlers::get_users)
+            .service(handlers::get_user)
+            .service(handlers::verify_user)
+            .service(handlers::create_user)
+    })
         .bind("127.0.0.1:8081")?
         .run()
         .await

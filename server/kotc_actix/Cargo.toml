@@ -9,3 +9,6 @@ edition = "2021"
 actix-web = "4.0.0-beta.21"
 actix = "0.12.0"
 actix-web-actors = "4.0.0-beta.10"
+kotc_database = { path = "../kotc_database" }
+serde = "1.0.136"
+pwhash = "1.0.0"
