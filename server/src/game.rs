@@ -1,5 +1,7 @@
+use std::panic;
+use std::{thread, time};
 // use std::collections::HashMap;
-use itertools::iproduct;
+use itertools::{cloned, iproduct, Itertools};
 use rand::{seq::IteratorRandom, thread_rng};
 
 use crate::game::column::Column;
@@ -13,52 +15,35 @@ pub mod player;
 const NUMBER_OF_ROUNDS: u8 = 6;
 
 #[derive(Clone, Debug)]
-pub enum Character {
-    Kral,
-    Kralovna,
-    Julie,
-    Alchymista,
-    Sermir,
-    Statkar,
-    Kupec,
-    Kardinal,
-    Trubadur,
-    Objevitel,
-    Mordyr,
-    Boure,
-    Prevlek,
-    Zradca,
-    Musketyri,
-    Mag,
-    Carodejnice,
-    Princ,
-    Panos,
-    Poustevnik,
-    Palecek,
-    Dvojnik,
-    Drak,
-    Romeo,
-    Zebrak,
+pub enum Resource {
+    Coins,
+    Corn,
+    Hat,
+    Fiddle,
+    Swords,
+    Flask,
 }
 
 #[derive(Clone, Debug)]
-pub enum Token {
-    Coins(u8),
-    Corn(u8),
-    Hat(u8),
-    Fiddle(u8),
-    Swords(u8),
-    Flask(u8),
+pub struct Token {
+    resource: Resource,
+    points: u8
 }
 
-fn get_token_types() -> [fn(u8) -> Token; 6] {
-    [Token::Coins, Token::Corn, Token::Hat, Token::Fiddle, Token::Swords, Token::Flask]
+fn get_resource_types() -> [Resource; 6] {
+    [Resource::Coins, Resource::Corn, Resource::Hat, Resource::Fiddle, Resource::Swords, Resource::Flask]
+}
+
+// TODO move this to kotc_actix and import it from there
+struct Action {
+    pub card: u8,
+    pub column: u8
 }
 
 #[derive(Clone)]
 pub struct Game<'a> {
     players: Vec<Player<'a>>,
-    columns: Vec< Column>,
+    columns: Vec<Column>,
     token_deck: Vec<Token>,
 }
 
@@ -74,24 +59,71 @@ impl Game<'_> {
 
     fn init_token_deck(number_of_players: usize) -> Vec<Token> {
         let mut rng = thread_rng();
-        iproduct!([1, 2, 3, 3, 4, 5], get_token_types())
+        iproduct!(get_resource_types(), [1, 2, 3, 3, 4, 5])
             .choose_multiple(&mut rng, number_of_players * NUMBER_OF_ROUNDS as usize)
-            .iter()
-            .map(|(points, resource)| resource(*points))
+            .into_iter()
+            .map(|(resource, points)| Token {resource, points})
             .collect()
     }
 
-    pub fn start_game(&mut self) {
+    pub async fn start_game(&mut self) -> Option<()> {
         while !self.token_deck.is_empty() {
-            self.round()
+            self.round().await?;
+            break;
         }
+        Some(())
     }
 
-    fn round(&mut self) {
-        // TODO create fresh columns
-        // TODO make action for each player
-        // TODO repeat until all columns are completed
-        // TODO calculate winners and assign points
+    async fn round(&mut self) -> Option<()> {
+        self.columns = vec![];
+        (0..self.players.len()).into_iter().for_each(|_| {
+            let token = match self.token_deck.pop() {
+                Some(token) => token,
+                None => panic!("Bad number of tokens in token deck!")
+            };
+            self.columns.push(Column::new(token));
+        });
+
+        let players = self.players.clone();
+        let mut player_it = players.iter().cycle();
+        while self.columns.iter().any(|column| !column.is_completed()) {
+            self.make_action(player_it.next()?).await;
+            break;
+        }
+        self.eval_columns();
+        Some(())
+    }
+
+    async fn make_action(&mut self, player: &mut Player<'_>) {
+        println!("{}, make action!", player.user.username);
+        let action = 0;// let action = wait_for_action().await?;
+        println!("completed");
+
+        player.draw_card();
+    }
+
+    fn eval_columns(&mut self) {
+        self.columns.iter().for_each(|column| {
+            // TODO alchymista, sermir, statkar, kupec, kardinal, trubadur
+            // TODO musketyri
+
+            // TODO mag
+            // TODO carodejnice
+            // TODO princ+panos
+            // TODO poustevnik
+            // TODO palecek
+            // TODO dvojnik
+            // TODO drak
+            // TODO Romeo
+            // TODO spocitat body
+
+            // TODO zebrak
+            // TODO urcit vitaza a pripocitat body
+        })
+    }
+
+    fn get_player_by_username(&self) {
+        // alebo rovno assign_points_to_player(username)?
     }
 
     pub fn get_results(&self) { // -> HashMap<String, u8> {
@@ -101,4 +133,9 @@ impl Game<'_> {
     pub fn print_players(&self) {
         println!("{:?}", self.players)
     }
+}
+
+async fn wait() {
+    let ten_millis = time::Duration::from_millis(5000);
+    thread::sleep(ten_millis);
 }
