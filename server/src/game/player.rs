@@ -1,5 +1,6 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
+use crate::game::{get_all_resources, Resource};
 
 use super::card::{Card, Character};
 use super::{User, Token};
@@ -81,5 +82,23 @@ impl Player<'_> {
 
     pub fn add_token(&mut self, token: Token) {
         self.tokens.push(token);
+    }
+
+    fn get_obtained_resources(&self) -> Vec<Resource> {
+        self.tokens.iter().map(|token| token.clone().resource).collect()
+    }
+
+    fn get_token_points(&self) -> u8 {
+        self.tokens.iter().map(|token| token.points).sum()
+    }
+
+    pub fn get_score(&self) -> u8 {
+        let points = self.get_token_points();
+        let my_resources = self.get_obtained_resources();
+        let has_all = get_all_resources()
+            .map(|resource| my_resources.contains(&resource))
+            .iter().any(|&x| x);
+        // TODO ak ma double, tak za kazdu extra kartu -1 bod
+        if has_all {points*2} else {points}
     }
 }

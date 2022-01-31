@@ -14,7 +14,7 @@ pub mod player;
 
 const NUMBER_OF_ROUNDS: u8 = 6;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Resource {
     Coins,
     Corn,
@@ -24,15 +24,16 @@ pub enum Resource {
     Flask,
 }
 
+fn get_all_resources() -> [Resource; 6] {
+    [Resource::Coins, Resource::Corn, Resource::Hat, Resource::Fiddle, Resource::Swords, Resource::Flask]
+}
+
 #[derive(Clone, Debug)]
 pub struct Token {
     pub resource: Resource,
     pub points: u8
 }
 
-fn get_resource_types() -> [Resource; 6] {
-    [Resource::Coins, Resource::Corn, Resource::Hat, Resource::Fiddle, Resource::Swords, Resource::Flask]
-}
 
 // TODO move this to kotc_actix and import it from there
 struct Action {
@@ -59,7 +60,7 @@ impl Game<'_> {
 
     fn init_token_deck(number_of_players: usize) -> Vec<Token> {
         let mut rng = thread_rng();
-        iproduct!(get_resource_types(), [1, 2, 3, 3, 4, 5])
+        iproduct!(get_all_resources(), [1, 2, 3, 3, 4, 5])
             .choose_multiple(&mut rng, number_of_players * NUMBER_OF_ROUNDS as usize)
             .into_iter()
             .map(|(resource, points)| Token {resource, points})
@@ -103,6 +104,7 @@ impl Game<'_> {
     }
 
     fn eval_columns(&mut self) {
+        // evaluates columns and adds tokens to the players
         self.columns.iter_mut().for_each(|column| {
             let winner = column.eval();
             println!("AND THE WINNER OF COLUMN IS: {}", winner);
@@ -118,9 +120,6 @@ impl Game<'_> {
         // alebo rovno assign_points_to_player(username)?
     }
 
-    pub fn print_players(&self) {
-        println!("{:?}", self.players)
-    }
 }
 
 async fn wait() {

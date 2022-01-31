@@ -64,7 +64,6 @@ async fn main() -> anyhow::Result<()> {
     start_actix_server().await?;
 
     let mut game = Game::new(vec![&user, &user2]);
-    game.print_players();
     game.start_game().await;
 
     test_column_eval();
