@@ -2,14 +2,14 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 
 use super::card::{Card, Character};
-use super::User;
+use super::{User, Token};
 
 #[derive(Clone, Debug)]
 pub struct Player<'a> {
     pub user: &'a User,
     hand: Vec<Card>,
     deck: Vec<Card>,
-    score: u8,
+    tokens: Vec<Token>,
 }
 
 impl Player<'_> {
@@ -18,7 +18,7 @@ impl Player<'_> {
             user,
             hand: vec![],
             deck: vec![],
-            score: 0,
+            tokens: vec![],
         };
         player.refill_deck();
         player.draw_card();
@@ -45,8 +45,8 @@ impl Player<'_> {
             Card::new(self.user.username.clone(), Character::Objevitel, 13.0),
             Card::new(self.user.username.clone(), Character::Mordyr, 9.5),
             Card::new(self.user.username.clone(), Character::Boure, 9.0),
-            Card::new(self.user.username.clone(), Character::Prevlek, 0.0),
-            Card::new(self.user.username.clone(), Character::Zradca, 10.0),
+            // Card::new(self.user.username.clone(), Character::Prevlek, 0.0),
+            // Card::new(self.user.username.clone(), Character::Zradca, 10.0),
             Card::new(self.user.username.clone(), Character::Musketyri, 11.0),
             Card::new(self.user.username.clone(), Character::Mag, 7.0),
             Card::new(self.user.username.clone(), Character::Carodejnice, 1.0),
@@ -77,5 +77,9 @@ impl Player<'_> {
     pub fn draw_card(&mut self) {
         let card = self.next_card();
         self.hand.push(card);
+    }
+
+    pub fn add_token(&mut self, token: Token) {
+        self.tokens.push(token);
     }
 }

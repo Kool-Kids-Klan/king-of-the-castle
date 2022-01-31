@@ -26,8 +26,8 @@ pub enum Resource {
 
 #[derive(Clone, Debug)]
 pub struct Token {
-    resource: Resource,
-    points: u8
+    pub resource: Resource,
+    pub points: u8
 }
 
 fn get_resource_types() -> [Resource; 6] {
@@ -87,7 +87,7 @@ impl Game<'_> {
         let players = self.players.clone();
         let mut player_it = players.iter().cycle();
         while self.columns.iter().any(|column| !column.is_completed()) {
-            self.make_action(player_it.next()?).await;
+            // self.make_action(player_it.next()?).await;
             break;
         }
         self.eval_columns();
@@ -103,31 +103,19 @@ impl Game<'_> {
     }
 
     fn eval_columns(&mut self) {
-        self.columns.iter().for_each(|column| {
-            // TODO alchymista, sermir, statkar, kupec, kardinal, trubadur
-            // TODO musketyri
-
-            // TODO mag
-            // TODO carodejnice
-            // TODO princ+panos
-            // TODO poustevnik
-            // TODO palecek
-            // TODO dvojnik
-            // TODO drak
-            // TODO Romeo
-            // TODO spocitat body
-
-            // TODO zebrak
-            // TODO urcit vitaza a pripocitat body
-        })
+        self.columns.iter_mut().for_each(|column| {
+            let winner = column.eval();
+            println!("AND THE WINNER OF COLUMN IS: {}", winner);
+            let win_player = match self.players.iter_mut().filter(|player| player.user.username == winner).next() {
+                Some(player) => player,
+                None => panic!("Error evaluating winner happened!"),
+            };
+            win_player.add_token(column.token.clone());
+        });
     }
 
     fn get_player_by_username(&self) {
         // alebo rovno assign_points_to_player(username)?
-    }
-
-    pub fn get_results(&self) { // -> HashMap<String, u8> {
-
     }
 
     pub fn print_players(&self) {
