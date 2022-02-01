@@ -123,6 +123,14 @@ impl Column {
         }
     }
 
+    fn get_player_highest_card_index(&self, player: String) -> usize {
+        let result = self.cards.iter().find_position(| card| card.owner == player);
+        match result {
+            Some((index, _)) => index,
+            None => panic!("Player doesn't have any card in this column.")
+        }
+    }
+
     fn set_mirrorer_points(&mut self) {
         let mut iterator = self.cards.iter_mut().rev().peekable();
         while let Some(card) = iterator.next() {
@@ -151,19 +159,45 @@ impl Column {
         result
     }
 
+    fn comparator((highest_a, score_a): (&usize, &f32),
+                  (highest_b, score_b): (&usize, &f32),
+                  beggar_activated: bool) -> Option<Ordering> {
+        if score_a != score_b {
+            if beggar_activated {
+                score_a.partial_cmp(&score_b)
+            } else {
+                score_b.partial_cmp(&score_a)
+            }
+        } else {
+            if beggar_activated {
+                highest_b.partial_cmp(&highest_a)
+            } else {
+                highest_a.partial_cmp(&highest_b)
+            }
+        }
+    }
 
-    fn get_winner(&self, results: &mut ColumnResults, musketeers: bool) -> String {
+    fn get_winner(&self, results: &ColumnResults, musketeers: bool) -> String {
         let characters: Vec<Character> = self.cards.iter().map(|card| card.character).collect();
         let beggar = characters.iter().filter(|&&character| character == Character::Zebrak).count() >= 1;
 
-        let compare: for<'r, 's> fn(&'r (String, f32), &'s (String, f32)) -> _ = if !musketeers && beggar {
-            |(_, r1), (_, r2)| r1.partial_cmp(r2).unwrap_or(std::cmp::Ordering::Equal)
+        let compare: for<'r, 's> fn(&'r (usize, &f32), &'s (usize, &f32)) -> _ = if !musketeers && beggar {
+            |(h1, s1), (h2, s2)| Column::comparator((h1, s1), (h2, s2), true)
+                .unwrap_or(std::cmp::Ordering::Equal)
         } else {
-            |(_, r1), (_, r2)| r2.partial_cmp(r1).unwrap_or(std::cmp::Ordering::Equal)
+            |(h1, s1), (h2, s2)| Column::comparator((h1, s1), (h2, s2), false)
+                .unwrap_or(std::cmp::Ordering::Equal)
         };
 
-        results.sort_by(compare);
+        results.into_iter()
+            .map(|(player, score)| (self.get_player_highest_card_index(player.to_string()), score))
+            .collect::<Vec<(usize, &f32)>>()
+            .sort_by(compare);
+
         println!("WINNER:\n{:?}", results[0]);
-        results[0].0.clone()
+        match results.get(0) {
+            Some(result) => result.0.clone(),
+            None => panic!("Empty column. What a relief. Uff")
+        }
     }
 }
