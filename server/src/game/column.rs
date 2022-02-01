@@ -1,11 +1,13 @@
+use anyhow::Result;
+use itertools::{chain, Itertools};
+use std::cmp::Ordering;
+
 use super::card::{Card, Character};
 use crate::game::Token;
-
-use anyhow::Result;
-use itertools::Itertools;
+use crate::game::player::Player;
 use super::Resource;
 
-type GameResult = Vec<(String, f32)>;
+type ColumnResults = Vec<(String, f32)>;
 
 #[derive(Clone, Debug)]
 pub struct Column {
@@ -76,31 +78,49 @@ impl Column {
             _ => {},
         });
 
-        match self.apply_buffs() {
-            Some(winner) => return winner,
-            None => (),
+        let all_with_combo = self.get_players_with_prince_squire_combo();
+        match self.get_player_with_highest_prince_squire_combo(all_with_combo) {
+            Some(player) => return player,
+            None => ()
         }
+
         self.set_mirrorer_points();
         self.get_winner(&mut self.get_results(), false)
     }
 
-    pub fn apply_buffs(&mut self) -> Option<String> {
+    pub fn get_players_with_prince_squire_combo(&mut self) -> Vec<String> {
+        // apply Romeo+Julia buff on the way
+        // TODO drak debuff
+
+        let mut players = vec![];
         let cards_by_owners = self.cards
             .iter_mut()
             .map(|card| (card.owner.clone(), card))
             .into_group_map();
         for (owner, cards) in cards_by_owners {
             let characters: Vec<Character> = cards.iter().map(|card| card.character).collect();
+
             if characters.contains(&Character::Princ) && characters.contains(&Character::Panos) {
-                // TODO ak maju viaceri princ+panos, vyhrava najvrchnejsi
-                return Some(owner);
+                players.push(owner);
             }
+
             if characters.contains(&Character::Julie) {
-                cards.into_iter().filter(|card| card.character == Character::Romeo).for_each(|card| card.strength = 15.0);
+                cards.into_iter()
+                    .filter(|card| card.character == Character::Romeo)
+                    .for_each(|card| card.strength = 15.0);
             }
-            // TODO drak
         }
-        None
+        players
+    }
+
+    fn get_player_with_highest_prince_squire_combo(&self, all_with_combo: Vec<String>) -> Option<String> {
+        let winner = self.cards.iter().find(| card| {
+            all_with_combo.contains(&card.owner) && [Character::Princ, Character::Panos].contains(&card.character)
+        });
+        match winner {
+            Some(card) => Some(card.clone().owner),
+            None => None
+        }
     }
 
     fn set_mirrorer_points(&mut self) {
@@ -117,12 +137,12 @@ impl Column {
         }
     }
 
-    fn get_results(&self) -> GameResult {
+    fn get_results(&self) -> ColumnResults {
         let cards_by_owners = self.cards
             .iter()
             .map(|card| (card.owner.clone(), card))
             .into_group_map();
-        let result: GameResult = cards_by_owners.iter().map(|(owner, cards)| {
+        let result: ColumnResults = cards_by_owners.iter().map(|(owner, cards)| {
             let strength = cards.iter().map(|card| card.strength).sum();
             println!("{}: {:?}", owner.clone(), cards);
             (owner.clone(), strength)
@@ -131,7 +151,8 @@ impl Column {
         result
     }
 
-    fn get_winner(&self, points: &mut GameResult, musketeers: bool) -> String {
+
+    fn get_winner(&self, results: &mut ColumnResults, musketeers: bool) -> String {
         let characters: Vec<Character> = self.cards.iter().map(|card| card.character).collect();
         let beggar = characters.iter().filter(|&&character| character == Character::Zebrak).count() >= 1;
 
@@ -141,9 +162,8 @@ impl Column {
             |(_, r1), (_, r2)| r2.partial_cmp(r1).unwrap_or(std::cmp::Ordering::Equal)
         };
 
-        // TODO pri remize vyhrava ten s najvyssou kartou (alebo najnizsou ak je zobrak)
-        points.sort_by(compare);
-        println!("WINNER:\n{:?}", points[0]);
-        points[0].0.clone()
+        results.sort_by(compare);
+        println!("WINNER:\n{:?}", results[0]);
+        results[0].0.clone()
     }
 }
