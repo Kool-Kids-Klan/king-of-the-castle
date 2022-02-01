@@ -7,6 +7,7 @@ use rand::{seq::IteratorRandom, thread_rng};
 use crate::game::column::Column;
 use crate::game::player::Player;
 use kotc_database::models::User;
+use crate::Character;
 
 pub mod card;
 pub mod column;
@@ -44,8 +45,10 @@ struct Action {
 #[derive(Clone)]
 pub struct Game<'a> {
     players: Vec<Player<'a>>,
+    player_on_turn: u8,
     columns: Vec<Column>,
     token_deck: Vec<Token>,
+    started: bool
 }
 
 impl Game<'_> {
@@ -53,54 +56,90 @@ impl Game<'_> {
         let players = users.iter().map(|&user| Player::new(user)).collect();
         Game {
             players,
+            player_on_turn: 0,
             columns: vec![],
-            token_deck: Game::init_token_deck(users.len()),
+            token_deck: vec![],
+            started: false
         }
     }
 
-    fn init_token_deck(number_of_players: usize) -> Vec<Token> {
+    pub fn add_player(&mut self, user: &User) {
+        // FIXME
+        // self.players.push(Player::new(user));
+    }
+
+    fn init_token_deck(&mut self) -> Vec<Token> {
         let mut rng = thread_rng();
         iproduct!(get_all_resources(), [1, 2, 3, 3, 4, 5])
-            .choose_multiple(&mut rng, number_of_players * NUMBER_OF_ROUNDS as usize)
+            .choose_multiple(&mut rng, self.players.len() * NUMBER_OF_ROUNDS as usize)
             .into_iter()
             .map(|(resource, points)| Token {resource, points})
             .collect()
     }
 
-    pub async fn start_game(&mut self) -> Option<()> {
-        while !self.token_deck.is_empty() {
-            self.round().await?;
-            break;
-        }
-        Some(())
+    pub fn start_game(&mut self) {
+        self.init_token_deck();
+
+        // while !self.token_deck.is_empty() {
+        //     self.round().await?;
+        //     break;
+        // }
     }
 
-    async fn round(&mut self) -> Option<()> {
-        self.columns = vec![];
-        (0..self.players.len()).into_iter().for_each(|_| {
-            let token = match self.token_deck.pop() {
-                Some(token) => token,
-                None => panic!("Bad number of tokens in token deck!")
-            };
-            self.columns.push(Column::new(token));
-        });
+    // async fn round(&mut self) -> Option<()> {
+    //     self.columns = vec![];
+    //     (0..self.players.len()).into_iter().for_each(|_| {
+    //         let token = match self.token_deck.pop() {
+    //             Some(token) => token,
+    //             None => panic!("Bad number of tokens in token deck!")
+    //         };
+    //         self.columns.push(Column::new(token));
+    //     });
+    //
+    //     let players = self.players.clone();
+    //     let mut player_it = players.iter().cycle();
+    //     while self.columns.iter().any(|column| !column.is_completed()) {
+    //         // self.make_action(player_it.next()?).await;
+    //         break;
+    //     }
+    //     self.eval_columns();
+    //     Some(())
+    // }
 
-        let players = self.players.clone();
-        let mut player_it = players.iter().cycle();
-        while self.columns.iter().any(|column| !column.is_completed()) {
-            // self.make_action(player_it.next()?).await;
-            break;
-        }
-        self.eval_columns();
-        Some(())
-    }
+    pub fn make_action(&mut self,
+                   player_id: i32,
+                   column_index: u8,
+                   card_index: Character) {
+        let mut player_ref: &Player;
+        match self.get_player_by_id(player_id) {
+            Some(p) => {
+                player_ref = p;
+            },
+            None => {}
+        };
+        // if let Some(&player_obj) = self.players.get(player_id) {
+        //     if player_id != self.player_on_turn {
+        //         // TODO send message "ERROR: It's not your turn."
+        //         return;
+        //     }
+        // } else {
+        //     // TODO send message "ERROR: Invalid player id."
+        //     return;
+        // }
+        // if let Some(&column) = self.columns.get(column_index) {
+        //     if column.blocked {
+        //         // TODO send message "ERROR: Column is blocked by Storm."
+        //         return;
+        //     }
+        // } else {
+        //     // TODO send message "ERROR: Invalid column."
+        //     return;
+        // }
 
-    async fn make_action(&mut self, player: &mut Player<'_>) {
-        println!("{}, make action!", player.user.username);
-        let action = 0;// let action = wait_for_action().await?;
-        println!("completed");
-
-        player.draw_card();
+        // FIXME draw card
+        // player_ref.draw_card();
+        // TODO send message "Add card to hand"
+        self.player_on_turn = (self.player_on_turn + 1) % self.players.len() as u8;
     }
 
     fn eval_columns(&mut self) {
@@ -116,13 +155,8 @@ impl Game<'_> {
         });
     }
 
-    fn get_player_by_username(&self) {
-        // alebo rovno assign_points_to_player(username)?
+    fn get_player_by_id(&self, player_id: i32) -> Option<&Player> {
+        self.players.iter().find(|p| p.user.id == player_id)
     }
 
-}
-
-async fn wait() {
-    let ten_millis = time::Duration::from_millis(5000);
-    thread::sleep(ten_millis);
 }

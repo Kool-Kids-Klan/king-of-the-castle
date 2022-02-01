@@ -31,7 +31,7 @@ async fn main() -> anyhow::Result<()> {
     let user = user_repo.get_user(user_id).await?;
     println!("{:?}", user);
     let user2_id = user_repo
-        .create_user("Dante", "d@gmail.com", "bab", "dgfvbzsd<a")
+        .create_user("Dante", "d@gmail.com", "bab")
         .await?;
     let user2 = user_repo.get_user(user2_id).await?;
     println!("{:?}", user2);
@@ -64,9 +64,9 @@ async fn main() -> anyhow::Result<()> {
     start_actix_server().await?;
 
     let mut game = Game::new(vec![&user, &user2]);
-    game.start_game().await;
+    // game.start_game().await;
 
-    test_column_eval();
+    // test_column_eval();
 
     Ok(())
 }
