@@ -11,6 +11,7 @@ pub struct Player<'a> {
     hand: Vec<Card>,
     deck: Vec<Card>,
     tokens: Vec<Token>,
+    ready: bool
 }
 
 impl Player<'_> {
@@ -20,12 +21,20 @@ impl Player<'_> {
             hand: vec![],
             deck: vec![],
             tokens: vec![],
+            ready: false
         };
         player.refill_deck();
         player.draw_card();
+        // TODO send message "Add card to hand"
         player.draw_card();
+        // TODO send message "Add card to hand"
         player.draw_card();
+        // TODO send message "Add card to hand"
         player
+    }
+
+    pub fn flip_ready(&mut self) {
+        self.ready = !self.ready;
     }
 
     fn refill_deck(&mut self) {
@@ -75,9 +84,10 @@ impl Player<'_> {
         }
     }
 
-    pub fn draw_card(&mut self) {
+    pub fn draw_card(&mut self) -> Card {
         let card = self.next_card();
-        self.hand.push(card);
+        self.hand.push(card.clone());
+        card
     }
 
     pub fn add_token(&mut self, token: Token) {
