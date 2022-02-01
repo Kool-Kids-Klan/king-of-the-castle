@@ -4,10 +4,10 @@ use std::{thread, time};
 use itertools::{cloned, iproduct, Itertools};
 use rand::{seq::IteratorRandom, thread_rng};
 
-use crate::game::column::Column;
-use crate::game::player::Player;
+use column::Column;
+use player::Player;
 use kotc_database::models::User;
-use crate::Character;
+use card::Character;
 
 pub mod card;
 pub mod column;
