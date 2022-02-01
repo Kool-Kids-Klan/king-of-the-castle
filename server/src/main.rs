@@ -2,28 +2,21 @@ extern crate core;
 
 mod game;
 
-use std::sync::Arc;
-
 use kotc_actix::start_actix_server;
 use crate::game::{Game, column::Column, Token};
 
 use game::card::{Card, Character};
-use kotc_database::{
-    establish_connection,
-    repo::{
-        game_repo::{GameRepo, PostgresGameRepo},
-        participation_repo::{ParticipationRepo, PostgresParticipationRepo},
-        user_repo::{PostgresUserRepo, UserRepo},
-    },
+use kotc_database::{get_game_repo, get_participation_repo, get_user_repo};
+
+use kotc_database::repo::{
+    game_repo::GameRepo, participation_repo::ParticipationRepo, user_repo::UserRepo,
 };
 
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
-    let conn_pool = Arc::new(establish_connection().await);
-
-    let user_repo = Arc::new(PostgresUserRepo::new(conn_pool.clone()));
-    let game_repo = Arc::new(PostgresGameRepo::new(conn_pool.clone()));
-    let participation_repo = Arc::new(PostgresParticipationRepo::new(conn_pool.clone()));
+    let user_repo = get_user_repo().await;
+    let game_repo = get_game_repo().await;
+    let participation_repo = get_participation_repo().await;
 
     let user_id = user_repo
         .create_user("Puckoland", "k@gmail.com", "asdfjkn")
