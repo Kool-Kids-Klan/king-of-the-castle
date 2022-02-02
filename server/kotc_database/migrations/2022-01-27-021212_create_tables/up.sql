@@ -2,8 +2,7 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(64) NOT NULL,
     email VARCHAR(64) NOT NULL,
-    salt CHAR(32) NOT NULL,
-    passhash CHAR(64) NOT NULL,
+    passhash VARCHAR(128) NOT NULL,
     games_played INTEGER NOT NULL DEFAULT 0,
     games_won INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()

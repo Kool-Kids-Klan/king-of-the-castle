@@ -20,5 +20,6 @@ fn app() -> Html {
 }
 
 fn main() {
+    connect_websocket();
     yew::start_app::<App>();
 }
