@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 yew = "0.19.3"
 kotc_reqwasm = { path = "kotc_reqwasm" }
+gloo-utils = "0.1"

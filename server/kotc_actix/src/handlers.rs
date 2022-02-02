@@ -11,6 +11,8 @@ use crate::kotc_ws_server::KotcWsServer;
 use crate::kots_ws_session::KotcWsSession;
 use kotc_database::repo::user_repo::*;
 
+extern crate google_signin;
+
 #[derive(Debug, Deserialize)]
 pub struct UserData {
     username: String,
@@ -24,8 +26,18 @@ pub struct PasswordData {
 }
 
 #[get("/users")]
-pub async fn get_users(data: Data<Arc<PostgresUserRepo>>) -> impl Responder {
+pub async fn get_users(data: Data<Arc<PostgresUserRepo>>, req: HttpRequest) -> impl Responder {
+    let mut client = google_signin::Client::new();
+    client.audiences.push("229405536082-o0p730oresk0eeprtm1j9p27523thc47.apps.googleusercontent.com".to_string()); // required
     let users = data.list_users().await.unwrap_or_default();
+    let x = req.head().headers().get("authorization").unwrap().to_str().unwrap();
+    println!("{:?}", x);
+    let mut y = x.split(' ');
+    y.next();
+    let z = y.next().unwrap();
+    println!("{}", z);
+    let id_info = client.verify(z).expect("Expected token to be valid");
+    println!("{:?}", id_info);
 
     HttpResponse::Ok().json(users)
 }
