@@ -10,3 +10,12 @@ cargo run --bin client
 
 ## Run with Docker
 TODO
+
+## Run client
+To run webassembly client:
+Initial setup:
+```
+cargo install trunk
+rustup target add wasm32-unknown-unknown
+trunk serve --open
+```
