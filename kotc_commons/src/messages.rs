@@ -15,7 +15,7 @@ pub struct ClientWsMessage {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PlayCard {
     pub card_index: usize,
-    pub column_index: usize
+    pub column_index: usize,
 }
 
 /// ****SERVER MESSAGES****

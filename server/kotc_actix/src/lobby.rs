@@ -1,9 +1,9 @@
-use std::collections::HashSet;
 use kotc_game::game::Game;
+use std::collections::HashSet;
 
 pub struct Lobby {
     pub game: Game,
-    pub sessions: HashSet<usize>
+    pub sessions: HashSet<usize>,
 }
 
 impl Lobby {

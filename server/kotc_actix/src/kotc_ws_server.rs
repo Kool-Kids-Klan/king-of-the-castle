@@ -1,15 +1,15 @@
 use crate::kotc_messages::{ClientMessage, Connect, Disconnect, Error, ServerWsMessage};
-use actix::prelude::{Actor, Context, Handler, Recipient};
-use std::collections::{HashMap};
-use kotc_commons::messages::{ClientWsMessage, PlayCard};
-use kotc_commons::messages::message_types::ServerWsMessageType;
 use crate::lobby::Lobby;
+use actix::prelude::{Actor, Context, Handler, Recipient};
+use kotc_commons::messages::message_types::ServerWsMessageType;
+use kotc_commons::messages::{ClientWsMessage, PlayCard};
+use std::collections::HashMap;
 
 pub type Socket = Recipient<ServerWsMessage>;
 
 pub struct KotcWsServer {
-    sessions: HashMap<usize, Socket>,        // map of all sockets
-    lobbies: HashMap<usize, Lobby>, // map of all lobbies
+    sessions: HashMap<usize, Socket>, // map of all sockets
+    lobbies: HashMap<usize, Lobby>,   // map of all lobbies
 }
 
 impl Default for KotcWsServer {
@@ -48,20 +48,30 @@ impl Handler<Connect> for KotcWsServer {
         self.lobbies
             .entry(msg.lobby_id)
             .or_insert_with(Lobby::new)
-            .sessions.insert(msg.id);
+            .sessions
+            .insert(msg.id);
 
         self.lobbies
             .get(&msg.lobby_id)
             .unwrap()
-            .sessions.iter()
+            .sessions
+            .iter()
             .filter(|connection_id| *connection_id.to_owned() != msg.id)
             .for_each(|connection_id| {
-                self.send_message(ServerWsMessageType::UserJoined, &format!("User {} joined", msg.id), connection_id)
+                self.send_message(
+                    ServerWsMessageType::UserJoined,
+                    &format!("User {} joined", msg.id),
+                    connection_id,
+                )
             });
 
         self.sessions.insert(msg.id, msg.addr);
 
-        self.send_message(ServerWsMessageType::YourId, &format!("Your id is {}", msg.id), &msg.id);
+        self.send_message(
+            ServerWsMessageType::YourId,
+            &format!("Your id is {}", msg.id),
+            &msg.id,
+        );
     }
 }
 
@@ -73,10 +83,15 @@ impl Handler<Disconnect> for KotcWsServer {
             self.lobbies
                 .get(&msg.lobby_id)
                 .unwrap()
-                .sessions.iter()
+                .sessions
+                .iter()
                 .filter(|session_id| *session_id.to_owned() != msg.id)
                 .for_each(|session_id| {
-                    self.send_message(ServerWsMessageType::UserDisconnected, &format!("User {} disconnected.", &msg.id), session_id)
+                    self.send_message(
+                        ServerWsMessageType::UserDisconnected,
+                        &format!("User {} disconnected.", &msg.id),
+                        session_id,
+                    )
                 });
             if let Some(lobby) = self.lobbies.get_mut(&msg.lobby_id) {
                 if lobby.sessions.len() > 1 {
@@ -103,7 +118,14 @@ impl Handler<ClientMessage> for KotcWsServer {
         self.lobbies
             .get(&msg.lobby_id)
             .unwrap()
-            .sessions.iter()
-            .for_each(|client| self.send_message(ServerWsMessageType::Error, &error_message_serialized, client)); // TODO: DO NOT use unwrap!!
+            .sessions
+            .iter()
+            .for_each(|client| {
+                self.send_message(
+                    ServerWsMessageType::Error,
+                    &error_message_serialized,
+                    client,
+                )
+            }); // TODO: DO NOT use unwrap!!
     }
 }

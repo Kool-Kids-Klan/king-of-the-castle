@@ -1,11 +1,7 @@
 use std::sync::Arc;
 
 use super::{
-    super::{
-        models::Game,
-        schema::games::dsl as table,
-        PgPool,
-    },
+    super::{models::Game, schema::games::dsl as table, PgPool},
     user_repo::{PostgresUserRepo, UserRepo},
 };
 
@@ -62,7 +58,7 @@ impl GameRepo for PostgresGameRepo {
         let game: Game = diesel::update(table::games.filter(table::id.eq(game_id)))
             .set((
                 table::winner_id.eq(Some(new_winner_id)),
-                table::ended_at.eq(Some(Utc::now().naive_utc()))
+                table::ended_at.eq(Some(Utc::now().naive_utc())),
             ))
             .get_result(&self.pg_pool.get()?)
             .expect("Error updating game");

@@ -1,14 +1,14 @@
-mod ws_structs;
 mod server_structs;
+mod ws_structs;
 
 use futures::{SinkExt, StreamExt};
 use log::{info, Level};
 use reqwasm::websocket::{futures::WebSocket, Message};
 use wasm_bindgen_futures::spawn_local;
 
-use kotc_commons::messages::{ClientWsMessage, PlayCard, ServerWsMessage};
-use kotc_commons::messages::message_types::ClientWsMessageType;
 use crate::ws_structs::KotcMessage;
+use kotc_commons::messages::message_types::ClientWsMessageType;
+use kotc_commons::messages::{ClientWsMessage, PlayCard, ServerWsMessage};
 
 pub fn connect_websocket() {
     console_log::init_with_level(Level::Debug).unwrap();
@@ -49,8 +49,8 @@ pub fn connect_websocket() {
                         Err(_) => None,
                     },
                     _ => panic!("fuck you"),
-                }
-                Err(_) => panic!("fuck you again")
+                },
+                Err(_) => panic!("fuck you again"),
             };
 
             if let Some(kotc_msg) = kotc_message {

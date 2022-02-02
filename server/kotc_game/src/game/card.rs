@@ -36,7 +36,7 @@ pub struct Card {
     pub owner: String,
     pub character: Character,
     pub strength: f32,
-    pub revealed: bool
+    pub revealed: bool,
 }
 
 impl Card {
@@ -45,12 +45,11 @@ impl Card {
             owner,
             strength,
             character,
-            revealed: false
+            revealed: false,
         }
     }
 
     pub fn dummy_card() -> Card {
         Card::new("".to_string(), Character::Unknown, 0.0)
     }
-
 }

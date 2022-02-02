@@ -1,6 +1,10 @@
 extern crate kotc_game;
 
-use kotc_game::game::{card::{Card, Character}, Token, column::Column, Resource};
+use kotc_game::game::{
+    card::{Card, Character},
+    column::Column,
+    Resource, Token,
+};
 
 #[test]
 fn test_column_eval() {
@@ -32,7 +36,10 @@ fn test_column_eval() {
         Card::new(String::from("aaa"), Character::Romeo, 5.0),
         // Card::new(String::from("aaa"), Character::Zebrak, 4.0),
     ];
-    let mut column = Column::new(Token {resource: Resource::Coins, points: 3});
+    let mut column = Column::new(Token {
+        resource: Resource::Coins,
+        points: 3,
+    });
     cards.into_iter().for_each(|card| column.add_card(card));
     println!("AND THE WINNER IS: {}", column.eval());
 }

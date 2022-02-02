@@ -19,9 +19,7 @@ async fn db_test() -> anyhow::Result<()> {
         .await?;
     let user = user_repo.get_user(user_id).await?;
     println!("{:?}", user);
-    let user2_id = user_repo
-        .create_user("Dante", "d@gmail.com", "bab")
-        .await?;
+    let user2_id = user_repo.create_user("Dante", "d@gmail.com", "bab").await?;
     let user2 = user_repo.get_user(user2_id).await?;
     println!("{:?}", user2);
 

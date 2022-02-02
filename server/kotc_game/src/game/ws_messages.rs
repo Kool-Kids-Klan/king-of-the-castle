@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use kotc_commons::messages::message_types::ServerWsMessageType;
+use serde::{Deserialize, Serialize};
 
 use crate::game::card::Card;
 use crate::game::column::Column;
@@ -15,7 +15,6 @@ pub struct Error {
 pub struct UpdateHand {
     pub hand: Vec<Card>,
 }
-
 
 #[derive(Serialize, Deserialize)]
 pub struct UpdateBoard {

@@ -1,7 +1,7 @@
 use actix::prelude::Message;
 use actix::Recipient;
-use serde::{Serialize, Deserialize};
 use kotc_commons::messages::message_types::ServerWsMessageType;
+use serde::{Deserialize, Serialize};
 
 // use kotc_commons::messages::KotcWsMessage;
 

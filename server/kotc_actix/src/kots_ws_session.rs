@@ -55,13 +55,13 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for KotcWsSession {
                 ws::Message::Ping(msg) => {
                     self.hb = Instant::now();
                     ctx.pong(&msg);
-                },
+                }
                 ws::Message::Pong(_) => self.hb = Instant::now(),
                 ws::Message::Binary(bin) => ctx.binary(bin),
                 ws::Message::Close(reason) => {
                     ctx.close(reason);
                     ctx.stop();
-                },
+                }
                 ws::Message::Continuation(_) => ctx.stop(),
                 ws::Message::Nop => (),
                 Text(s) => self.server_addr.do_send(ClientMessage {

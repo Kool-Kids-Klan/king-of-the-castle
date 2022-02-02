@@ -1,5 +1,5 @@
 use actix::Addr;
-use actix_web::web::{Data, Path, Payload, Json};
+use actix_web::web::{Data, Json, Path, Payload};
 use actix_web::{get, post, Error, HttpRequest, HttpResponse, Responder};
 use actix_web_actors::ws;
 use serde::Deserialize;
@@ -31,10 +31,7 @@ pub async fn get_users(data: Data<Arc<PostgresUserRepo>>) -> impl Responder {
 }
 
 #[get("/users/{user_id}")]
-pub async fn get_user(
-    path: Path<i32>,
-    data: Data<Arc<PostgresUserRepo>>,
-) -> impl Responder {
+pub async fn get_user(path: Path<i32>, data: Data<Arc<PostgresUserRepo>>) -> impl Responder {
     let id = path.into_inner();
     let result = data.get_user(id).await;
 

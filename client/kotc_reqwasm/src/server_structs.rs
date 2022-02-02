@@ -13,7 +13,7 @@ pub enum Resource {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Token {
     pub resource: Resource,
-    pub points: u8
+    pub points: u8,
 }
 
 #[derive(Clone)]
@@ -23,7 +23,7 @@ pub struct Game {
     player_on_turn: usize,
     columns: Vec<Column>,
     token_deck: Vec<Token>,
-    started: bool
+    started: bool,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -33,13 +33,13 @@ pub struct Player {
     pub hand: Vec<Card>,
     deck: Vec<Card>,
     tokens: Vec<Token>,
-    ready: bool
+    ready: bool,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Column {
     pub token: Token,
-    pub blocked: bool,  // Boure
+    pub blocked: bool, // Boure
     cards: Vec<Card>,
 }
 
@@ -48,7 +48,7 @@ pub struct Card {
     pub owner: String,
     pub character: Character,
     pub strength: f32,
-    pub revealed: bool
+    pub revealed: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Copy, Serialize, Deserialize)]
