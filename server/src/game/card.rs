@@ -2,31 +2,32 @@ use super::player::Player;
 
 #[derive(Clone, Debug, PartialEq, Copy)]
 pub enum Character {
-    Kral,
-    Kralovna,
-    Julie,
-    Alchymista,
-    Sermir,
-    Statkar,
-    Kupec,
-    Kardinal,
-    Trubadur,
-    Objevitel,
-    Mordyr,
-    Boure,
-    // Prevlek,
-    // Zradca,
-    Musketyri,
-    Mag,
-    Carodejnice,
-    Princ,
-    Panos,
-    Poustevnik,
-    Palecek,
-    Dvojnik,
-    Drak,
+    Unknown, // not a real character, used for hidden cards etc.
+    King,
+    Queen,
+    Julia,
+    Alchemist,
+    Swordsman,
+    Landlord,
+    Merchant,
+    Cardinal,
+    Troubadour,
+    Explorer,
+    Killer,
+    Storm,
+    Cloak,
+    Traitor,
+    Musketeers,
+    Mage,
+    Witch,
+    Prince,
+    Squire,
+    Hermit,
+    Thumb,
+    Doppelganger,
+    Dragon,
     Romeo,
-    Zebrak,
+    Beggar,
 }
 
 #[derive(Clone, Debug)]
@@ -46,4 +47,9 @@ impl Card {
             revealed: false
         }
     }
+
+    pub fn dummy_card() -> Card {
+        Card::new("".to_string(), Character::Unknown, 0.0)
+    }
+
 }
