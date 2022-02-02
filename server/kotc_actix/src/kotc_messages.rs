@@ -3,12 +3,6 @@ use actix::Recipient;
 use kotc_commons::messages::message_types::ServerWsMessageType;
 use serde::{Deserialize, Serialize};
 
-// use kotc_commons::messages::KotcWsMessage;
-
-// #[derive(Message)]
-// #[rtype(result = "()")]
-// pub struct KotcMessage(pub String);
-
 #[derive(Serialize, Deserialize, Debug, Message)]
 #[rtype(result = "()")]
 pub struct ServerWsMessage {

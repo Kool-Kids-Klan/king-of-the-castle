@@ -31,10 +31,6 @@ pub fn connect_websocket() {
             .send(Message::Text(client_message_serialized))
             .await
             .unwrap();
-        // write
-        //     .send(Message::Text(String::from("test 2")))
-        //     .await
-        //     .unwrap();
         info!("FINISHING FIRST LOCAL");
     });
 
