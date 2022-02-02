@@ -1,17 +1,18 @@
-use std::panic;
-use std::{thread, time};
+use std::{panic, thread, time};
 // use std::collections::HashMap;
 use itertools::{cloned, iproduct, Itertools};
 use rand::{seq::IteratorRandom, thread_rng};
+use chrono::{NaiveDateTime, Utc};
 
 use column::Column;
 use player::Player;
 use kotc_database::models::User;
-use card::Character;
+use card::{Card};
 
 pub mod card;
 pub mod column;
 pub mod player;
+mod utils;
 
 const NUMBER_OF_ROUNDS: u8 = 6;
 
@@ -35,27 +36,21 @@ pub struct Token {
     pub points: u8
 }
 
-
-// TODO move this to kotc_actix and import it from there
-struct Action {
-    pub card: u8,
-    pub column: u8
-}
-
 #[derive(Clone)]
-pub struct Game<'a> {
-    players: Vec<Player<'a>>,
-    player_on_turn: u8,
+pub struct Game {
+    id: i32,
+    players: Vec<Player>,
+    player_on_turn: usize,
     columns: Vec<Column>,
     token_deck: Vec<Token>,
     started: bool
 }
 
-impl Game<'_> {
-    pub fn new(users: Vec<&User>) -> Game {
-        let players = users.iter().map(|&user| Player::new(user)).collect();
+impl Game {
+    pub fn new() -> Game {
         Game {
-            players,
+            id: 0,
+            players: vec![],
             player_on_turn: 0,
             columns: vec![],
             token_deck: vec![],
@@ -63,8 +58,12 @@ impl Game<'_> {
         }
     }
 
-    pub fn add_player(&mut self, user: &User) {
+    pub async fn add_player(&mut self, user_id: i32) -> User {
         // FIXME
+        match utils::find_user_by_id(user_id).await {
+            Ok(user) => return user,
+            Err(_) => panic!("User not found.")
+        };
         // self.players.push(Player::new(user));
     }
 
@@ -77,8 +76,10 @@ impl Game<'_> {
             .collect()
     }
 
-    pub fn start_game(&mut self) {
+    pub async fn start_game(&mut self) {
         self.init_token_deck();
+        self.started = true;
+        self.id = utils::create_new_game_in_db().await;
 
         // while !self.token_deck.is_empty() {
         //     self.round().await?;
@@ -108,38 +109,68 @@ impl Game<'_> {
 
     pub fn make_action(&mut self,
                    player_id: i32,
-                   column_index: u8,
-                   card_index: Character) {
-        let mut player_ref: &Player;
-        match self.get_player_by_id(player_id) {
-            Some(p) => {
-                player_ref = p;
-            },
-            None => {}
-        };
-        // if let Some(&player_obj) = self.players.get(player_id) {
-        //     if player_id != self.player_on_turn {
-        //         // TODO send message "ERROR: It's not your turn."
-        //         return;
-        //     }
-        // } else {
-        //     // TODO send message "ERROR: Invalid player id."
-        //     return;
-        // }
-        // if let Some(&column) = self.columns.get(column_index) {
-        //     if column.blocked {
-        //         // TODO send message "ERROR: Column is blocked by Storm."
-        //         return;
-        //     }
-        // } else {
-        //     // TODO send message "ERROR: Invalid column."
-        //     return;
-        // }
+                   column_index: usize,
+                   card_index: usize) {
+        if let Some(_) = self.get_player_by_id(player_id) {} else {
+            // TODO send message "ERROR: Invalid player id."
+            return;
+        }
 
-        // FIXME draw card
-        // player_ref.draw_card();
-        // TODO send message "Add card to hand"
-        self.player_on_turn = (self.player_on_turn + 1) % self.players.len() as u8;
+        let mut played_card: Card = Card::dummy_card();
+        match self.players.get(self.player_on_turn) {
+            Some(player_on_turn) => {
+                if player_id != player_on_turn.user.id {
+                    // TODO send message "ERROR: It's not your turn."
+                    return;
+                }
+                match player_on_turn.hand.get(card_index) {
+                    Some(c) => {
+                        played_card = c.clone();
+                    },
+                    None => {
+                        // TODO send message "ERROR: invalid card index."
+                        return
+                    }
+                }
+            },
+            None => {} // This cannot happen, self.player_on_turn is always in range
+        };
+
+        match self.columns.get_mut(column_index) {
+            Some(column) => {
+                if column.blocked {
+                    // TODO send message "ERROR: Column is blocked by Storm."
+                    return;
+                } else {
+                    column.add_card(played_card);
+
+
+
+
+                    if let Some(p) = self.get_player_by_id(player_id) {
+                        // always true
+                        // TODO send message "Remove card from hand"
+                        p.hand.remove(card_index);
+                    }
+                }
+            },
+            None => {
+                // TODO send message "ERROR: Invalid column."
+                return;
+            }
+        }
+
+
+
+
+
+        // TODO maybe try to implement Rc+Refcell for self.players, so it can be borrowed multiple times and get_player_by_id() would only need to be called once
+        if let Some(p) = self.get_player_by_id(player_id) {
+            // always true
+            // TODO send message "Add card to hand"
+            p.draw_card();
+        }
+        self.player_on_turn = (self.player_on_turn + 1) % self.players.len();
     }
 
     fn eval_columns(&mut self) {
@@ -155,8 +186,8 @@ impl Game<'_> {
         });
     }
 
-    fn get_player_by_id(&self, player_id: i32) -> Option<&Player> {
-        self.players.iter().find(|p| p.user.id == player_id)
+    fn get_player_by_id(&mut self, player_id: i32) -> Option<&mut Player> {
+        self.players.iter_mut().find(|p| p.user.id == player_id)
     }
 
 }

@@ -8,9 +8,8 @@ edition = "2021"
 [dependencies]
 actix-web = "3.2.0"
 actix-rt = "2.6.0"
-anyhow = "1.0.8"
+kotc_actix = { path = "./kotc_actix" }
+kotc_database = { path = "./kotc_database" }
+kotc_game = { path = "./kotc_game" }
 chrono = { version = "0.4.19", features = ["serde"] }
-kotc_database = { path = "kotc_database" }
-kotc_actix = { path = "kotc_actix" }
-rand = "0.8.4"
-itertools = "0.10.1"
+anyhow = "1.0.8"

@@ -2,6 +2,7 @@ table! {
     games (id) {
         id -> Int4,
         started_at -> Timestamp,
+        ended_at -> Nullable<Timestamp>,
         winner_id -> Nullable<Int4>,
     }
 }

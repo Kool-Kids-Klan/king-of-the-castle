@@ -1,5 +1,7 @@
 extern crate kotc_database;
 
+use chrono::Utc;
+
 use kotc_database::{get_game_repo, get_participation_repo, get_user_repo};
 
 use kotc_database::repo::{
@@ -49,5 +51,4 @@ async fn db_test() -> anyhow::Result<()> {
     user_repo.delete_user(user_id).await?;
 
     Ok(())
-
 }

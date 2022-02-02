@@ -11,6 +11,7 @@ CREATE TABLE users (
 CREATE TABLE games (
     id SERIAL PRIMARY KEY,
     started_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    ended_at TIMESTAMP,
     winner_id INTEGER REFERENCES users(id)
 );
 

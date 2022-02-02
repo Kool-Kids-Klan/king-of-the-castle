@@ -6,16 +6,16 @@ use super::card::{Card, Character};
 use super::{User, Token};
 
 #[derive(Clone, Debug)]
-pub struct Player<'a> {
-    pub user: &'a User,
-    hand: Vec<Card>,
+pub struct Player {
+    pub user: User,
+    pub hand: Vec<Card>,
     deck: Vec<Card>,
     tokens: Vec<Token>,
     ready: bool
 }
 
-impl Player<'_> {
-    pub fn new(user: &User) -> Player {
+impl Player {
+    pub fn new(user: User) -> Player {
         let mut player = Player {
             user,
             hand: vec![],
@@ -43,31 +43,31 @@ impl Player<'_> {
             .map(|card| card.character)
             .collect();
         let initial_deck = vec![
-            Card::new(self.user.username.clone(), Character::Kral, 20.0),
-            Card::new(self.user.username.clone(), Character::Kralovna, 16.0),
-            Card::new(self.user.username.clone(), Character::Julie, 14.0),
-            Card::new(self.user.username.clone(), Character::Alchymista, 8.0),
-            Card::new(self.user.username.clone(), Character::Sermir, 8.0),
-            Card::new(self.user.username.clone(), Character::Statkar, 8.0),
-            Card::new(self.user.username.clone(), Character::Kupec, 8.0),
-            Card::new(self.user.username.clone(), Character::Kardinal, 8.0),
-            Card::new(self.user.username.clone(), Character::Trubadur, 8.0),
-            Card::new(self.user.username.clone(), Character::Objevitel, 13.0),
-            Card::new(self.user.username.clone(), Character::Mordyr, 9.5),
-            Card::new(self.user.username.clone(), Character::Boure, 9.0),
+            Card::new(self.user.username.clone(), Character::King, 20.0),
+            Card::new(self.user.username.clone(), Character::Queen, 16.0),
+            Card::new(self.user.username.clone(), Character::Julia, 14.0),
+            Card::new(self.user.username.clone(), Character::Alchemist, 8.0),
+            Card::new(self.user.username.clone(), Character::Swordsman, 8.0),
+            Card::new(self.user.username.clone(), Character::Landlord, 8.0),
+            Card::new(self.user.username.clone(), Character::Merchant, 8.0),
+            Card::new(self.user.username.clone(), Character::Cardinal, 8.0),
+            Card::new(self.user.username.clone(), Character::Troubadour, 8.0),
+            // Card::new(self.user.username.clone(), Character::Explorer, 13.0),
+            Card::new(self.user.username.clone(), Character::Killer, 9.5),
+            Card::new(self.user.username.clone(), Character::Storm, 9.0),
             // Card::new(self.user.username.clone(), Character::Prevlek, 0.0),
             // Card::new(self.user.username.clone(), Character::Zradca, 10.0),
-            Card::new(self.user.username.clone(), Character::Musketyri, 11.0),
-            Card::new(self.user.username.clone(), Character::Mag, 7.0),
-            Card::new(self.user.username.clone(), Character::Carodejnice, 1.0),
-            Card::new(self.user.username.clone(), Character::Princ, 14.0),
-            Card::new(self.user.username.clone(), Character::Panos, 2.0),
-            Card::new(self.user.username.clone(), Character::Poustevnik, 12.0),
-            Card::new(self.user.username.clone(), Character::Palecek, 2.0),
-            Card::new(self.user.username.clone(), Character::Dvojnik, 0.0),
-            Card::new(self.user.username.clone(), Character::Drak, 11.0),
+            Card::new(self.user.username.clone(), Character::Musketeers, 11.0),
+            Card::new(self.user.username.clone(), Character::Mage, 7.0),
+            Card::new(self.user.username.clone(), Character::Witch, 1.0),
+            Card::new(self.user.username.clone(), Character::Prince, 14.0),
+            Card::new(self.user.username.clone(), Character::Squire, 2.0),
+            Card::new(self.user.username.clone(), Character::Hermit, 12.0),
+            Card::new(self.user.username.clone(), Character::Thumb, 2.0),
+            Card::new(self.user.username.clone(), Character::Doppelganger, 0.0),
+            Card::new(self.user.username.clone(), Character::Dragon, 11.0),
             Card::new(self.user.username.clone(), Character::Romeo, 5.0),
-            Card::new(self.user.username.clone(), Character::Zebrak, 4.0),
+            Card::new(self.user.username.clone(), Character::Beggar, 4.0),
         ].into_iter().filter(|card| !except.contains(&card.character)).collect();
         let mut rng = thread_rng();
         self.deck = initial_deck;
