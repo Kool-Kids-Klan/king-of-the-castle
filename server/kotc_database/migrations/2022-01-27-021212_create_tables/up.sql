@@ -10,9 +10,9 @@ CREATE TABLE users (
 
 CREATE TABLE games (
     id SERIAL PRIMARY KEY,
-    started_at TIMESTAMP NOT NULL,
-    ended_at TIMESTAMP NOT NULL,
-    winner_id INTEGER NOT NULL REFERENCES users(id)
+    started_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    ended_at TIMESTAMP,
+    winner_id INTEGER REFERENCES users(id)
 );
 
 CREATE TABLE participations (
