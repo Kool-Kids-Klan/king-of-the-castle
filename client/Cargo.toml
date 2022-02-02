@@ -6,7 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-yew = "0.19.3"
 kotc_reqwasm = { path = "kotc_reqwasm" }
 serde = "1.0.136"
 serde_json = "1.0.78"
+yew = "0.19"
+yew-router = "0.16"
