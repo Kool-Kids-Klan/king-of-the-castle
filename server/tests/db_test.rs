@@ -25,9 +25,7 @@ async fn db_test() -> anyhow::Result<()> {
     let user2 = user_repo.get_user(user2_id).await?;
     println!("{:?}", user2);
 
-    let game_id = game_repo.create_game(Utc::now().naive_utc(),
-                                        Utc::now().naive_utc(),
-                                        user_id).await?;
+    let game_id = game_repo.create_game().await?;
     let game = game_repo.get_game(game_id).await?;
     println!("{:?}", game);
 
