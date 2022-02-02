@@ -12,7 +12,7 @@ type ColumnResults = Vec<(String, f32)>;
 #[derive(Clone, Debug)]
 pub struct Column {
     pub token: Token,
-    blocked: bool,  // Boure
+    pub blocked: bool,  // Boure
     cards: Vec<Card>,
 }
 
@@ -29,33 +29,41 @@ impl Column {
         self.cards.len() as u8 >= self.token.points || self.blocked
     }
 
-    fn reveal_last_card(&mut self) {
-        if !self.cards.is_empty() {
-            let last_index = self.cards.len() - 1;
-            self.cards[last_index].revealed = true;
+    fn reveal_last_card(&mut self) -> Option<Character> {
+        if let Some(last_card) = self.cards.last_mut() {
+            last_card.revealed = true;
+            // TODO send message "Update column"
+            Some(last_card.character)
+        } else {
+            None
         }
     }
 
     pub fn add_card(&mut self, card: Card)  {
-        self.reveal_last_card();
-        self.cards.push(card);
+        match self.reveal_last_card(){
+            Some(Character::Killer) => {},
+            _ => {
+                self.cards.push(card);
+                // TODO send message "Update column"
+            }
+        }
     }
 
     pub fn eval(&mut self) -> String {
         let bonus_character = match self.token.resource {
-            Resource::Coins => Character::Kupec,
-            Resource::Corn => Character::Statkar,
-            Resource::Hat => Character::Kardinal,
-            Resource::Fiddle => Character::Trubadur,
-            Resource::Swords => Character::Sermir,
-            Resource::Flask => Character::Alchymista,
+            Resource::Coins => Character::Merchant,
+            Resource::Corn => Character::Landlord,
+            Resource::Hat => Character::Cardinal,
+            Resource::Fiddle => Character::Troubadour,
+            Resource::Swords => Character::Swordsman,
+            Resource::Flask => Character::Alchemist,
         };
         self.cards.iter_mut().for_each(|card| if card.character == bonus_character {card.strength = 12.0});
 
         let characters: Vec<Character> = self.cards.iter().map(|card| card.character).collect();
-        let musketeers = characters.contains(&Character::Musketyri);
-        let witches = characters.iter().filter(|&&character| character == Character::Carodejnice).count() == 1;
-        let mages = characters.iter().filter(|&&character| character == Character::Mag).count() == 1;
+        let musketeers = characters.contains(&Character::Musketeers);
+        let witches = characters.iter().filter(|&&character| character == Character::Witch).count() == 1;
+        let mages = characters.iter().filter(|&&character| character == Character::Mage).count() == 1;
 
         if musketeers {
             return self.get_winner(&mut self.get_results(), true);
@@ -67,14 +75,14 @@ impl Column {
 
         if witches {
             self.cards.retain(|card| 
-                card.strength > 9.0 || card.character == Character::Carodejnice || card.character == Character::Dvojnik
+                card.strength > 9.0 || card.character == Character::Witch || card.character == Character::Doppelganger
             );
         }
 
         let num_of_cards = self.cards.len() as f32;
         self.cards.iter_mut().for_each(|card| match card.character {
-            Character::Poustevnik => card.strength = f32::max(0.0, card.strength - num_of_cards + 1.0),
-            Character::Palecek => card.strength += (num_of_cards - 1.0) * 3.0,
+            Character::Hermit => card.strength = f32::max(0.0, card.strength - num_of_cards + 1.0),
+            Character::Thumb => card.strength += (num_of_cards - 1.0) * 3.0,
             _ => {},
         });
 
@@ -100,11 +108,11 @@ impl Column {
         for (owner, cards) in cards_by_owners {
             let characters: Vec<Character> = cards.iter().map(|card| card.character).collect();
 
-            if characters.contains(&Character::Princ) && characters.contains(&Character::Panos) {
+            if characters.contains(&Character::Prince) && characters.contains(&Character::Squire) {
                 players.push(owner);
             }
 
-            if characters.contains(&Character::Julie) {
+            if characters.contains(&Character::Julia) {
                 cards.into_iter()
                     .filter(|card| card.character == Character::Romeo)
                     .for_each(|card| card.strength = 15.0);
@@ -115,7 +123,7 @@ impl Column {
 
     fn get_player_with_highest_prince_squire_combo(&self, all_with_combo: Vec<String>) -> Option<String> {
         let winner = self.cards.iter().find(| card| {
-            all_with_combo.contains(&card.owner) && [Character::Princ, Character::Panos].contains(&card.character)
+            all_with_combo.contains(&card.owner) && [Character::Prince, Character::Squire].contains(&card.character)
         });
         match winner {
             Some(card) => Some(card.clone().owner),
@@ -136,7 +144,7 @@ impl Column {
         while let Some(card) = iterator.next() {
             match iterator.peek_mut() {
                 Some(next) => {
-                    if next.character == Character::Dvojnik {
+                    if next.character == Character::Doppelganger {
                         next.strength = card.strength;
                     }
                 },
@@ -179,7 +187,7 @@ impl Column {
 
     fn get_winner(&self, results: &ColumnResults, musketeers: bool) -> String {
         let characters: Vec<Character> = self.cards.iter().map(|card| card.character).collect();
-        let beggar = characters.iter().filter(|&&character| character == Character::Zebrak).count() >= 1;
+        let beggar = characters.iter().filter(|&&character| character == Character::Beggar).count() >= 1;
 
         let compare: for<'r, 's> fn(&'r (usize, &f32), &'s (usize, &f32)) -> _ = if !musketeers && beggar {
             |(h1, s1), (h2, s2)| Column::comparator((h1, s1), (h2, s2), true)
