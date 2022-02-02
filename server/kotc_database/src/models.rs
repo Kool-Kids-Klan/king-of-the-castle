@@ -36,18 +36,10 @@ pub struct Participation {
     pub game_id: i32,
 }
 
-#[derive(Insertable)]
-#[table_name = "games"]
-pub struct NewGame {
-    pub started_at: NaiveDateTime,
-    pub ended_at: NaiveDateTime,
-    pub winner_id: i32,
-}
-
 #[derive(Serialize, Deserialize, Queryable, Debug)]
 pub struct Game {
     pub id: i32,
     pub started_at: NaiveDateTime,
-    pub ended_at: NaiveDateTime,
-    pub winner_id: i32,
+    pub ended_at: Option<NaiveDateTime>,
+    pub winner_id: Option<i32>,
 }

@@ -10,7 +10,13 @@ pub async fn find_user_by_id(id: i32) -> Result<User> {
     get_user_repo().await.get_user(id).await
 }
 
-pub async fn add_game_to_db(started_at: NaiveDateTime, winner_id: i32) {
-    let ended_at = Utc::now().naive_utc();
-    get_game_repo().await.create_game(started_at, ended_at, winner_id).await;
+pub async fn create_new_game_in_db() -> i32 {
+    match get_game_repo().await.create_game().await {
+        Ok(game_id) => game_id,
+        Err(_) => panic!("Game creation failed.")
+    }
+}
+
+pub async fn update_game_in_db(game_id: i32, winner_id: i32) {
+    get_game_repo().await.update_game_winner(game_id, winner_id).await;
 }

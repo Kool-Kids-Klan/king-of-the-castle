@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use super::{
     super::{
-        models::{Game, NewGame},
+        models::Game,
         schema::games::dsl as table,
         PgPool,
     },
@@ -11,12 +11,12 @@ use super::{
 
 use anyhow::Result;
 use async_trait::async_trait;
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
 
 #[async_trait]
 pub trait GameRepo {
-    async fn create_game(&self, started_at: NaiveDateTime, ended_at: NaiveDateTime, winner_id: i32) -> Result<i32>;
+    async fn create_game(&self) -> Result<i32>;
     async fn get_game(&self, game_id: i32) -> Result<Game>;
     async fn delete_game(&self, game_id: i32) -> Result<()>;
     async fn update_game_winner(&self, game_id: i32, new_winner_id: i32) -> Result<Game>;
@@ -34,18 +34,9 @@ impl PostgresGameRepo {
 
 #[async_trait]
 impl GameRepo for PostgresGameRepo {
-    async fn create_game(&self,
-                         started_at: NaiveDateTime,
-                         ended_at: NaiveDateTime,
-                         winner_id: i32) -> Result<i32> {
-        let new_game = NewGame {
-            started_at,
-            ended_at,
-            winner_id
-        };
-
+    async fn create_game(&self) -> Result<i32> {
         let rec: Game = diesel::insert_into(table::games)
-            .values(&new_game)
+            .default_values()
             .get_result(&self.pg_pool.get()?)
             .expect("Error saving new game");
 
@@ -69,7 +60,10 @@ impl GameRepo for PostgresGameRepo {
 
     async fn update_game_winner(&self, game_id: i32, new_winner_id: i32) -> Result<Game> {
         let game: Game = diesel::update(table::games.filter(table::id.eq(game_id)))
-            .set(table::winner_id.eq(new_winner_id))
+            .set((
+                table::winner_id.eq(Some(new_winner_id)),
+                table::ended_at.eq(Some(Utc::now().naive_utc()))
+            ))
             .get_result(&self.pg_pool.get()?)
             .expect("Error updating game");
 
