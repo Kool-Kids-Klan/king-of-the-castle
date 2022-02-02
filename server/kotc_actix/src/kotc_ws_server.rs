@@ -1,12 +1,13 @@
 use crate::kotc_messages::{ClientMessage, Connect, Disconnect, KotcMessage};
 use actix::prelude::{Actor, Context, Handler, Recipient};
 use std::collections::{HashMap, HashSet};
+use crate::lobby::Lobby;
 
-type Socket = Recipient<KotcMessage>;
+pub type Socket = Recipient<KotcMessage>;
 
 pub struct KotcWsServer {
     sessions: HashMap<usize, Socket>,        // map of all sockets
-    lobbies: HashMap<usize, HashSet<usize>>, // map of all lobbies
+    lobbies: HashMap<usize, Lobby>, // map of all lobbies
 }
 
 impl Default for KotcWsServer {
@@ -41,13 +42,13 @@ impl Handler<Connect> for KotcWsServer {
     fn handle(&mut self, msg: Connect, _: &mut Self::Context) -> Self::Result {
         self.lobbies
             .entry(msg.lobby_id)
-            .or_insert_with(HashSet::new)
-            .insert(msg.id);
+            .or_insert_with(Lobby::new)
+            .sessions.insert(msg.id);
 
         self.lobbies
             .get(&msg.lobby_id)
             .unwrap()
-            .iter()
+            .sessions.iter()
             .filter(|connection_id| *connection_id.to_owned() != msg.id)
             .for_each(|connection_id| {
                 self.send_message(&format!("User {} joined", msg.id), connection_id)
@@ -67,14 +68,14 @@ impl Handler<Disconnect> for KotcWsServer {
             self.lobbies
                 .get(&msg.lobby_id)
                 .unwrap()
-                .iter()
+                .sessions.iter()
                 .filter(|session_id| *session_id.to_owned() != msg.id)
                 .for_each(|session_id| {
                     self.send_message(&format!("User {} disconnected.", &msg.id), session_id)
                 });
             if let Some(lobby) = self.lobbies.get_mut(&msg.lobby_id) {
-                if lobby.len() > 1 {
-                    lobby.remove(&msg.id); // remove the user from lobby (there are other users)
+                if lobby.sessions.len() > 1 {
+                    lobby.sessions.remove(&msg.id); // remove the user from lobby (there are other users)
                 } else {
                     self.lobbies.remove(&msg.lobby_id); // remove the lobby, because it is empty
                 };
@@ -90,7 +91,7 @@ impl Handler<ClientMessage> for KotcWsServer {
         self.lobbies
             .get(&msg.lobby_id)
             .unwrap()
-            .iter()
+            .sessions.iter()
             .for_each(|client| self.send_message(&msg.msg, client)); // TODO: DO NOT use unwrap!!
     }
 }
