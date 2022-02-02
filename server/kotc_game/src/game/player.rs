@@ -1,11 +1,12 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use crate::game::{get_all_resources, Resource};
+use serde::{Deserialize, Serialize};
 
 use super::card::{Card, Character};
 use super::{User, Token};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Player {
     pub user: User,
     pub hand: Vec<Card>,

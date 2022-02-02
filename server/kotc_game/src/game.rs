@@ -3,6 +3,7 @@ use std::{panic, thread, time};
 use itertools::{cloned, iproduct, Itertools};
 use rand::{seq::IteratorRandom, thread_rng};
 use chrono::{NaiveDateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 use column::Column;
 use player::Player;
@@ -16,7 +17,7 @@ mod utils;
 
 const NUMBER_OF_ROUNDS: u8 = 6;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Resource {
     Coins,
     Corn,
@@ -30,7 +31,7 @@ fn get_all_resources() -> [Resource; 6] {
     [Resource::Coins, Resource::Corn, Resource::Hat, Resource::Fiddle, Resource::Swords, Resource::Flask]
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Token {
     pub resource: Resource,
     pub points: u8

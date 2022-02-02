@@ -1,6 +1,7 @@
 use anyhow::Result;
 use itertools::{chain, Itertools};
 use std::cmp::Ordering;
+use serde::{Deserialize, Serialize};
 
 use super::card::{Card, Character};
 use crate::game::Token;
@@ -9,7 +10,7 @@ use super::Resource;
 
 type ColumnResults = Vec<(String, f32)>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Column {
     pub token: Token,
     pub blocked: bool,  // Boure
