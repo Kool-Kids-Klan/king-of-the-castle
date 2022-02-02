@@ -3,6 +3,7 @@ members = [
     "server",
     "server/kotc_database",
     "server/kotc_actix",
+    "server/kotc_game",
     "client",
     "client/kotc_reqwasm",
     "kotc_commons",

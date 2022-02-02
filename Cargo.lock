@@ -1224,6 +1224,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "kotc_game"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "itertools",
+ "kotc_database",
+ "rand 0.8.4",
+]
+
+[[package]]
 name = "kotc_reqwasm"
 version = "0.1.0"
 dependencies = [
@@ -1903,10 +1914,9 @@ dependencies = [
  "actix-web",
  "anyhow",
  "chrono",
- "itertools",
  "kotc_actix",
  "kotc_database",
- "rand 0.8.4",
+ "kotc_game",
 ]
 
 [[package]]
