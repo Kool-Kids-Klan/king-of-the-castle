@@ -6,16 +6,16 @@ use super::card::{Card, Character};
 use super::{User, Token};
 
 #[derive(Clone, Debug)]
-pub struct Player<'a> {
-    pub user: &'a User,
+pub struct Player {
+    pub user: User,
     hand: Vec<Card>,
     deck: Vec<Card>,
     tokens: Vec<Token>,
     ready: bool
 }
 
-impl Player<'_> {
-    pub fn new(user: &User) -> Player {
+impl Player {
+    pub fn new(user: User) -> Player {
         let mut player = Player {
             user,
             hand: vec![],

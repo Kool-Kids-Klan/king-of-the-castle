@@ -3,6 +3,7 @@ use std::{thread, time};
 // use std::collections::HashMap;
 use itertools::{cloned, iproduct, Itertools};
 use rand::{seq::IteratorRandom, thread_rng};
+use chrono::{NaiveDateTime, Utc};
 
 use column::Column;
 use player::Player;
@@ -12,6 +13,7 @@ use card::Character;
 pub mod card;
 pub mod column;
 pub mod player;
+mod utils;
 
 const NUMBER_OF_ROUNDS: u8 = 6;
 
@@ -35,36 +37,32 @@ pub struct Token {
     pub points: u8
 }
 
-
-// TODO move this to kotc_actix and import it from there
-struct Action {
-    pub card: u8,
-    pub column: u8
-}
-
 #[derive(Clone)]
-pub struct Game<'a> {
-    players: Vec<Player<'a>>,
+pub struct Game {
+    players: Vec<Player>,
     player_on_turn: u8,
     columns: Vec<Column>,
     token_deck: Vec<Token>,
-    started: bool
+    started_at: Option<NaiveDateTime>
 }
 
-impl Game<'_> {
-    pub fn new(users: Vec<&User>) -> Game {
-        let players = users.iter().map(|&user| Player::new(user)).collect();
+impl Game {
+    pub fn new() -> Game {
         Game {
-            players,
+            players: vec![],
             player_on_turn: 0,
             columns: vec![],
             token_deck: vec![],
-            started: false
+            started_at: None
         }
     }
 
-    pub fn add_player(&mut self, user: &User) {
+    pub async fn add_player(&mut self, user_id: i32) -> User {
         // FIXME
+        match utils::find_user_by_id(user_id).await {
+            Ok(user) => return user,
+            Err(e) => panic!("User not found.")
+        };
         // self.players.push(Player::new(user));
     }
 
@@ -79,6 +77,7 @@ impl Game<'_> {
 
     pub fn start_game(&mut self) {
         self.init_token_deck();
+        self.started_at = Some(Utc::now().naive_utc());
 
         // while !self.token_deck.is_empty() {
         //     self.round().await?;
