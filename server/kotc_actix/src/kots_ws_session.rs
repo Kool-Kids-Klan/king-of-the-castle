@@ -67,7 +67,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for KotcWsSession {
                 Text(s) => self.server_addr.do_send(ClientMessage {
                     session_id: self.id,
                     lobby_id: self.lobby_id,
-                    msg: s, // TODO: can we use ByteString in ClientMessage
+                    msg: s,
                 }),
             },
             Err(e) => panic!("WebSocket error: {:?}", e),

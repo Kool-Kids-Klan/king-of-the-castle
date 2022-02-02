@@ -49,9 +49,9 @@ pub async fn join_lobby(
     req: HttpRequest,
     stream: Payload,
     Path(lobby_id): Path<usize>,
-    srv: Data<Addr<KotcWsServer>>,
+    server: Data<Addr<KotcWsServer>>,
 ) -> Result<HttpResponse, Error> {
-    let ws = KotcWsSession::new(lobby_id, srv.get_ref().clone());
+    let ws = KotcWsSession::new(lobby_id, server.get_ref().clone());
 
     let resp = ws::start(ws, &req, stream)?;
     Ok(resp)
