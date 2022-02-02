@@ -14,6 +14,7 @@ pub mod card;
 pub mod column;
 pub mod player;
 mod utils;
+pub mod ws_messages;
 
 const NUMBER_OF_ROUNDS: u8 = 6;
 
