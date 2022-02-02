@@ -1,5 +1,5 @@
-use chrono::NaiveDateTime;
 use super::schema::*;
+use chrono::NaiveDateTime;
 use diesel::Queryable;
 use serde::{Deserialize, Serialize};
 

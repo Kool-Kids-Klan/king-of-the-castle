@@ -1,6 +1,7 @@
 use super::player::Player;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Copy)]
+#[derive(Clone, Debug, PartialEq, Copy, Serialize, Deserialize)]
 pub enum Character {
     Unknown, // not a real character, used for hidden cards etc.
     King,
@@ -30,12 +31,12 @@ pub enum Character {
     Beggar,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Card {
     pub owner: String,
     pub character: Character,
     pub strength: f32,
-    pub revealed: bool
+    pub revealed: bool,
 }
 
 impl Card {
@@ -44,12 +45,11 @@ impl Card {
             owner,
             strength,
             character,
-            revealed: false
+            revealed: false,
         }
     }
 
     pub fn dummy_card() -> Card {
         Card::new("".to_string(), Character::Unknown, 0.0)
     }
-
 }

@@ -551,6 +551,8 @@ name = "client"
 version = "0.1.0"
 dependencies = [
  "kotc_reqwasm",
+ "serde",
+ "serde_json",
  "yew",
  "yew-router",
 ]
@@ -1202,10 +1204,13 @@ dependencies = [
  "actix",
  "actix-web",
  "actix-web-actors",
+ "kotc_commons",
  "kotc_database",
+ "kotc_game",
  "pwhash",
  "rand 0.8.4",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -1213,6 +1218,7 @@ name = "kotc_commons"
 version = "0.1.0"
 dependencies = [
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -1234,8 +1240,10 @@ dependencies = [
  "anyhow",
  "chrono",
  "itertools",
+ "kotc_commons",
  "kotc_database",
  "rand 0.8.4",
+ "serde",
 ]
 
 [[package]]
@@ -1244,7 +1252,6 @@ version = "0.1.0"
 dependencies = [
  "console_log",
  "futures",
- "gloo-timers",
  "kotc_commons",
  "log",
  "reqwasm",

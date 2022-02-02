@@ -5,7 +5,7 @@ Rust implementation of the vintage board game "Kráľovské rošády"
 ```shell
 cargo install trunk
 rustup target add wasm32-unknown-unknown
-cd client && trunk server --open
+cd client && trunk serve --open
 ```
 
 ## Run without docker

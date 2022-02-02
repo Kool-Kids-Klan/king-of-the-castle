@@ -7,7 +7,7 @@ use actix_web_actors::ws::Message::Text;
 use rand::Rng;
 use std::time::{Duration, Instant};
 
-use crate::kotc_messages::{ClientMessage, Connect, Disconnect, KotcMessage};
+use crate::kotc_messages::{ClientMessage, Connect, Disconnect, ServerWsMessage};
 use crate::kotc_ws_server::KotcWsServer;
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
@@ -55,19 +55,19 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for KotcWsSession {
                 ws::Message::Ping(msg) => {
                     self.hb = Instant::now();
                     ctx.pong(&msg);
-                },
+                }
                 ws::Message::Pong(_) => self.hb = Instant::now(),
                 ws::Message::Binary(bin) => ctx.binary(bin),
                 ws::Message::Close(reason) => {
                     ctx.close(reason);
                     ctx.stop();
-                },
+                }
                 ws::Message::Continuation(_) => ctx.stop(),
                 ws::Message::Nop => (),
                 Text(s) => self.server_addr.do_send(ClientMessage {
                     session_id: self.id,
                     lobby_id: self.lobby_id,
-                    msg: s, // TODO: can we use ByteString in ClientMessage
+                    msg: s,
                 }),
             },
             Err(e) => panic!("WebSocket error: {:?}", e),
@@ -75,11 +75,11 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for KotcWsSession {
     }
 }
 
-impl Handler<KotcMessage> for KotcWsSession {
+impl Handler<ServerWsMessage> for KotcWsSession {
     type Result = ();
 
-    fn handle(&mut self, msg: KotcMessage, ctx: &mut Self::Context) -> Self::Result {
-        ctx.text(msg.0);
+    fn handle(&mut self, msg: ServerWsMessage, ctx: &mut Self::Context) -> Self::Result {
+        ctx.text(serde_json::to_string(&msg).unwrap());
     }
 }
 

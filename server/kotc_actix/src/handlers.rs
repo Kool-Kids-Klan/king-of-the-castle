@@ -1,5 +1,5 @@
 use actix::Addr;
-use actix_web::web::{Data, Path, Payload, Json};
+use actix_web::web::{Data, Json, Path, Payload};
 use actix_web::{get, post, Error, HttpRequest, HttpResponse, Responder};
 use actix_web_actors::ws;
 use serde::Deserialize;
@@ -31,10 +31,7 @@ pub async fn get_users(data: Data<Arc<PostgresUserRepo>>) -> impl Responder {
 }
 
 #[get("/users/{user_id}")]
-pub async fn get_user(
-    path: Path<i32>,
-    data: Data<Arc<PostgresUserRepo>>,
-) -> impl Responder {
+pub async fn get_user(path: Path<i32>, data: Data<Arc<PostgresUserRepo>>) -> impl Responder {
     let id = path.into_inner();
     let result = data.get_user(id).await;
 
@@ -49,9 +46,9 @@ pub async fn join_lobby(
     req: HttpRequest,
     stream: Payload,
     Path(lobby_id): Path<usize>,
-    srv: Data<Addr<KotcWsServer>>,
+    server: Data<Addr<KotcWsServer>>,
 ) -> Result<HttpResponse, Error> {
-    let ws = KotcWsSession::new(lobby_id, srv.get_ref().clone());
+    let ws = KotcWsSession::new(lobby_id, server.get_ref().clone());
 
     let resp = ws::start(ws, &req, stream)?;
     Ok(resp)

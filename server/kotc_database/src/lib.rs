@@ -37,12 +37,13 @@ pub async unsafe fn establish_connection() {
 
             let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
-            PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url));
+            PgConnection::establish(&database_url)
+                .expect(&format!("Error connecting to {}", database_url));
 
             VAL = Some(Arc::new(
                 init_pool(&database_url)
-                .await
-                .expect("Failed to create pool")
+                    .await
+                    .expect("Failed to create pool"),
             ));
         }
     }
@@ -51,8 +52,7 @@ pub async unsafe fn establish_connection() {
 pub async fn get_user_repo() -> Arc<PostgresUserRepo> {
     unsafe {
         establish_connection().await;
-        let con_pool = 
-            match &VAL {
+        let con_pool = match &VAL {
             Some(pool) => pool.clone(),
             None => panic!("Not connected!"),
         };
@@ -63,8 +63,7 @@ pub async fn get_user_repo() -> Arc<PostgresUserRepo> {
 pub async fn get_game_repo() -> Arc<PostgresGameRepo> {
     unsafe {
         establish_connection().await;
-        let con_pool = 
-            match &VAL {
+        let con_pool = match &VAL {
             Some(pool) => pool.clone(),
             None => panic!("Not connected!"),
         };
@@ -75,8 +74,7 @@ pub async fn get_game_repo() -> Arc<PostgresGameRepo> {
 pub async fn get_participation_repo() -> Arc<PostgresParticipationRepo> {
     unsafe {
         establish_connection().await;
-        let con_pool = 
-            match &VAL {
+        let con_pool = match &VAL {
             Some(pool) => pool.clone(),
             None => panic!("Not connected!"),
         };

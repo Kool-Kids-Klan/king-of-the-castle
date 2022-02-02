@@ -1,17 +1,18 @@
+use crate::game::{get_all_resources, Resource};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use crate::game::{get_all_resources, Resource};
+use serde::{Deserialize, Serialize};
 
 use super::card::{Card, Character};
-use super::{User, Token};
+use super::{Token, User};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Player {
     pub user: User,
     pub hand: Vec<Card>,
     deck: Vec<Card>,
     tokens: Vec<Token>,
-    ready: bool
+    ready: bool,
 }
 
 impl Player {
@@ -21,7 +22,7 @@ impl Player {
             hand: vec![],
             deck: vec![],
             tokens: vec![],
-            ready: false
+            ready: false,
         };
         player.refill_deck();
         player.draw_card();
@@ -38,7 +39,9 @@ impl Player {
     }
 
     fn refill_deck(&mut self) {
-        let except: Vec<Character> = self.hand.clone()
+        let except: Vec<Character> = self
+            .hand
+            .clone()
             .into_iter()
             .map(|card| card.character)
             .collect();
@@ -68,7 +71,10 @@ impl Player {
             Card::new(self.user.username.clone(), Character::Dragon, 11.0),
             Card::new(self.user.username.clone(), Character::Romeo, 5.0),
             Card::new(self.user.username.clone(), Character::Beggar, 4.0),
-        ].into_iter().filter(|card| !except.contains(&card.character)).collect();
+        ]
+        .into_iter()
+        .filter(|card| !except.contains(&card.character))
+        .collect();
         let mut rng = thread_rng();
         self.deck = initial_deck;
         self.deck.shuffle(&mut rng);
@@ -95,7 +101,10 @@ impl Player {
     }
 
     fn get_obtained_resources(&self) -> Vec<Resource> {
-        self.tokens.iter().map(|token| token.clone().resource).collect()
+        self.tokens
+            .iter()
+            .map(|token| token.clone().resource)
+            .collect()
     }
 
     fn get_token_points(&self) -> u8 {
@@ -107,8 +116,13 @@ impl Player {
         let my_resources = self.get_obtained_resources();
         let has_all = get_all_resources()
             .map(|resource| my_resources.contains(&resource))
-            .iter().any(|&x| x);
+            .iter()
+            .any(|&x| x);
         // TODO ak ma double, tak za kazdu extra kartu -1 bod
-        if has_all {points*2} else {points}
+        if has_all {
+            points * 2
+        } else {
+            points
+        }
     }
 }
