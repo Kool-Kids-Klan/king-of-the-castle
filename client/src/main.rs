@@ -1,5 +1,3 @@
-use kotc_reqwasm::connect_websocket;
-
 mod pages;
 mod router;
 mod header;
