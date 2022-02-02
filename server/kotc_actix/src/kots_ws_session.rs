@@ -7,7 +7,7 @@ use actix_web_actors::ws::Message::Text;
 use rand::Rng;
 use std::time::{Duration, Instant};
 
-use crate::kotc_messages::{ClientMessage, Connect, Disconnect, KotcMessage};
+use crate::kotc_messages::{ClientMessage, Connect, Disconnect, ServerWsMessage};
 use crate::kotc_ws_server::KotcWsServer;
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
@@ -75,11 +75,11 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for KotcWsSession {
     }
 }
 
-impl Handler<KotcMessage> for KotcWsSession {
+impl Handler<ServerWsMessage> for KotcWsSession {
     type Result = ();
 
-    fn handle(&mut self, msg: KotcMessage, ctx: &mut Self::Context) -> Self::Result {
-        ctx.text(msg.0);
+    fn handle(&mut self, msg: ServerWsMessage, ctx: &mut Self::Context) -> Self::Result {
+        ctx.text(serde_json::to_string(&msg).unwrap());
     }
 }
 
