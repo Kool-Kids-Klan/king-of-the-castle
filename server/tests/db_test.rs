@@ -51,5 +51,4 @@ async fn db_test() -> anyhow::Result<()> {
     user_repo.delete_user(user_id).await?;
 
     Ok(())
-
 }
