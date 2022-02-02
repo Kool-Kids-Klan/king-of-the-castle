@@ -2,6 +2,7 @@ mod handlers;
 mod kotc_messages;
 mod kotc_ws_server;
 mod kots_ws_session;
+mod lobby;
 
 use actix::Actor;
 use actix_web::{web, App, HttpServer};

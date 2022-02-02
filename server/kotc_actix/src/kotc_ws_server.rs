@@ -1,6 +1,6 @@
 use crate::kotc_messages::{ClientMessage, Connect, Disconnect, KotcMessage};
 use actix::prelude::{Actor, Context, Handler, Recipient};
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 use crate::lobby::Lobby;
 
 pub type Socket = Recipient<KotcMessage>;
