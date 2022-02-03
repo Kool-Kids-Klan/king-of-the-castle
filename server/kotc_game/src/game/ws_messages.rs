@@ -1,79 +1,63 @@
 use std::collections::HashMap;
 use kotc_commons::messages::message_types::ServerWsMessageType;
-use serde::{Serialize};
+use serde::{Serialize, Deserialize};
 
 use crate::game::card::Card;
 use crate::game::column::Column;
 use crate::game::Token;
 
+#[derive(Debug)]
 pub enum MessageRecipient {
     SingleUser,
     AllUsers
 }
 
-pub trait ServerMessageTrait {}
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct UpdatePlayers {
     pub players: Vec<String>,
 }
-impl ServerMessageTrait for UpdatePlayers {}
 
-
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateHand {
     pub hand: Vec<Card>,
 }
-impl ServerMessageTrait for UpdateHand {}
 
-
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateTokens {
     pub tokens: HashMap<String, Vec<Token>>,  // (username, tokens)
 }
-impl ServerMessageTrait for UpdateTokens {}
 
-
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateColumns {
     pub columns: Vec<Column>,
 }
-impl ServerMessageTrait for UpdateColumns {}
 
-
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct FinishGame {
     pub winner: String,
     pub results: HashMap<String, u8>  // (username, score)
 }
-impl ServerMessageTrait for FinishGame {}
 
-
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ActionLog {
     pub detail: String,
 }
-impl ServerMessageTrait for ActionLog {}
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Success {}
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Error {
     pub detail: String,
 }
-impl ServerMessageTrait for Error {}
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct StartGame {}
 
-#[derive(Serialize)]
-pub struct Success {}
-impl ServerMessageTrait for Success {}
-
-
+#[derive(Debug)]
 pub struct ServerMessage {
     pub message_type: ServerWsMessageType,
     pub recipient: MessageRecipient,
     pub content: String,
 }
-
-
-
-

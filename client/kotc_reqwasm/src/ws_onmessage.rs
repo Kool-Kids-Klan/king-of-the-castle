@@ -6,7 +6,7 @@ use reqwasm::websocket::{Message, WebSocketError};
 use serde::de;
 use kotc_commons::messages::message_types::ServerWsMessageType;
 use kotc_commons::messages::ServerWsMessage;
-use crate::ws_structs::{Error, StartGame, UpdateBoard, UpdateHand, UserDisconnected, UserJoined, WsAction, YourId};
+use crate::ws_structs::{ActionLog, Error, FinishGame, StartGame, Success, UpdateColumns, UpdateHand, UpdatePlayers, UpdateTokens, WsAction, YourId};
 
 fn get_server_message(msg: Result<Message, WebSocketError>) -> ServerWsMessage {
     match msg {
@@ -32,8 +32,8 @@ pub async fn onmessage(mut read: SplitStream<WebSocket>) {
         let server_message = get_server_message(msg);
 
         match server_message.message_type {
-            ServerWsMessageType::UpdateBoard => {
-                let update_board: UpdateBoard = get_deserialized(&server_message.content);
+            ServerWsMessageType::UpdateColumns => {
+                let update_board: UpdateColumns = get_deserialized(&server_message.content);
                 info!("update board {:?}", update_board);
             },
             ServerWsMessageType::UpdateHand => {
@@ -48,14 +48,18 @@ pub async fn onmessage(mut read: SplitStream<WebSocket>) {
                 let your_id: YourId = get_deserialized(&server_message.content);
                 info!("your id {:?}", your_id);
             },
-            ServerWsMessageType::UserJoined => {
-                let user_joined: UserJoined = get_deserialized(&server_message.content);
-                info!("user joined {:?}", user_joined);
-            },
-            ServerWsMessageType::UserDisconnected => {
-                let user_disconnected: UserDisconnected = get_deserialized(&server_message.content);
-                info!("user disconnected {:?}", user_disconnected);
-            },
+            // ServerWsMessageType::UserJoined => {
+            //     let user_joined: UserJoined = get_deserialized(&server_message.content);
+            //     info!("user joined {:?}", user_joined);
+            // },
+            // ServerWsMessageType::UserDisconnected => {
+            //     let user_disconnected: UserDisconnected = get_deserialized(&server_message.content);
+            //     info!("user disconnected {:?}", user_disconnected);
+            // },
+            ServerWsMessageType::UpdatePlayers => {
+                let update_players: UpdatePlayers = get_deserialized(&server_message.content);
+                info!("update players {:?}", update_players);
+            }
             ServerWsMessageType::WsAction => {
                 let ws_action: WsAction = get_deserialized(&server_message.content);
                 info!("ws action {:?}", ws_action);
@@ -64,6 +68,22 @@ pub async fn onmessage(mut read: SplitStream<WebSocket>) {
                 let start_game: StartGame = get_deserialized(&server_message.content);
                 info!("start game {:?}", start_game);
             },
+            ServerWsMessageType::UpdateTokens => {
+                let update_tokens: UpdateTokens = get_deserialized(&server_message.content);
+                info!("update tokens {:?}", update_tokens);
+            }
+            ServerWsMessageType::FinishGame => {
+                let finish_game: FinishGame = get_deserialized(&server_message.content);
+                info!("finish game {:?}", finish_game);
+            }
+            ServerWsMessageType::ActionLog => {
+                let action_log: ActionLog = get_deserialized(&server_message.content);
+                info!("action log {:?}", action_log);
+            }
+            ServerWsMessageType::Success => {
+                let success: Success = get_deserialized(&server_message.content);
+                info!("success {:?}", success);
+            }
         };
     }
 }

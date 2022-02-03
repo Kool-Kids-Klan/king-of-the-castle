@@ -14,8 +14,29 @@ pub struct ClientWsMessage {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PlayCard {
+    pub user_id: i32,
     pub card_index: usize,
     pub column_index: usize,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Ready {
+    pub user_id: i32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UnReady {
+    pub user_id: i32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UserJoined {
+    pub user_id: i32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Error {
+    pub detail: String,
 }
 
 /// ****SERVER MESSAGES****

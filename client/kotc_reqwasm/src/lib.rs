@@ -12,7 +12,7 @@ use serde::Serialize;
 
 use kotc_commons::messages::{ClientWsMessage};
 use crate::ws_onmessage::onmessage;
-use crate::ws_send::{play_card};
+use crate::ws_send::{play_card, ready, user_joined};
 
 fn serialize<T: Serialize>(object: T) -> String {
     serde_json::to_string(&object).unwrap()
@@ -48,6 +48,8 @@ pub fn connect_websocket() { // This method is meant to return KotcWebSocket, th
     console_log::init_with_level(Level::Debug).unwrap();
     let mut ws = KotcWebSocket::new("ws://127.0.0.1:8081/lobby/1234");
     spawn_local(async move {
-        ws.send_message(play_card(1, 3)).await;
+        ws.send_message(user_joined(19)).await;
+        ws.send_message(ready(19)).await;
+        ws.send_message(play_card(19, 1, 3)).await;
     })
 }

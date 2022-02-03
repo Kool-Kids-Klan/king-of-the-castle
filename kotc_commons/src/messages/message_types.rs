@@ -5,22 +5,24 @@ pub enum ClientWsMessageType {
     PlayCard,
     Ready,
     Unready,
+    UserJoined,
     Error,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ServerWsMessageType {
     WsAction,
-    UserJoined,
-    UserDisconnected,
+    // UserJoined,
+    // UserDisconnected,
     YourId,
 
     UpdatePlayers,
     UpdateHand,
     UpdateTokens,
     UpdateColumns,
+    StartGame,
     FinishGame,
     ActionLog,
+    Success,
     Error,
-    Success
 }

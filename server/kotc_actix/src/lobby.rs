@@ -1,6 +1,7 @@
 use kotc_game::game::Game;
 use std::collections::HashSet;
 
+#[derive(Clone)]
 pub struct Lobby {
     pub game: Game,
     pub sessions: HashSet<usize>,
