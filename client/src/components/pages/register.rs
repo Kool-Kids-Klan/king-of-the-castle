@@ -1,5 +1,9 @@
+use kotc_reqwasm::endpoints::register_user;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
+use yew_router::{hooks::use_history, history::History};
+
+use crate::router::Route;
 
 #[derive(Clone, Debug, Default)]
 pub struct RegisterInfo {
@@ -10,8 +14,19 @@ pub struct RegisterInfo {
 
 #[function_component(Register)]
 pub fn register() -> Html {
+    let history = use_history().unwrap();
 
     let register_info = use_state(RegisterInfo::default);
+
+    let onsubmit = {
+        let register_info = register_info.clone();
+        Callback::from(move |e: FocusEvent| {
+            e.prevent_default();
+            let info = (*register_info).clone();
+            register_user(info.username, info.email, info.password);
+            history.push(Route::Home);
+        })
+    };
 
     let oninput_username = {
         let register_info = register_info.clone();
@@ -45,7 +60,7 @@ pub fn register() -> Html {
 
     html! {
          <div class="register" >
-             <form class="form">
+             <form class="form" {onsubmit} >
                  <label class="form__label" for="username">{"Username:"}</label>
                  <input value={register_info.username.clone()} oninput={oninput_username} class="form__input" type="text" id="username" name="username"/>
                  <label class="form__label" for="email">{"Email:"}</label>

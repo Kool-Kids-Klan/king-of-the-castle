@@ -1,5 +1,5 @@
 use actix::Addr;
-use actix_web::web::{Data, Json, Path, Payload};
+use actix_web::web::{Data, Path, Payload};
 use actix_web::{get, post, Error, HttpRequest, HttpResponse, Responder};
 use actix_web_actors::ws;
 use serde::Deserialize;
@@ -19,7 +19,8 @@ pub struct UserData {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct PasswordData {
+pub struct LoginData {
+    username: String,
     password: String,
 }
 
@@ -54,18 +55,20 @@ pub async fn join_lobby(
     Ok(resp)
 }
 
-#[post("/users/{user_id}/login")]
+#[post("/users/login")]
 pub async fn verify_user(
-    path: Path<i32>,
     data: Data<Arc<PostgresUserRepo>>,
-    body: Json<PasswordData>,
+    body: String,
 ) -> impl Responder {
-    let id = path.into_inner();
-    let result = data.get_user(id).await;
+    let result = data.list_users().await;
+
+    println!("{:?}", body);
+    let login_body: LoginData = serde_json::from_str(&body).unwrap();
+    println!("{:?}", login_body);
 
     match result {
         Ok(user) => {
-            let verified = verify(&body.password, &user.passhash);
+            let verified = user.iter().filter(|user| user.username == login_body.username && verify(&login_body.password, &user.passhash)).last();
             HttpResponse::Ok().json(verified)
         }
         Err(_) => HttpResponse::NotFound().json(""),
@@ -75,9 +78,12 @@ pub async fn verify_user(
 #[post("/users")]
 pub async fn create_user(
     data: Data<Arc<PostgresUserRepo>>,
-    user_body: Json<UserData>,
+    body: String,
 ) -> impl Responder {
+    println!("{:?}", body);
+    let user_body: UserData = serde_json::from_str(&body).unwrap();
     println!("{:?}", user_body);
+
     let result = data
         .create_user(
             &user_body.username,

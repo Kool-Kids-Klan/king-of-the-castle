@@ -2,6 +2,7 @@ mod server_structs;
 mod ws_structs;
 mod ws_onmessage;
 mod ws_send;
+pub mod endpoints;
 
 use futures::{SinkExt, StreamExt};
 use log::{info, Level};
