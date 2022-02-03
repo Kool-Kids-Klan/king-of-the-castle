@@ -15,9 +15,14 @@ impl Card {
     }
 }
 
+fn def_on_click() -> Callback<Card> {
+    Callback::from(move |card: Card| println!("card selected"))
+}
+
 #[derive(Clone, Properties, PartialEq)]
 pub struct CardsListProps {
     pub cards: Vec<Card>,
+    #[prop_or_else(def_on_click)]
     pub on_click: Callback<Card>,
 }
 
