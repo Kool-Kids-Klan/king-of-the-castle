@@ -1,60 +1,53 @@
 mod server_structs;
 mod ws_structs;
+mod ws_onmessage;
+mod ws_send;
 
 use futures::{SinkExt, StreamExt};
 use log::{info, Level};
 use reqwasm::websocket::{futures::WebSocket, Message};
 use wasm_bindgen_futures::spawn_local;
+use futures::stream::SplitSink;
+use serde::Serialize;
 
-use crate::ws_structs::KotcMessage;
-use kotc_commons::messages::message_types::ClientWsMessageType;
-use kotc_commons::messages::{ClientWsMessage, PlayCard, ServerWsMessage};
+use kotc_commons::messages::{ClientWsMessage};
+use crate::ws_onmessage::onmessage;
+use crate::ws_send::{play_card};
 
-pub fn connect_websocket() {
-    console_log::init_with_level(Level::Debug).unwrap();
-    let ws = WebSocket::open("ws://127.0.0.1:8081/lobby/1234").unwrap();
-    let (mut write, mut read) = ws.split();
+fn serialize<T: Serialize>(object: T) -> String {
+    serde_json::to_string(&object).unwrap()
+}
 
-    spawn_local(async move {
-        info!("FIRST SPAWN LOCAL, state");
-        let play_card = PlayCard {
-            card_index: 1,
-            column_index: 1,
-        };
-        let play_card_serialized = serde_json::to_string(&play_card).unwrap();
-        let client_message = ClientWsMessage {
-            message_type: ClientWsMessageType::PlayCard,
-            content: play_card_serialized,
-        };
-        let client_message_serialized = serde_json::to_string(&client_message).unwrap();
-        write
+pub struct KotcWebSocket {
+    pub write: SplitSink<WebSocket, Message>,
+}
+
+impl KotcWebSocket {
+    pub fn new(socket_url: &str) -> Self {
+        let ws = WebSocket::open(socket_url).unwrap();
+        let (write, read) = ws.split();
+        spawn_local(async move {
+            onmessage(read).await;
+        });
+
+        KotcWebSocket {
+            write,
+        }
+    }
+
+    pub async fn send_message(&mut self, client_message: ClientWsMessage) {
+        let client_message_serialized = serialize(client_message);
+        self.write
             .send(Message::Text(client_message_serialized))
             .await
             .unwrap();
-        info!("FINISHING FIRST LOCAL");
-    });
+    }
+}
 
+pub fn connect_websocket() { // This method is meant to return KotcWebSocket, thus it would be possible to call ws.send_message from anywhere
+    console_log::init_with_level(Level::Debug).unwrap();
+    let mut ws = KotcWebSocket::new("ws://127.0.0.1:8081/lobby/1234");
     spawn_local(async move {
-        info!("SECOND SPAWN LOCAL");
-        while let Some(msg) = read.next().await {
-            info!("this is message {:?}", msg);
-            let kotc_message: Option<KotcMessage> = match msg {
-                Ok(message) => match message {
-                    Message::Text(content) => match serde_json::from_str(&content) {
-                        Ok(n) => Some(n),
-                        Err(_) => None,
-                    },
-                    _ => panic!("fuck you"),
-                },
-                Err(_) => panic!("fuck you again"),
-            };
-
-            if let Some(kotc_msg) = kotc_message {
-                info!("deserialized message {:?}", kotc_msg);
-            }
-            // let server_message: ServerWsMessage = serde_json::from_str(&msg.unwrap()).unwrap();
-            // log!(format!("1. {:?}", msg));
-        }
-        // log!("WebSocket Closed");
+        ws.send_message(play_card(1, 3)).await;
     })
 }
