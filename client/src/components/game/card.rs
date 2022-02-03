@@ -9,7 +9,7 @@ pub struct Card {
 impl Card {
     pub fn new(name: &str) -> Card {
         let name = name.to_string();
-        let path = format!("assets/cards/backsides/{}.png", name);
+        let path = format!("assets/cards/characters/{}.png", name);
 
         Card { name, path }
     }

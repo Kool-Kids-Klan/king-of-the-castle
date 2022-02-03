@@ -12,13 +12,17 @@ html, body, .container {
     width: 100vw;
 }
 
-h1, h2, h3, span, .form__label, .form__button, .header__link {
+h1, h2, h3, span, button, label, a {
     color: var(--color-secondary);
     font-family: 'MedievalSharp', cursive;
 }
 
 body {
     background-color: var(--color-primary);
+}
+
+button {
+    cursor: pointer;
 }
 
 .container {
@@ -30,7 +34,6 @@ body {
 .header {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: auto;
     padding: 1rem;
 }
 
@@ -48,6 +51,7 @@ body {
 .home, .login, .register, .not-found, .lobby {
     margin: 0 0 auto 0;
     display: flex;
+    flex-grow: 1;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -89,7 +93,7 @@ body {
     align-self: end;
 }
 
-.form__button:hover, .header__link:hover {
+.form__button:hover, .header__link:hover, .lobby__button:hover {
     color: var(--color-hover);
 }
 
@@ -112,6 +116,7 @@ body {
     overflow: hidden;
     
     display: grid;
+    gap: 1rem;
     grid-template-columns: 10% auto 10%;
     grid-template-rows: auto 20%;
     grid-template-areas: 
@@ -137,16 +142,25 @@ body {
     grid-area: columns;
 }
 
+.game__column::-webkit-scrollbar {
+    display: none;
+}
+
 .game__column {
     overflow: scroll;
     scrollbar-width: none;
 
     display: flex;
     flex-direction: column;
+    margin: 0 .5rem;
 }
 
 .game__token {
     margin-bottom: 10px;
+}
+
+.game__logs::-webkit-scrollbar {
+    display: none;
 }
 
 .game__logs {
@@ -156,6 +170,10 @@ body {
     grid-area: logs;
 }
 
+.game__tokens::-webkit-scrollbar {
+    display: none;
+}
+
 .game__tokens {
     overflow: scroll;
     scrollbar-width: none;
@@ -163,10 +181,28 @@ body {
     grid-area: tokens;
 }
 
+
+.lobby {
+    max-width: 60%;
+    margin: 0 auto auto auto;
+    justify-content: flex-start;
+}
+
+.lobby__title {
+    font-size: 4rem;
+}
+
+.lobby__button {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    margin: auto 0;
+}
+
 .lobby__headstones {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 2rem 4rem;
+    gap: 1rem 6rem;
 }
 
 .headstone {
@@ -177,5 +213,10 @@ body {
 }
 
 .headstone__img {
-    width: 100%;
+    width: 80%;
+    margin: 0.5rem 0 1rem 0;
 }
+.headstone__name {
+    font-size: 2rem;
+}
+
