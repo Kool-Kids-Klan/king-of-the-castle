@@ -1,4 +1,5 @@
 use std::{panic};
+use std::collections::HashMap;
 // use std::collections::HashMap;
 use itertools::{iproduct};
 use rand::{seq::IteratorRandom, thread_rng};
@@ -6,8 +7,11 @@ use serde::{Deserialize, Serialize};
 
 use card::Card;
 use column::Column;
-use kotc_database::models::User;
 use player::Player;
+use ws_messages::{MessageRecipient, ServerMessage, Error};
+use kotc_database::models::User;
+use kotc_commons::messages::message_types::ServerWsMessageType;
+use crate::game::card::Character;
 
 pub mod card;
 pub mod column;
@@ -66,13 +70,23 @@ impl Game {
         }
     }
 
-    pub async fn add_player(&mut self, user_id: i32) -> User {
-        // FIXME
+    pub async fn add_player(&mut self, user_id: i32) {
         match utils::find_user_by_id(user_id).await {
-            Ok(user) => return user,
+            Ok(user) => self.players.push(Player::new(user)),
             Err(_) => panic!("User not found."),
         };
-        // self.players.push(Player::new(user));
+    }
+
+    pub fn player_flip_ready(&mut self, user_id: i32) {
+        if let Some(player) = self.get_player_by_id(user_id) {
+            player.flip_ready();
+        } else {
+            // TODO send message "ERROR: Invalid player id."
+        }
+    }
+
+    fn get_player_by_id(&mut self, user_id: i32) -> Option<&mut Player> {
+        self.players.iter_mut().find(|p| p.user_id == user_id)
     }
 
     fn init_token_deck(&mut self) -> Vec<Token> {
@@ -84,39 +98,26 @@ impl Game {
             .collect()
     }
 
-    pub async fn start_game(&mut self) {
-        self.init_token_deck();
-        self.started = true;
-        self.id = utils::create_new_game_in_db().await;
-
-        // while !self.token_deck.is_empty() {
-        //     self.round().await?;
-        //     break;
-        // }
+    fn draw_next_tokens(&mut self) {
+        (0..self.players.len()).into_iter().for_each(|_| {
+            let token = match self.token_deck.pop() {
+                Some(token) => token,
+                None => panic!("Error: Bad number of tokens in token deck!")
+            };
+            self.columns.push(Column::new(token));
+        });
+        // TODO send message "Update columns"
     }
 
-    // async fn round(&mut self) -> Option<()> {
-    //     self.columns = vec![];
-    //     (0..self.players.len()).into_iter().for_each(|_| {
-    //         let token = match self.token_deck.pop() {
-    //             Some(token) => token,
-    //             None => panic!("Bad number of tokens in token deck!")
-    //         };
-    //         self.columns.push(Column::new(token));
-    //     });
-    //
-    //     let players = self.players.clone();
-    //     let mut player_it = players.iter().cycle();
-    //     while self.columns.iter().any(|column| !column.is_completed()) {
-    //         // self.make_action(player_it.next()?).await;
-    //         break;
-    //     }
-    //     self.eval_columns();
-    //     Some(())
-    // }
+    pub async fn start_game(&mut self) {
+        self.id = utils::create_new_game_in_db(&self.players).await;
+        self.started = true;
+        self.init_token_deck();
+        self.draw_next_tokens();
+    }
 
-    pub fn make_action(&mut self, player_id: i32, column_index: usize, card_index: usize) {
-        if let Some(_) = self.get_player_by_id(player_id) {
+    pub fn make_action(&mut self, user_id: i32, column_index: usize, card_index: usize) {
+        if let Some(_) = self.get_player_by_id(user_id) {
         } else {
             // TODO send message "ERROR: Invalid player id."
             return;
@@ -125,7 +126,7 @@ impl Game {
         let mut played_card: Card = Card::dummy_card();
         match self.players.get(self.player_on_turn) {
             Some(player_on_turn) => {
-                if player_id != player_on_turn.user.id {
+                if user_id != player_on_turn.user_id {
                     // TODO send message "ERROR: It's not your turn."
                     return;
                 }
@@ -149,8 +150,16 @@ impl Game {
                     return;
                 } else {
                     column.add_card(played_card);
+                    // TODO send message "Update columns"
+                    if let Some(character) = column.reveal_previous_card() {
+                        // TODO send message "Update columns"
+                        if character == Character::Killer {
+                            column.pop_card();
+                            // TODO send message "Update columns"
+                        }
+                    }
 
-                    if let Some(p) = self.get_player_by_id(player_id) {
+                    if let Some(p) = self.get_player_by_id(user_id) {
                         // always true
                         // TODO send message "Remove card from hand"
                         p.hand.remove(card_index);
@@ -164,35 +173,62 @@ impl Game {
         }
 
         // TODO maybe try to implement Rc+Refcell for self.players, so it can be borrowed multiple times and get_player_by_id() would only need to be called once
-        if let Some(p) = self.get_player_by_id(player_id) {
+        if let Some(p) = self.get_player_by_id(user_id) {
             // always true
             // TODO send message "Add card to hand"
             p.draw_card();
         }
         self.player_on_turn = (self.player_on_turn + 1) % self.players.len();
 
-        // if self.columns.iter().any(|column| !column.is_completed())
+        if self.round_finished() {
+            self.eval_columns();
+            if self.token_deck.is_empty() {
+                // TODO finish game
+            } else {
+                self.columns = vec![];
+                self.draw_next_tokens();
+            }
+        }
+    }
+
+    fn round_finished(&self) -> bool {
+        self.columns.iter().all(|column| column.is_completed())
     }
 
     fn eval_columns(&mut self) {
         // evaluates columns and adds tokens to the players
         self.columns.iter_mut().for_each(|column| {
             let winner = column.eval();
-            println!("AND THE WINNER OF COLUMN IS: {}", winner);
             let win_player = match self
                 .players
                 .iter_mut()
-                .filter(|player| player.user.username == winner)
+                .filter(|player| player.username == winner)
                 .next()
             {
                 Some(player) => player,
-                None => panic!("Error evaluating winner happened!"),
+                None => panic!("Error while evaluating winner!"),
             };
             win_player.add_token(column.token.clone());
+            // TODO send message "add token"
         });
     }
 
-    fn get_player_by_id(&mut self, player_id: i32) -> Option<&mut Player> {
-        self.players.iter_mut().find(|p| p.user.id == player_id)
+    fn get_results(&self) -> (String, HashMap<String, u8>) {
+        let mut results: HashMap<String, u8> = self.players.iter()
+            .map(|player| (player.clone().username, player.get_score()))
+            .collect();
+        let mut winner = "Unknown".to_string();
+        if let Some((username, _)) = results
+            .iter()
+            .max_by_key(|(_, &score)| score) {
+            winner = username.clone();
+        }
+        (winner, results)
+    }
+
+    fn finish_game(&mut self, winner_id: i32) {
+        utils::update_game_result_in_db(self.id, winner_id);
+        let (winner, results) = self.get_results();
+        // TODO send message "Game finished" + results
     }
 }
