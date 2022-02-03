@@ -5,7 +5,6 @@ pub enum ClientWsMessageType {
     PlayCard,
     Ready,
     Unready,
-
     Error,
 }
 
@@ -16,9 +15,12 @@ pub enum ServerWsMessageType {
     UserDisconnected,
     YourId,
 
+    UpdatePlayers,
     UpdateHand,
-    UpdateBoard,
-    StartGame,
-
+    UpdateTokens,
+    UpdateColumns,
+    FinishGame,
+    ActionLog,
     Error,
+    Success
 }

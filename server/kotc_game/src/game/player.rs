@@ -12,7 +12,7 @@ pub struct Player {
     pub username: String,
     pub hand: Vec<Card>,
     deck: Vec<Card>,
-    tokens: Vec<Token>,
+    pub tokens: Vec<Token>,
     ready: bool,
 }
 
@@ -28,11 +28,8 @@ impl Player {
         };
         player.refill_deck();
         player.draw_card();
-        // TODO send message "Add card to hand"
         player.draw_card();
-        // TODO send message "Add card to hand"
         player.draw_card();
-        // TODO send message "Add card to hand"
         player
     }
 
