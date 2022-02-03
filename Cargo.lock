@@ -1245,6 +1245,7 @@ dependencies = [
  "kotc_database",
  "rand 0.8.4",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

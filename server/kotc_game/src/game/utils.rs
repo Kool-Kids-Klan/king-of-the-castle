@@ -12,7 +12,7 @@ pub async fn find_user_by_id(id: i32) -> Result<User> {
 }
 
 // call when starting the game
-pub async fn create_new_game_in_db(players: &Vec<Player>) -> i32 {
+pub async fn create_new_game_in_db(players: Vec<Player>) -> i32 {
     let game_id = match get_game_repo().await.create_game().await {
         Ok(game_id) => game_id,
         Err(_) => panic!("Game creation failed."),
