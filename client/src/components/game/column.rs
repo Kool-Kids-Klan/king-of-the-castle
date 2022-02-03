@@ -10,7 +10,7 @@ pub struct Token {
 impl Token {
     pub fn new(name: &str) -> Token {
         let name = name.to_string();
-        let path = format!("assets/cards/{}.jpeg", name);
+        let path = format!("assets/cards/points/{}.png", name);
 
         Token { name, path }
     }

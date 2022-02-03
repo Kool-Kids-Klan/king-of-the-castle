@@ -28,30 +28,30 @@ pub fn game() -> Html {
 
     let player_tokens: UseStateHandle<HashMap<String, Vec<Token>>> = use_state(|| HashMap::new());
 
-    let hand = vec![Card::new("king"), Card::new("beggar"), Card::new("beggar"), Card::new("beggar")];
+    let hand = vec![Card::new("backside_black"), Card::new("backside_black"), Card::new("backside_white"), Card::new("backside_white")];
     let columns = vec![
         Column::new(
-            Token::new("beggar"),
+            Token::new("coins_1"),
             hand.clone(),
         ),
         Column::new(
-            Token::new("king"),
+            Token::new("coins_1"),
             hand.clone(),
         ),
         Column::new(
-            Token::new("beggar"),
+            Token::new("coins_1"),
             hand.clone(),
         ),
         Column::new(
-            Token::new("beggar"),
+            Token::new("coins_1"),
             hand.clone(),
         ),
         Column::new(
-            Token::new("beggar"),
+            Token::new("coins_1"),
             hand.clone(),
         ),
         Column::new(
-            Token::new("beggar"),
+            Token::new("coins_1"),
             hand.clone(),
         ),
     ];

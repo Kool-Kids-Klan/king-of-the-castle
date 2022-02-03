@@ -553,6 +553,7 @@ dependencies = [
  "kotc_reqwasm",
  "serde",
  "serde_json",
+ "web-sys",
  "yew",
  "yew-router",
 ]
