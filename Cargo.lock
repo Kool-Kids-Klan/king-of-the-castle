@@ -63,6 +63,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "actix-cors"
+version = "0.5.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "36b133d8026a9f209a9aeeeacd028e7451bcca975f592881b305d37983f303d7"
+dependencies = [
+ "actix-web",
+ "derive_more",
+ "futures-util",
+ "log",
+ "once_cell",
+ "tinyvec",
+]
+
+[[package]]
 name = "actix-http"
 version = "2.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1223,6 +1237,7 @@ name = "kotc_actix"
 version = "0.1.0"
 dependencies = [
  "actix",
+ "actix-cors",
  "actix-web",
  "actix-web-actors",
  "kotc_commons",
@@ -1272,6 +1287,7 @@ dependencies = [
 name = "kotc_reqwasm"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "console_log",
  "futures",
  "kotc_commons",
@@ -1280,6 +1296,7 @@ dependencies = [
  "serde",
  "serde_json",
  "wasm-bindgen-futures",
+ "yew",
 ]
 
 [[package]]

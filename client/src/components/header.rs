@@ -1,8 +1,9 @@
-use crate::{LoggedUser, Route, User};
+use crate::Route;
 use yew::prelude::*;
 use yew_router::prelude::*;
 use yewdux::prelude::*;
 use yewdux_functional::*;
+use kotc_reqwasm::endpoints::LoggedUser;
 
 #[function_component(Header)]
 pub fn header() -> Html {

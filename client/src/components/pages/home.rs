@@ -2,7 +2,7 @@ use std::rc::Rc;
 use yew::prelude::*;
 use yewdux::prelude::BasicStore;
 use yewdux_functional::use_store;
-use crate::LoggedUser;
+use kotc_reqwasm::endpoints::LoggedUser;
 
 #[function_component(Home)]
 pub fn home() -> Html {
