@@ -1,9 +1,11 @@
-use crate::kotc_messages::{ClientMessage, Connect, Disconnect, Error, ServerWsMessage};
+use crate::kotc_messages::{ClientMessage, Connect, Disconnect, ServerWsMessage, WsAction};
 use crate::lobby::Lobby;
 use actix::prelude::{Actor, Context, Handler, Recipient};
 use kotc_commons::messages::message_types::ServerWsMessageType;
-use kotc_commons::messages::{ClientWsMessage, PlayCard};
+use kotc_commons::messages::{ClientWsMessage};
 use std::collections::HashMap;
+use kotc_game::game::card::{Card, Character};
+use kotc_game::game::ws_messages::UpdateHand;
 
 pub type Socket = Recipient<ServerWsMessage>;
 
@@ -51,6 +53,10 @@ impl Handler<Connect> for KotcWsServer {
             .sessions
             .insert(msg.id);
 
+        let ws_action = WsAction {
+            detail: format!("User {} joined", msg.id),
+        };
+        let ws_action_serialized = serde_json::to_string(&ws_action).unwrap();
         self.lobbies
             .get(&msg.lobby_id)
             .unwrap()
@@ -59,17 +65,21 @@ impl Handler<Connect> for KotcWsServer {
             .filter(|connection_id| *connection_id.to_owned() != msg.id)
             .for_each(|connection_id| {
                 self.send_message(
-                    ServerWsMessageType::UserJoined,
-                    &format!("User {} joined", msg.id),
+                    ServerWsMessageType::WsAction,
+                    &ws_action_serialized,
                     connection_id,
                 )
             });
 
         self.sessions.insert(msg.id, msg.addr);
 
+        let ws_action = WsAction {
+            detail: format!("Your id is {}", msg.id),
+        };
+        let ws_action_serialized = serde_json::to_string(&ws_action).unwrap();
         self.send_message(
-            ServerWsMessageType::YourId,
-            &format!("Your id is {}", msg.id),
+            ServerWsMessageType::WsAction,
+            &ws_action_serialized,
             &msg.id,
         );
     }
@@ -79,6 +89,10 @@ impl Handler<Disconnect> for KotcWsServer {
     type Result = ();
 
     fn handle(&mut self, msg: Disconnect, _: &mut Self::Context) -> Self::Result {
+        let ws_action = WsAction {
+            detail: format!("User {} disconnected.", &msg.id),
+        };
+        let ws_action_serialized = serde_json::to_string(&ws_action).unwrap();
         if self.sessions.remove(&msg.id).is_some() {
             self.lobbies
                 .get(&msg.lobby_id)
@@ -88,8 +102,8 @@ impl Handler<Disconnect> for KotcWsServer {
                 .filter(|session_id| *session_id.to_owned() != msg.id)
                 .for_each(|session_id| {
                     self.send_message(
-                        ServerWsMessageType::UserDisconnected,
-                        &format!("User {} disconnected.", &msg.id),
+                        ServerWsMessageType::WsAction,
+                        &ws_action_serialized,
                         session_id,
                     )
                 });
@@ -111,21 +125,25 @@ impl Handler<ClientMessage> for KotcWsServer {
         println!("this is message string {}", msg.msg);
         let client_message: ClientWsMessage = serde_json::from_str(&msg.msg).unwrap();
         println!("this is message object {:?}", client_message);
-        let error_message = Error {
-            detail: String::from("this is fucking error"),
+        let mut card = Vec::new();
+        card.push(Card::new(String::from("owner"), Character::Alchemist, 10.0));
+        let update_hand = UpdateHand {
+            hand: card,
         };
-        let error_message_serialized = serde_json::to_string(&error_message).unwrap();
-        self.lobbies
-            .get(&msg.lobby_id)
-            .unwrap()
-            .sessions
-            .iter()
-            .for_each(|client| {
-                self.send_message(
-                    ServerWsMessageType::Error,
-                    &error_message_serialized,
-                    client,
-                )
-            }); // TODO: DO NOT use unwrap!!
+        let update_hand_serialized = serde_json::to_string(&update_hand).unwrap();
+        for _ in 0..10 {
+            self.lobbies
+                .get(&msg.lobby_id)
+                .unwrap()
+                .sessions
+                .iter()
+                .for_each(|client| {
+                    self.send_message(
+                        ServerWsMessageType::UpdateHand,
+                        &update_hand_serialized,
+                        client,
+                    )
+                });
+        } // TODO: DO NOT use unwrap!!
     }
 }

@@ -11,6 +11,7 @@ pub enum ClientWsMessageType {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ServerWsMessageType {
+    WsAction,
     UserJoined,
     UserDisconnected,
     YourId,

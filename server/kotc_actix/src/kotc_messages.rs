@@ -33,7 +33,7 @@ pub struct ClientMessage {
     pub msg: String,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct Error {
+#[derive(Debug, Serialize, Deserialize)]
+pub struct WsAction {
     pub detail: String,
 }
