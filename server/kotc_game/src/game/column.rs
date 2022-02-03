@@ -1,4 +1,4 @@
-use itertools::{Itertools};
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
@@ -28,10 +28,10 @@ impl Column {
         self.cards.len() as u8 >= self.token.points || self.blocked
     }
 
-    fn reveal_last_card(&mut self) -> Option<Character> {
-        if let Some(last_card) = self.cards.last_mut() {
+    pub fn reveal_previous_card(&mut self) -> Option<Character> {
+        let number_of_cards = self.cards.len();
+        if let Some(last_card) = self.cards.get_mut(number_of_cards-2) {
             last_card.revealed = true;
-            // TODO send message "Update column"
             Some(last_card.character)
         } else {
             None
@@ -39,13 +39,11 @@ impl Column {
     }
 
     pub fn add_card(&mut self, card: Card) {
-        match self.reveal_last_card() {
-            Some(Character::Killer) => {}
-            _ => {
-                self.cards.push(card);
-                // TODO send message "Update column"
-            }
-        }
+        self.cards.push(card);
+    }
+
+    pub fn pop_card(&mut self) {
+        self.cards.pop();
     }
 
     pub fn eval(&mut self) -> String {
