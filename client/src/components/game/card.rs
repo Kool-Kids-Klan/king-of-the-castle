@@ -42,3 +42,12 @@ pub fn cards_list(CardsListProps { cards, on_click }: &CardsListProps) -> Html {
         }
     }).collect()
 }
+
+#[function_component(Hand)]
+pub fn hand(CardsListProps { cards, on_click }: &CardsListProps) -> Html {
+    html! {
+        <div id={"game__hand"}>
+            <CardsList cards={cards.clone()} on_click={on_click} />
+        </div>
+    }
+}

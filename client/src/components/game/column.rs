@@ -50,12 +50,18 @@ pub struct ColumnsListProps {
 
 #[function_component(ColumnsList)]
 pub fn columns_list(ColumnsListProps { columns }: &ColumnsListProps) -> Html {
-    columns
-        .iter()
-        .map(|column| {
-            html! {
-               <ColumnComponent column={column.clone()} />
-            }
-        })
-        .collect()
+    html! {
+        <div id={"game__columns"}>
+        {
+            columns
+                .iter()
+                .map(|column| {
+                    html! {
+                        <ColumnComponent column={column.clone()} />
+                    }
+                })
+                .collect::<Vec<Html>>()
+        }
+        </div>
+    }
 }
