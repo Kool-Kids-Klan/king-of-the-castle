@@ -1,23 +1,22 @@
-mod pages;
+mod components;
 mod router;
-mod header;
 
-use yew_router::prelude::*;
+use components::header::Header;
+use kotc_reqwasm::connect_websocket;
+use router::{switch, Route};
 use yew::prelude::*;
-// use kotc_reqwasm::connect_websocket;
-use crate::router::{Route, switch};
-use crate::header::Header;
+use yew_router::prelude::*;
 
 #[function_component(App)]
 fn app() -> Html {
-   return html! {
-    <div class="container" >
-       <BrowserRouter>
-            <Header />
-            <Switch<Route> render={Switch::render(switch)} />
-        </BrowserRouter>
-    </div>
-   }
+    html! {
+        <div class="container" >
+            <BrowserRouter>
+                <Header />
+                <Switch<Route> render={Switch::render(switch)} />
+            </BrowserRouter>
+        </div>
+    }
 }
 
 fn main() {

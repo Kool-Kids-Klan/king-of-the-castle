@@ -1,11 +1,11 @@
-use yew_router::prelude::*;
+use crate::components::game::Game;
+use crate::components::pages::home::Home;
+use crate::components::pages::lobby::Lobby;
+use crate::components::pages::login::Login;
+use crate::components::pages::not_found::NotFound;
+use crate::components::pages::register::Register;
 use yew::prelude::*;
-use crate::pages::login::Login;
-use crate::pages::register::Register;
-use crate::pages::lobby::Lobby;
-use crate::pages::game::Game;
-use crate::pages::home::Home;
-use crate::pages::not_found::NotFound;
+use yew_router::prelude::*;
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {

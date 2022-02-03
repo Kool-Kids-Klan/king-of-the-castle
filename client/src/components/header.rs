@@ -55,7 +55,7 @@ pub fn header() -> Html {
             </>
         }
     };
-    return html! {
+    html! {
         <div class="header">
             { home_button }
             {
@@ -66,5 +66,5 @@ pub fn header() -> Html {
                  }
              }
          </div>
-    };
+    }
 }
