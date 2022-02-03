@@ -4,6 +4,7 @@ pub mod column;
 use yew::prelude::*;
 
 use card::{Card, CardsList};
+use column::{Column, ColumnsList, Token};
 
 #[function_component(Game)]
 pub fn game() -> Html {
@@ -19,13 +20,31 @@ pub fn game() -> Html {
         }
     });
 
-    let cards = vec![Card::new("king"), Card::new("beggar")];
+    let hand = vec![Card::new("king"), Card::new("beggar"), Card::new("beggar"), Card::new("beggar")];
+    let columns = vec![
+        Column::new(
+            Token::new("beggar"),
+            hand.clone(),
+        ),
+        Column::new(
+            Token::new("king"),
+            hand.clone(),
+        ),
+        Column::new(
+            Token::new("beggar"),
+            hand.clone(),
+        ),
+    ];
 
     html! {
-       <div class="game">
-          <h1>{"Game"}</h1>
-          <CardsList cards={ cards } on_click={ on_card_select } />
-          { for details }
-       </div>
+        <div class="game">
+            <div id={"game__columns"}>
+                <ColumnsList columns={ columns } />
+            </div>
+            <div id={"game__hand"}>
+                <CardsList cards={ hand } on_click={ on_card_select } />
+            </div>
+            { for details }
+        </div>
     }
 }

@@ -10,7 +10,7 @@ pub struct Token {
 impl Token {
     pub fn new(name: &str) -> Token {
         let name = name.to_string();
-        let path = format!("assets/tokens/{}.jpeg", name);
+        let path = format!("assets/cards/{}.jpeg", name);
 
         Token { name, path }
     }
@@ -22,6 +22,12 @@ pub struct Column {
     pub cards: Vec<Card>,
 }
 
+impl Column {
+    pub fn new(token: Token, cards: Vec<Card>) -> Self {
+        Self { token, cards }
+    }
+}
+
 #[derive(Properties, PartialEq)]
 pub struct ColumnProps {
     pub column: Column,
@@ -30,8 +36,8 @@ pub struct ColumnProps {
 #[function_component(ColumnComponent)]
 pub fn column(ColumnProps { column }: &ColumnProps) -> Html {
     html! {
-        <div>
-            <img name={ column.token.name.clone() } src={ column.token.path.clone() } />
+        <div class={"game__column"}>
+            <img class={"game__token"} name={ column.token.name.clone() } src={ column.token.path.clone() } />
             <CardsList cards={column.cards.clone()} />
         </div>
     }
