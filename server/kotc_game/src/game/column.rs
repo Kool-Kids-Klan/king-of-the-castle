@@ -1,11 +1,9 @@
-use anyhow::Result;
-use itertools::{chain, Itertools};
+use itertools::{Itertools};
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
 use super::card::{Card, Character};
 use super::Resource;
-use crate::game::player::Player;
 use crate::game::Token;
 
 type ColumnResults = Vec<(String, f32)>;

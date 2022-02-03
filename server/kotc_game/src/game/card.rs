@@ -1,4 +1,3 @@
-use super::player::Player;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Copy, Serialize, Deserialize)]

@@ -1,7 +1,6 @@
-use std::{panic, thread, time};
+use std::{panic};
 // use std::collections::HashMap;
-use chrono::{NaiveDateTime, Utc};
-use itertools::{cloned, iproduct, Itertools};
+use itertools::{iproduct};
 use rand::{seq::IteratorRandom, thread_rng};
 use serde::{Deserialize, Serialize};
 
@@ -171,6 +170,8 @@ impl Game {
             p.draw_card();
         }
         self.player_on_turn = (self.player_on_turn + 1) % self.players.len();
+
+        // if self.columns.iter().any(|column| !column.is_completed())
     }
 
     fn eval_columns(&mut self) {
