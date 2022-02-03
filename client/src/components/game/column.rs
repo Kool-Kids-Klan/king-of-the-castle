@@ -16,6 +16,20 @@ impl Token {
     }
 }
 
+#[derive(Clone, Properties, PartialEq)]
+pub struct TokenListProps {
+    pub tokens: Vec<Token>,
+}
+
+#[function_component(TokenList)]
+pub fn token_list(TokenListProps { tokens }: &TokenListProps) -> Html {
+    tokens.iter().map(|token| {
+        html! {
+            <img name={ token.name.clone() } src={ token.path.clone() } />
+        }
+    }).collect()
+}
+
 #[derive(Clone, PartialEq)]
 pub struct Column {
     pub token: Token,

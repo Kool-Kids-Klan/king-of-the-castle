@@ -152,6 +152,13 @@ body {
 .game__logs {
     overflow: scroll;
     scrollbar-width: none;
-    
+
     grid-area: logs;
+}
+
+.game__tokens {
+    overflow: scroll;
+    scrollbar-width: none;
+
+    grid-area: tokens;
 }
