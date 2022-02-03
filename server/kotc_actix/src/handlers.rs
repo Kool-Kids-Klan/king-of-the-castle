@@ -9,7 +9,7 @@ use pwhash::sha512_crypt::{hash, verify};
 
 use crate::kotc_ws_server::KotcWsServer;
 use crate::kots_ws_session::KotcWsSession;
-use kotc_database::repo::user_repo::*;
+use kotc_database::repo::user_repo::{UserRepo, PostgresUserRepo};
 
 #[derive(Debug, Deserialize)]
 pub struct UserData {

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use super::{
     super::{
         models::{NewParticipation, Participation},
-        schema::participations::dsl::*,
+        schema::participations::dsl as table,
         PgPool,
     },
     user_repo::{PostgresUserRepo, UserRepo},
@@ -38,7 +38,7 @@ impl ParticipationRepo for PostgresParticipationRepo {
             user_id: new_user_id,
         };
 
-        let rec: Participation = diesel::insert_into(participations)
+        let rec: Participation = diesel::insert_into(table::participations)
             .values(&new_participation)
             .get_result(&self.pg_pool.get()?)
             .expect("Error saving new participation");
@@ -50,14 +50,14 @@ impl ParticipationRepo for PostgresParticipationRepo {
     }
 
     async fn get_participation(&self, participation_id: i32) -> Result<Participation> {
-        Ok(participations
-            .filter(id.eq(participation_id))
+        Ok(table::participations
+            .filter(table::id.eq(participation_id))
             .first(&self.pg_pool.get()?)
             .expect("Error loading participation"))
     }
 
     async fn delete_participation(&self, participation_id: i32) -> Result<()> {
-        diesel::delete(participations.filter(id.eq(participation_id)))
+        diesel::delete(table::participations.filter(table::id.eq(participation_id)))
             .execute(&self.pg_pool.get()?)
             .expect("Error deleting participation");
 

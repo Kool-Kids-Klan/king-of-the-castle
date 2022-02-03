@@ -1,5 +1,4 @@
 use anyhow::Result;
-use chrono::{NaiveDateTime, Utc};
 use kotc_database::{get_game_repo, get_user_repo};
 
 use kotc_database::models::User;

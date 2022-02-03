@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use super::super::{
     models::{NewUser, User},
-    schema::users::dsl::*,
+    schema::users::dsl as table,
     PgPool,
 };
 
@@ -51,7 +51,7 @@ impl UserRepo for PostgresUserRepo {
             passhash: new_passhash,
         };
 
-        let rec: User = diesel::insert_into(users)
+        let rec: User = diesel::insert_into(table::users)
             .values(&new_user)
             .get_result(&self.pg_pool.get()?)
             .expect("Error saving new user");
@@ -60,15 +60,15 @@ impl UserRepo for PostgresUserRepo {
     }
 
     async fn list_users(&self) -> Result<Vec<User>> {
-        Ok(users.load::<User>(&self.pg_pool.get()?)?)
+        Ok(table::users.load::<User>(&self.pg_pool.get()?)?)
     }
 
     async fn get_user(&self, user_id: i32) -> Result<User> {
-        Ok(users.filter(id.eq(user_id)).first(&self.pg_pool.get()?)?)
+        Ok(table::users.filter(table::id.eq(user_id)).first(&self.pg_pool.get()?)?)
     }
 
     async fn delete_user(&self, user_id: i32) -> Result<()> {
-        diesel::delete(users.filter(id.eq(user_id))).execute(&self.pg_pool.get()?)?;
+        diesel::delete(table::users.filter(table::id.eq(user_id))).execute(&self.pg_pool.get()?)?;
 
         Ok(())
     }
@@ -94,11 +94,11 @@ impl UserRepo for PostgresUserRepo {
             None => &user.passhash,
         };
 
-        let user = diesel::update(users.filter(id.eq(user_id)))
+        let user = diesel::update(table::users.filter(table::id.eq(user_id)))
             .set((
-                username.eq(new_username),
-                email.eq(new_email),
-                passhash.eq(new_passhash),
+                table::username.eq(new_username),
+                table::email.eq(new_email),
+                table::passhash.eq(new_passhash),
             ))
             .get_result(&self.pg_pool.get()?)?;
 
@@ -106,16 +106,16 @@ impl UserRepo for PostgresUserRepo {
     }
 
     async fn add_played_game(&self, user_id: i32) -> Result<User> {
-        let user: User = diesel::update(users.filter(id.eq(user_id)))
-            .set(games_played.eq(games_played + 1))
+        let user: User = diesel::update(table::users.filter(table::id.eq(user_id)))
+            .set(table::games_played.eq(table::games_played + 1))
             .get_result(&self.pg_pool.get()?)?;
 
         Ok(user)
     }
 
     async fn add_won_game(&self, user_id: i32) -> Result<User> {
-        let user: User = diesel::update(users.filter(id.eq(user_id)))
-            .set(games_won.eq(games_won + 1))
+        let user: User = diesel::update(table::users.filter(table::id.eq(user_id)))
+            .set(table::games_won.eq(table::games_won + 1))
             .get_result(&self.pg_pool.get()?)?;
 
         Ok(user)
