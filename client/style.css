@@ -148,3 +148,10 @@ body {
 .game__token {
     margin-bottom: 10px;
 }
+
+.game__logs {
+    overflow: scroll;
+    scrollbar-width: none;
+    
+    grid-area: logs;
+}
