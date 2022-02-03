@@ -25,7 +25,7 @@ pub struct Disconnect {
     pub lobby_id: usize,
 }
 
-#[derive(Message)]
+#[derive(Message, Debug)]
 #[rtype(result = "()")]
 pub struct ClientMessage {
     pub session_id: usize,

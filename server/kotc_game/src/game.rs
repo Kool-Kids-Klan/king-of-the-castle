@@ -20,8 +20,9 @@ use ws_messages::{
     UpdateHand,
     FinishGame,
     ActionLog,
-    Error,
     Success,
+    Error,
+    StartGame,
 };
 
 pub mod card;
@@ -130,13 +131,13 @@ impl Game {
         });
     }
 
-    pub async fn start_game (&mut self) -> ServerMessage {
+    pub async fn start_game (&mut self) -> Vec<ServerMessage> {
         let players: Vec<Player> = Rc::clone(&self.players).borrow().to_vec();
         self.id = utils::create_new_game_in_db(players).await;
         self.started = true;
         self.init_token_deck();
         self.draw_next_tokens();
-        self.message_update_columns()
+        vec![self.message_start_game(), self.message_update_columns()]
     }
 
     pub async fn make_action (&mut self,
@@ -344,6 +345,14 @@ impl Game {
             message_type: ServerWsMessageType::Success,
             recipient: MessageRecipient::SingleUser,
             content: serde_json::to_string(&Success {}).unwrap()
+        }
+    }
+
+    fn message_start_game(&self) -> ServerMessage {
+        ServerMessage {
+            message_type: ServerWsMessageType::StartGame,
+            recipient: MessageRecipient::SingleUser,
+            content: serde_json::to_string(&StartGame {}).unwrap()
         }
     }
 }

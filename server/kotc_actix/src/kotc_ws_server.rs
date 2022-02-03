@@ -1,14 +1,19 @@
 use crate::kotc_messages::{ClientMessage, Connect, Disconnect, ServerWsMessage, WsAction};
 use crate::lobby::Lobby;
 use actix::prelude::{Actor, Context, Handler, Recipient};
-use kotc_commons::messages::message_types::ServerWsMessageType;
-use kotc_commons::messages::{ClientWsMessage};
-use std::collections::HashMap;
+use kotc_commons::messages::message_types::{ClientWsMessageType, ServerWsMessageType};
+use kotc_commons::messages::{ClientWsMessage, Error, PlayCard, Ready, UnReady, UserJoined};
+use std::collections::{HashMap, HashSet};
+use std::future::Future;
+use actix::AsyncContext;
+use serde::de::DeserializeOwned;
 use kotc_game::game::card::{Card, Character};
-use kotc_game::game::ws_messages::UpdateHand;
+use kotc_game::game::Game;
+use kotc_game::game::ws_messages::{MessageRecipient, ServerMessage};
 
 pub type Socket = Recipient<ServerWsMessage>;
 
+#[derive(Clone)]
 pub struct KotcWsServer {
     sessions: HashMap<usize, Socket>, // map of all sockets
     lobbies: HashMap<usize, Lobby>,   // map of all lobbies
@@ -118,32 +123,84 @@ impl Handler<Disconnect> for KotcWsServer {
     }
 }
 
+fn deserialize<T: DeserializeOwned>(serialized: &String) -> T {
+    serde_json::from_str(serialized).unwrap()
+}
+
+async fn send_messages(session_id: &usize, messages: Vec<ServerMessage>, sessions: &HashSet<usize>, this: &KotcWsServer) {
+    messages
+        .iter()
+        .for_each(|message| {
+            match message.recipient {
+                MessageRecipient::SingleUser =>{
+                    this.send_message (
+                        message.message_type.clone(),
+                        &message.content.clone(),
+                        session_id,
+                    )
+                },
+                MessageRecipient::AllUsers => {
+                    sessions
+                        .iter()
+                        .for_each(|client| {
+                            this.send_message(
+                                message.message_type.clone(),
+                                &message.content.clone(),
+                                client,
+                            )
+                        })
+                },
+            };
+        });
+}
+
 impl Handler<ClientMessage> for KotcWsServer {
     type Result = ();
 
-    fn handle(&mut self, msg: ClientMessage, _: &mut Self::Context) -> Self::Result {
-        println!("this is message string {}", msg.msg);
-        let client_message: ClientWsMessage = serde_json::from_str(&msg.msg).unwrap();
-        println!("this is message object {:?}", client_message);
-        let mut card = Vec::new();
-        card.push(Card::new(String::from("owner"), Character::Alchemist, 10.0));
-        let update_hand = UpdateHand {
-            hand: card,
-        };
-        let update_hand_serialized = serde_json::to_string(&update_hand).unwrap();
-        for _ in 0..10 {
-            self.lobbies
-                .get(&msg.lobby_id)
-                .unwrap()
-                .sessions
-                .iter()
-                .for_each(|client| {
-                    self.send_message(
-                        ServerWsMessageType::UpdateHand,
-                        &update_hand_serialized,
-                        client,
-                    )
-                });
-        } // TODO: DO NOT use unwrap!!
+    fn handle(&mut self, msg: ClientMessage, ctx: &mut Self::Context) -> Self::Result {
+        let client_message: ClientWsMessage = deserialize(&msg.msg);
+        let lobby = self.lobbies.get(&msg.lobby_id).unwrap();
+        let mut game = lobby.game.clone();
+        let sessions = lobby.sessions.clone();
+        let this = self.clone();
+
+        match client_message.message_type {
+            ClientWsMessageType::UserJoined => {
+                let user_joined: UserJoined = deserialize(&client_message.content);
+                let fut = async move {
+                    let messages = game.add_player(user_joined.user_id).await;
+                    send_messages(&msg.session_id, messages, &sessions, &this).await;
+                };
+                let fut = actix::fut::wrap_future::<_, Self>(fut);
+                ctx.spawn(fut);
+                println!("user joined {:?}", user_joined);
+            },
+            ClientWsMessageType::PlayCard => {
+                let play_card: PlayCard = deserialize(&client_message.content);
+                let fut = async move {
+                    let messages = game.make_action(play_card.user_id, play_card.column_index, play_card.card_index).await;
+                    send_messages(&msg.session_id, messages, &sessions, &this);
+                };
+                let fut = actix::fut::wrap_future::<_, Self>(fut);
+                ctx.spawn(fut);
+                println!("Play card {:?}", play_card);
+            },
+            ClientWsMessageType::Ready => {
+                let ready: Ready = deserialize(&client_message.content);
+                let message = game.player_flip_ready(ready.user_id);
+                send_messages(&msg.session_id, vec![message], &sessions, &this);
+                println!("user ready {:?}", ready);
+            },
+            ClientWsMessageType::Unready => {
+                let unready: UnReady = deserialize(&client_message.content);
+                let message = game.player_flip_ready(unready.user_id);
+                send_messages(&msg.session_id, vec![message], &sessions, &this);
+                println!("user unready {:?}", unready);
+            }
+            ClientWsMessageType::Error => {
+                let error: Error = deserialize(&client_message.content);
+                println!("error {:?}", error);
+            }
+        }
     }
 }
