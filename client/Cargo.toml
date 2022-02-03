@@ -11,3 +11,14 @@ serde = "1.0.136"
 serde_json = "1.0.78"
 yew = "0.19"
 yew-router = "0.16"
+
+[dependencies.web-sys]
+version = "0.3"
+features = [
+    "Document",
+    "Element",
+    "Node",
+    "Window",
+    "HtmlCollection",
+    "HtmlInputElement",
+]
