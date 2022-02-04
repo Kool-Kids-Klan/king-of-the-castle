@@ -18,7 +18,6 @@ pub enum ServerWsMessageType {
 
     UpdatePlayers,
     UpdateHand,
-    UpdateTokens,
     UpdateColumns,
     StartGame,
     FinishGame,

@@ -12,11 +12,6 @@ pub struct UpdateColumns {
     pub board: Vec<Column>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UpdateTokens {
-    pub tokens: HashMap<String, Vec<Token>>,  // (username, tokens)
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StartGame {}
 

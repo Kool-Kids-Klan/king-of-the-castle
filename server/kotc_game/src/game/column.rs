@@ -11,7 +11,7 @@ type ColumnResults = Vec<(String, f32)>;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Column {
     pub token: Token,
-    pub blocked: bool, // Boure
+    pub is_blocked: bool, // Boure
     pub cards: Vec<Card>,
 }
 
@@ -19,18 +19,19 @@ impl Column {
     pub fn new(token: Token) -> Column {
         Column {
             token,
-            blocked: false,
+            is_blocked: false,
             cards: vec![],
         }
     }
 
     pub fn is_completed(&self) -> bool {
-        self.cards.len() as u8 >= self.token.points || self.blocked
+        self.cards.len() as u8 >= self.token.points || self.is_blocked
     }
 
     pub fn reveal_previous_card(&mut self) -> Option<Character> {
         let number_of_cards = self.cards.len();
-        if let Some(previous_card) = self.cards.get_mut(number_of_cards-2) {
+        if self.cards.len() >= 2 {
+            let mut previous_card = self.cards.get_mut(number_of_cards-2).unwrap();
             previous_card.revealed = true;
             Some(previous_card.character)
         } else {
@@ -180,12 +181,9 @@ impl Column {
             .iter()
             .map(|(owner, cards)| {
                 let strength = cards.iter().map(|card| card.strength).sum();
-                println!("{}: {:?}", owner.clone(), cards);
                 (owner.clone(), strength)
             })
             .collect();
-        println!("RESULTS:\n{:?}", result);
-        println!("Concealed cards: {:?}", self.get_concealed_cards());
         result
     }
 
@@ -247,7 +245,6 @@ impl Column {
     }
 
     pub fn get_concealed_cards(&self) -> Vec<Card> {
-        println!("{:?}", self.cards);
         self.cards
             .clone()
             .into_iter()
