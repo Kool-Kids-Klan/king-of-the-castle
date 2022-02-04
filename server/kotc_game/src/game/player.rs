@@ -11,7 +11,7 @@ pub struct Player {
     pub user_id: i32,
     pub username: String,
     pub hand: Vec<Card>,
-    deck: Vec<Card>,
+    pub deck: Vec<Card>,
     pub tokens: Vec<Token>,
     pub ready: bool,
 }
@@ -90,7 +90,7 @@ impl Player {
         }
     }
 
-    pub fn draw_card(&mut self) -> (bool) {
+    pub fn draw_card(&mut self) -> bool {
         let (card, refilled) = self.next_card();
         self.hand.push(card.clone());
         refilled
