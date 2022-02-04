@@ -1,12 +1,13 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use gloo_storage::{SessionStorage, Storage};
+use kotc_reqwasm::server_structs::Player;
 use yew::prelude::*;
 use yewdux::prelude::BasicStore;
 use yewdux_functional::use_store;
 use kotc_reqwasm::{connect_websocket, KotcWebSocket, send_ready, send_join};
 use kotc_reqwasm::endpoints::{LoggedUser, User};
-use crate::components::pages::headstone::Headstone;
+use crate::components::pages::headstone::{HeadstoneList, HeadstoneProps};
 use crate::components::pages::home::{LobbyState};
 
 
@@ -26,8 +27,8 @@ pub struct KotcWebSocketState {
 }
 
 impl KotcWebSocketState {
-    pub fn new(lobby_id: String, user_id: i32) -> Self {
-        let ws = Rc::new(RefCell::new(connect_websocket(lobby_id)));
+    pub fn new(lobby_id: String, user_id: i32, set_players: Callback<Vec<Player>>) -> Self {
+        let ws = Rc::new(RefCell::new(connect_websocket(lobby_id, set_players)));
         send_join(user_id, Rc::clone(&ws));
 
         KotcWebSocketState {
@@ -39,16 +40,17 @@ impl KotcWebSocketState {
 impl Default for KotcWebSocketState {
     fn default() -> Self {
         KotcWebSocketState {
-            websocket: Rc::new(RefCell::new(connect_websocket(String::from("1234")))),
+            websocket: Rc::new(RefCell::new(connect_websocket(
+                String::from("1234"), 
+                Callback::from(|_| print!("")),
+            ))),
         }
     }
 }
 
 #[function_component(Lobby)]
 pub fn lobby() -> Html {
-    let tmp_color = PlayerColor::Black;
-    let tmp_username = "Username".to_string();
-    let ready = false;
+    let ready = use_state(|| false);
 
     // let store = use_store::<BasicStore<LoggedUser>>();
     // let lobby_info_store = use_store::<BasicStore<LobbyState>>();
@@ -58,32 +60,41 @@ pub fn lobby() -> Html {
     //     lobby_id = lobby_info;
     // }
 
+    let players = use_state(|| vec![]);
+
+    let set_players: Callback<Vec<Player>> = {
+        let players = players.clone();
+        Callback::from(move |i: Vec<Player>| players.set(i))
+    };
+
     log::info!("{:?}", lobby_id);
     // log::info!("{:?}", store.state());
     log::info!("{:?}", logged_user);
     
     // let user_id = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default().unwrap().id;
-    let ws = use_state(|| KotcWebSocketState::new(lobby_id, logged_user.id));
+    let ws = use_state(|| KotcWebSocketState::new(lobby_id, logged_user.id, set_players));
 
     let on_ready_click = {
+        let ready = ready.clone();
         Callback::from(move |_e: MouseEvent| {
             // let id = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default().unwrap().id;
             let r = Rc::clone(&ws.websocket);
             send_ready(logged_user.id, r);
+            ready.set(!*ready);
         })
     };
+
+    let headstone_props = players.iter().map(|p| HeadstoneProps {
+        color: PlayerColor::Black,
+        player_name: p.username.clone(),
+        ready: p.ready,
+    }).collect::<Vec<HeadstoneProps>>();
 
     html! {
          <div class="lobby" >
             <h1 class="lobby__title">{"Lobby"}</h1>
-            <div class="lobby__headstones">
-                <Headstone color={PlayerColor::Black} player_name={tmp_username.clone()} />
-                <Headstone color={PlayerColor::White} player_name={tmp_username.clone()} />
-                <Headstone color={PlayerColor::Red} player_name={tmp_username.clone()} />
-                <Headstone color={PlayerColor::Blue} player_name={tmp_username.clone()} />
-                <Headstone color={PlayerColor::Green} player_name={tmp_username.clone()} />
-            </div>
-            <button class="lobby__button" type="button" onclick={on_ready_click}>{if ready {"Not Ready"} else {"Ready"}}</button>
+            <HeadstoneList players={headstone_props} />
+            <button class="lobby__button" type="button" onclick={on_ready_click}>{if *ready {"Unready"} else {"Ready"}}</button>
          </div>
     }
 }
