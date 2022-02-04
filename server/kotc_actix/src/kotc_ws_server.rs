@@ -127,7 +127,7 @@ fn deserialize<T: DeserializeOwned>(serialized: &String) -> T {
     serde_json::from_str(serialized).unwrap()
 }
 
-async fn send_messages(session_id: &usize, messages: Vec<ServerMessage>, sessions: &HashSet<usize>, this: &KotcWsServer) {
+fn send_messages(session_id: &usize, messages: Vec<ServerMessage>, sessions: &HashSet<usize>, this: &KotcWsServer) {
     messages
         .iter()
         .for_each(|message| {
@@ -169,10 +169,11 @@ impl Handler<ClientMessage> for KotcWsServer {
                 let user_joined: UserJoined = deserialize(&client_message.content);
                 let fut = async move {
                     let messages = game.add_player(user_joined.user_id).await;
-                    send_messages(&msg.session_id, messages, &sessions, &this).await;
+                    send_messages(&msg.session_id, messages, &sessions, &this);
                 };
                 let fut = actix::fut::wrap_future::<_, Self>(fut);
-                ctx.spawn(fut);
+                // ctx.spawn(fut);
+                ctx.wait(fut);
                 println!("user joined {:?}", user_joined);
             },
             ClientWsMessageType::PlayCard => {
@@ -182,7 +183,8 @@ impl Handler<ClientMessage> for KotcWsServer {
                     send_messages(&msg.session_id, messages, &sessions, &this);
                 };
                 let fut = actix::fut::wrap_future::<_, Self>(fut);
-                ctx.spawn(fut);
+                // ctx.spawn(fut);
+                ctx.wait(fut);
                 println!("Play card {:?}", play_card);
             },
             ClientWsMessageType::Ready => {
