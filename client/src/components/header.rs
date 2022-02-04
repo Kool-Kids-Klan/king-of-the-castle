@@ -35,7 +35,7 @@ pub fn header() -> Html {
     let logout_button = {
         let history = history.clone();
         let onclick = Callback::once(move |_| {
-            SessionStorage::clear();
+            SessionStorage::delete("user");
             store.dispatch().reduce(|s| s.logged_user = None);;
             history.push(Route::Home)});
         html! {
