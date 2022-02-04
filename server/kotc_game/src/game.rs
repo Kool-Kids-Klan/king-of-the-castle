@@ -1,6 +1,6 @@
 use std::{panic};
 use std::collections::HashMap;
-use itertools::{iproduct};
+use itertools::{iproduct, Itertools};
 use rand::{seq::IteratorRandom, thread_rng};
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -66,7 +66,7 @@ pub struct Game {
     player_on_turn: usize,
     columns: Rc<RefCell<Vec<Column>>>,
     token_deck: Vec<Token>,
-    started: bool,
+    pub round: u8,
 }
 
 impl Game {
@@ -77,7 +77,7 @@ impl Game {
             player_on_turn: 0,
             columns: Rc::new(RefCell::new(vec![])),
             token_deck: vec![],
-            started: false,
+            round: 1,
         }
     }
 
@@ -90,22 +90,35 @@ impl Game {
                 Rc::clone(&self.players).borrow_mut().push(new_player.clone());
 
                 messages.push(self.message_update_players());
+                messages.push(self.log(
+                    format!("Player {} has joined the lobby.", new_player.username)
+                ));
                 messages.push(self.message_update_hand(new_player.hand));
                 messages
             },
-            Err(_) => vec![self.message_error("Error: User not found.".to_string())]
+            Err(_) => vec![self.message_error(
+                format!("Error: User with ID {} not found.", user_id)
+            )]
         }
     }
 
-    pub fn disconnect_player(&mut self, user_id: i32) -> ServerMessage {
+    pub fn disconnect_player(&mut self, user_id: i32) -> Vec<ServerMessage> {
         let mut players = Rc::clone(&self.players).borrow_mut().to_vec();
-        match players.iter().position(|player| player.user_id == user_id) {
-            Some(index) => {
+        match players.iter().find_position(|player| player.user_id == user_id) {
+            Some((index, player)) => {
+                let username = player.username.clone();
                 players.remove(index);
-                self.message_update_players()
+                vec![
+                    self.message_update_players(),
+                    self.log(
+                        format!("Player {} left the lobby.", username)
+                    )
+                ]
             },
             None => {
-                self.message_error("Error: Invalid user ID.".to_string())
+                vec![
+                    self.message_error(format!("Error: User with ID {} not found.", user_id))
+                ]
             }
         }
     }
@@ -128,14 +141,28 @@ impl Game {
                 if self.get_ready_count() >= 2 {
                     self.start_game().await;
                     messages.push(self.message_start_game());
+                    messages.push(self.log(
+                        format!("Game has started.\nRound {}/{} has started.\n{} is on turn.",
+                                self.round, NUMBER_OF_ROUNDS, self.get_player_on_turn_username())
+                    ));
                     messages.push(self.message_update_columns());
                 }
             }
             None => messages.push(
-                self.message_error("Error: Invalid user ID.".to_string())
+                self.message_error(
+                    format!("Error: User with ID {} not found.", user_id)
+                )
             )
         }
         messages
+    }
+
+    fn get_player_on_turn_username(&self) -> String {
+        Rc::clone(&self.players)
+            .borrow()
+            .get(self.player_on_turn)  // always in range
+            .unwrap()
+            .clone().username
     }
 
     fn init_token_deck(&mut self) -> Vec<Token> {
@@ -160,7 +187,6 @@ impl Game {
     async fn start_game (&mut self) {
         let players: Vec<Player> = Rc::clone(&self.players).borrow().to_vec();
         self.id = utils::create_new_game_in_db(players).await;
-        self.started = true;
         self.init_token_deck();
         self.draw_next_tokens();
     }
@@ -171,7 +197,9 @@ impl Game {
                        card_index: usize) -> Vec<ServerMessage> {
         if let Some(_) = Rc::clone(&self.players).borrow_mut().iter_mut().find(|p| p.user_id == user_id) {
         } else {
-            return vec![self.message_error("Error: Invalid user ID.".to_string())];
+            return vec![self.message_error(
+                    format!("Error: User with ID {} not found.", user_id)
+                )];
         }
 
         let mut played_card: Card = Card::dummy_card();
@@ -185,7 +213,8 @@ impl Game {
                         played_card = c.clone();
                     }
                     None => {
-                        return vec![self.message_error("Error: Invalid card index.".to_string())];
+                        return vec![self.message_error(
+                            format!("Error: Invalid card index: {}", card_index))];
                     }
                 }
             }
@@ -193,7 +222,6 @@ impl Game {
         };
 
         let mut messages = vec![];
-
         match Rc::clone(&self.columns).borrow_mut().get_mut(column_index) {
             Some(column) => {
                 if column.blocked {
@@ -206,6 +234,9 @@ impl Game {
                         // always true
                         p.hand.remove(card_index);
                         messages.push(self.message_update_hand(p.hand.clone()));
+                        messages.push(self.log(
+                            format!("Player {} has played {:?}.", user_id, played_card.character)
+                        ));
 
                         column.add_card(played_card);
                         messages.push(self.message_update_columns());
@@ -215,10 +246,19 @@ impl Game {
                             if character == Character::Killer {
                                 column.pop_card();
                                 messages.push(self.message_update_columns());
+                                messages.push(self.log(
+                                    format!("{}'s played card has been removed by Killer!",
+                                    p.username)
+                                ));
                             }
                         }
 
-                        p.draw_card();
+                        if p.draw_card() {
+                            messages.push(self.log(
+                                format!("Player {} has refilled his deck.",
+                                        self.get_player_on_turn_username())
+                            ));
+                        }
                         messages.push(self.message_update_hand(p.hand.clone()));
                     }
                 }
@@ -231,18 +271,36 @@ impl Game {
         self.player_on_turn = (self.player_on_turn + 1) % self.get_players_len();
 
         if self.round_finished() {
+            messages.push(self.log(
+                format!("All columns closed - round ended.")
+            ));
             self.eval_columns(&mut messages);
             if self.token_deck.is_empty() {
                 let (winner_id, winner_username, results) = self.get_results();
+
+                messages.push(self.log(
+                results.iter().fold(
+                    "".to_string(),
+                    |s, (username, score)| {
+                        s + &format!("{}: {} points\n", username, score)
+                    }) + &format!("Winner: {}", winner_username)
+                ));
+
                 messages.push(self.message_finish_game(winner_username, results));
                 utils::update_game_result_in_db(self.id, winner_id).await;
-            } else {
-                self.columns = Rc::new(RefCell::new(vec![]));
-                messages.push(self.message_update_columns());
-                self.draw_next_tokens();
-                messages.push(self.message_update_columns());
+                return messages;
             }
+            self.columns = Rc::new(RefCell::new(vec![]));
+            self.draw_next_tokens();
+            self.round += 1;
+            messages.push(self.log(
+                format!("Round {}/{} has started.", self.round, NUMBER_OF_ROUNDS)
+            ));
+            messages.push(self.message_update_columns());
         }
+        messages.push(self.log(
+            format!("{} is on turn.", self.get_player_on_turn_username())
+        ));
         messages
     }
 
@@ -259,16 +317,21 @@ impl Game {
             .borrow_mut()
             .iter_mut()
             .for_each(|column| {
-            let winner_username = column.eval();
-            match Rc::clone(&self.players)
-                .borrow_mut()
-                .iter_mut()
-                .find(|player| player.username == winner_username) {
-                Some(winner) => winner.add_token(column.token.clone()),
-                None => panic!("Error while evaluating winner!"),
-            };
-            messages.push(self.message_update_tokens());
-        });
+                let winner_username = column.eval();
+                messages.push(self.log(
+                    format!("{:?} for {} points won by {}",
+                            column.token.resource,
+                            column.token.points,
+                            winner_username)
+                ));
+                if let Some(winner) = Rc::clone(&self.players)
+                    .borrow_mut()
+                    .iter_mut()
+                    .find(|player| player.username == winner_username) {
+                    winner.add_token(column.token.clone())
+                }
+            });
+        messages.push(self.message_update_tokens());
     }
 
     fn get_results(&self) -> (i32, String, HashMap<String, u8>) {
