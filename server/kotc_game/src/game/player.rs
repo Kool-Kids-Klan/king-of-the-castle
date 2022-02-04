@@ -79,20 +79,21 @@ impl Player {
         self.deck.shuffle(&mut rng);
     }
 
-    fn next_card(&mut self) -> Card {
+    fn next_card(&mut self) -> (Card, bool) {
+        // returns (card, refilled?)
         match self.deck.pop() {
-            Some(card) => card,
+            Some(card) => (card, false),
             None => {
                 self.refill_deck();
-                self.next_card()
+                (self.next_card().0, true)
             }
         }
     }
 
-    pub fn draw_card(&mut self) -> Card {
-        let card = self.next_card();
+    pub fn draw_card(&mut self) -> (bool) {
+        let (card, refilled) = self.next_card();
         self.hand.push(card.clone());
-        card
+        refilled
     }
 
     pub fn add_token(&mut self, token: Token) {
