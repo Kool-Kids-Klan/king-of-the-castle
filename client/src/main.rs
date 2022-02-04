@@ -1,13 +1,27 @@
 mod components;
 mod router;
 
+use gloo_storage::{SessionStorage, Storage};
 use components::header::Header;
 use router::{switch, Route};
 use yew::prelude::*;
 use yew_router::prelude::*;
+use yewdux::prelude::*;
+use yewdux_functional::*;
+use kotc_reqwasm::endpoints::LoggedUser;
+
 
 #[function_component(App)]
 fn app() -> Html {
+    let store = use_store::<BasicStore<LoggedUser>>();
+    let user_state = store.state();
+    let maybe_user = SessionStorage::get("user");
+    if let Ok(user) = maybe_user {
+        match user_state {
+            Some(_) => {},
+            None => store.dispatch().reduce(|state|state.logged_user = Some(user))
+        }};
+
     html! {
         <div class="container" >
             <BrowserRouter>

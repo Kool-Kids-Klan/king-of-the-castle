@@ -1,9 +1,9 @@
-use crate::Route;
+use gloo_storage::{SessionStorage, Storage};
+use crate::{LoggedUser, Route};
 use yew::prelude::*;
 use yew_router::prelude::*;
 use yewdux::prelude::*;
 use yewdux_functional::*;
-use kotc_reqwasm::endpoints::LoggedUser;
 
 #[function_component(Header)]
 pub fn header() -> Html {
@@ -35,6 +35,7 @@ pub fn header() -> Html {
     let logout_button = {
         let history = history.clone();
         let onclick = Callback::once(move |_| {
+            SessionStorage::clear();
             store.dispatch().reduce(|s| s.logged_user = None);;
             history.push(Route::Home)});
         html! {
