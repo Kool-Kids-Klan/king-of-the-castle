@@ -1,5 +1,9 @@
 use yew::prelude::*;
 use web_sys::HtmlInputElement;
+use yew_router::prelude::*;
+use yewdux::prelude::*;
+use yewdux_functional::*;
+use crate::{LoggedUser, Route, User};
 
 
 #[derive(Clone, Debug, Default)]
@@ -10,6 +14,8 @@ pub struct LoginInfo {
 
 #[function_component(Login)]
 pub fn login() -> Html {
+    let history = use_history().unwrap();
+    let store = use_store::<BasicStore<LoggedUser>>();
 
     // let user_ctx = use_user_context();
     let login_info = use_state(LoginInfo::default);
@@ -33,14 +39,18 @@ pub fn login() -> Html {
     //     user_login.clone(),
     // );
 
-    // let onsubmit = {
-    //     let user_login = user_login.clone();
-    //     Callback::from(move |e: FocusEvent| {
-    //         e.prevent_default(); /* Prevent event propagation */
-    //         let user_login = user_login.clone();
-    //         user_login.run();
-    //     })
-    // };
+    let onsubmit = {
+        let login_info = login_info.clone();
+        Callback::from(move |e: FocusEvent| {
+            e.prevent_default();
+            let info = (*login_info).clone();
+            store.dispatch().reduce(|state| state.logged_user = Some(User {
+                id: 0,
+                username: info.username
+            }));
+            history.push(Route::Home);
+        })
+    };
 
     let oninput_username = {
         let login_info = login_info.clone();
@@ -63,7 +73,7 @@ pub fn login() -> Html {
 
     html! {
          <div class="login" >
-             <form class= "form">
+             <form class= "form" {onsubmit}>
                  <label class="form__label" for="username">{"Username"}</label>
                  <input value={login_info.username.clone()} oninput={oninput_username} class="form__input" type="text" id="username" name="username"/>
                  <label class="form__label" for="password">{"Password"}</label>
