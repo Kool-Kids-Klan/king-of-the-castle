@@ -82,7 +82,7 @@ impl Game {
         }
     }
 
-    pub async fn add_player (&mut self, user_id: i32) -> Vec<ServerMessage> {
+    pub async fn connect_player(&mut self, user_id: i32) -> Vec<ServerMessage> {
         match utils::find_user_by_id(user_id).await {
             Ok(user) => {
                 let mut messages = vec![];
@@ -94,7 +94,20 @@ impl Game {
                 messages.push(self.message_update_hand(new_player.hand));
                 messages
             },
-            Err(_) => vec![self.message_error("User not found.".to_string())]
+            Err(_) => vec![self.message_error("Error: User not found.".to_string())]
+        }
+    }
+
+    pub fn disconnect_player(&mut self, user_id: i32) -> ServerMessage {
+        let mut players = Rc::clone(&self.players).borrow_mut().to_vec();
+        match players.iter().position(|player| player.user_id == user_id) {
+            Some(index) => {
+                players.remove(index);
+                self.message_update_players()
+            },
+            None => {
+                self.message_error("Error: Invalid user ID.".to_string())
+            }
         }
     }
 
@@ -120,7 +133,7 @@ impl Game {
                 }
             }
             None => messages.push(
-                self.message_error("Error: Invalid player ID.".to_string())
+                self.message_error("Error: Invalid user ID.".to_string())
             )
         }
         messages
@@ -159,7 +172,7 @@ impl Game {
                        card_index: usize) -> Vec<ServerMessage> {
         if let Some(_) = Rc::clone(&self.players).borrow_mut().iter_mut().find(|p| p.user_id == user_id) {
         } else {
-            return vec![self.message_error("Error: Invalid player ID.".to_string())];
+            return vec![self.message_error("Error: Invalid user ID.".to_string())];
         }
 
         let mut played_card: Card = Card::dummy_card();
