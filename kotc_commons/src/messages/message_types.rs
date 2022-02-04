@@ -23,6 +23,5 @@ pub enum ServerWsMessageType {
     StartGame,
     FinishGame,
     ActionLog,
-    Success,
     Error,
 }

@@ -20,7 +20,6 @@ use ws_messages::{
     UpdateHand,
     FinishGame,
     ActionLog,
-    Success,
     Error,
     StartGame,
 };
@@ -372,14 +371,6 @@ impl Game {
             message_type: ServerWsMessageType::Error,
             recipient: MessageRecipient::SingleUser,
             content: serde_json::to_string(&Error { detail }).unwrap()
-        }
-    }
-
-    fn message_success(&self) -> ServerMessage {
-        ServerMessage {
-            message_type: ServerWsMessageType::Success,
-            recipient: MessageRecipient::SingleUser,
-            content: serde_json::to_string(&Success {}).unwrap()
         }
     }
 
