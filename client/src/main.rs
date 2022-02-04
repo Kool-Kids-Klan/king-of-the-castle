@@ -2,6 +2,8 @@ mod components;
 mod router;
 
 use gloo_storage::{SessionStorage, Storage};
+use std::cell::{RefCell};
+use std::rc::Rc;
 use components::header::Header;
 use router::{switch, Route};
 use yew::prelude::*;
@@ -9,7 +11,6 @@ use yew_router::prelude::*;
 use yewdux::prelude::*;
 use yewdux_functional::*;
 use kotc_reqwasm::endpoints::LoggedUser;
-
 
 #[function_component(App)]
 fn app() -> Html {

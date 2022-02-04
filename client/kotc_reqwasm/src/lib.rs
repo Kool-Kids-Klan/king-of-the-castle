@@ -1,9 +1,11 @@
-mod server_structs;
-mod ws_structs;
-mod ws_onmessage;
-mod ws_send;
 pub mod endpoints;
+pub mod server_structs;
+pub mod ws_structs;
+pub mod ws_onmessage;
+pub mod ws_send;
 
+use std::cell::RefCell;
+use std::rc::Rc;
 use futures::{SinkExt, StreamExt};
 use log::{info, Level};
 use reqwasm::websocket::{futures::WebSocket, Message};
@@ -11,7 +13,8 @@ use wasm_bindgen_futures::spawn_local;
 use futures::stream::SplitSink;
 use serde::Serialize;
 
-use kotc_commons::messages::{ClientWsMessage};
+use kotc_commons::messages::{ClientWsMessage, Ready, UserJoined};
+use kotc_commons::messages::message_types::ClientWsMessageType;
 use crate::ws_onmessage::onmessage;
 use crate::ws_send::{play_card, ready, user_joined};
 
@@ -45,12 +48,25 @@ impl KotcWebSocket {
     }
 }
 
-pub fn connect_websocket() { // This method is meant to return KotcWebSocket, thus it would be possible to call ws.send_message from anywhere
-    console_log::init_with_level(Level::Debug).unwrap();
-    let mut ws = KotcWebSocket::new("ws://127.0.0.1:8081/lobby/1234");
+pub fn connect_websocket(lobby_id: String) -> KotcWebSocket { // This method is meant to return KotcWebSocket, thus it would be possible to call ws.send_message from anywhere
+    // console_log::init_with_level(Level::Debug).unwrap();
+    let ws = KotcWebSocket::new(&format!("ws://127.0.0.1:8081/lobby/{}", lobby_id));
+    // spawn_local(async move {
+    //     ws.send_message(user_joined(19)).await;
+    //     ws.send_message(ready(19)).await;
+    //     ws.send_message(play_card(19, 1, 3)).await;
+    // });
+    ws
+}
+
+pub fn send_ready(id: i32, ws: Rc<RefCell<KotcWebSocket>>) {
     spawn_local(async move {
-        ws.send_message(user_joined(19)).await;
-        ws.send_message(ready(19)).await;
-        ws.send_message(play_card(19, 1, 3)).await;
-    })
+        Rc::clone(&ws).borrow_mut().send_message(ready(id)).await;
+    });
+}
+
+pub fn send_join(id: i32, ws: Rc<RefCell<KotcWebSocket>>) {
+    spawn_local(async move {
+        Rc::clone(&ws).borrow_mut().send_message(user_joined(id)).await;
+    });
 }
