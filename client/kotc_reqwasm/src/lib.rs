@@ -11,7 +11,7 @@ use log::{info, Level};
 use reqwasm::websocket::{futures::WebSocket, Message};
 use server_structs::Player;
 use wasm_bindgen_futures::spawn_local;
-use futures::stream::SplitSink;
+use futures::stream::{SplitSink, SplitStream};
 use serde::Serialize;
 
 use kotc_commons::messages::{ClientWsMessage, Ready, UserJoined};
@@ -24,21 +24,27 @@ fn serialize<T: Serialize>(object: T) -> String {
     serde_json::to_string(&object).unwrap()
 }
 
+pub struct KotcWebSocketReader {
+    pub read: SplitStream<WebSocket>,
+    pub set_players: Callback<Vec<Player>>,
+}
+
 pub struct KotcWebSocket {
     pub write: SplitSink<WebSocket, Message>,
 }
 
 impl KotcWebSocket {
-    pub fn new(socket_url: &str, set_players: Callback<Vec<Player>>) -> Self {
+    pub fn new(socket_url: &str, set_players: Callback<Vec<Player>>) -> KotcWebSocket {
         let ws = WebSocket::open(socket_url).unwrap();
         let (write, read) = ws.split();
+
+        let listener = KotcWebSocketReader { read, set_players };
+
         spawn_local(async move {
-            onmessage(read, set_players).await;
+            onmessage(listener).await;
         });
 
-        KotcWebSocket {
-            write,
-        }
+        KotcWebSocket { write }
     }
 
     pub async fn send_message(&mut self, client_message: ClientWsMessage) {

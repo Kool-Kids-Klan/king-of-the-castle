@@ -7,6 +7,7 @@ use serde::de;
 use kotc_commons::messages::message_types::ServerWsMessageType;
 use kotc_commons::messages::ServerWsMessage;
 use yew::Callback;
+use crate::{KotcWebSocketReader};
 use crate::server_structs::Player;
 use crate::ws_structs::{ActionLog, Error, FinishGame, StartGame, UpdateColumns, UpdateHand, UpdatePlayers, WsAction, YourId};
 
@@ -29,7 +30,9 @@ fn get_deserialized<T: de::DeserializeOwned>(content: &String) -> T {
     serde_json::from_str::<T>(content).unwrap()
 }
 
-pub async fn onmessage(mut read: SplitStream<WebSocket>, set_players: Callback<Vec<Player>>) {
+pub async fn onmessage(ws: KotcWebSocketReader) {
+    let mut read = ws.read;
+    let set_players = ws.set_players;
     while let Some(msg) = read.next().await {
         let server_message = get_server_message(msg);
 
