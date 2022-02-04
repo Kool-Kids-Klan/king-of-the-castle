@@ -9,7 +9,7 @@ pub struct UpdateHand {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateColumns {
-    pub board: Vec<Column>,
+    pub columns: Vec<Column>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,7 +27,7 @@ pub struct YourId {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdatePlayers {
-    pub players: Vec<String>,
+    pub players: Vec<Player>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

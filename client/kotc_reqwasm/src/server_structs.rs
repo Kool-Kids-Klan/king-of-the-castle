@@ -39,7 +39,7 @@ pub struct Player {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Column {
     pub token: Token,
-    pub blocked: bool, // Boure
+    pub is_blocked: bool, // Boure
     cards: Vec<Card>,
 }
 
