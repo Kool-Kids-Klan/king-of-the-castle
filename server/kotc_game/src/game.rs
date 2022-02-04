@@ -136,24 +136,28 @@ impl Game {
         match Rc::clone(&self.players).borrow_mut().iter_mut().find(|p| p.user_id == user_id) {
             Some(player) => {
                 player.flip_ready();
-                messages.push(self.message_update_players());
-
-                if self.get_ready_count() >= 2 {
-                    self.start_game().await;
-                    messages.push(self.message_start_game());
-                    messages.push(self.log(
-                        format!("Game has started.\nRound {}/{} has started.\n{} is on turn.",
-                                self.round, NUMBER_OF_ROUNDS, self.get_player_on_turn_username())
-                    ));
-                    messages.push(self.message_update_columns());
-                }
             }
-            None => messages.push(
-                self.message_error(
-                    format!("Error: User with ID {} not found.", user_id)
-                )
-            )
-        }
+            None => {
+                messages.push(
+                    self.message_error(
+                        format!("Error: User with ID {} not found.", user_id)
+                    )
+                );
+                return messages
+            }
+        };
+
+        messages.push(self.message_update_players());
+
+        if self.get_ready_count() >= 2 {
+            self.start_game().await;
+            messages.push(self.message_start_game());
+            messages.push(self.log(
+                format!("Game has started.\nRound {}/{} has started.\n{} is on turn.",
+                        self.round, NUMBER_OF_ROUNDS, self.get_player_on_turn_username())
+            ));
+            messages.push(self.message_update_columns());
+        };
         messages
     }
 
