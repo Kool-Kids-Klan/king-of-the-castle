@@ -27,6 +27,7 @@ impl Default for KotcWsServer {
 
 impl KotcWsServer {
     fn send_message(&self, message_type: ServerWsMessageType, content: &String, id_to: &usize) {
+        println!("Sending message: {:?} - {:?}", message_type, content);
         if let Some(recipient) = self.sessions.get(id_to) {
             let _ = recipient.do_send(ServerWsMessage {
                 message_type,
