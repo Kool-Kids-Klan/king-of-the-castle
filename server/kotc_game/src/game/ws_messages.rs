@@ -44,9 +44,6 @@ pub struct ActionLog {
     pub detail: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Success {}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Error {
     pub detail: String,

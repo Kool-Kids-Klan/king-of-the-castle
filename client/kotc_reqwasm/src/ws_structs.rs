@@ -21,9 +21,6 @@ pub struct UpdateTokens {
 pub struct StartGame {}
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Success {}
-
-#[derive(Debug, Serialize, Deserialize)]
 pub struct Error {
     pub detail: String,
 }

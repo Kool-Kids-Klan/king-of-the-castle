@@ -6,7 +6,7 @@ use reqwasm::websocket::{Message, WebSocketError};
 use serde::de;
 use kotc_commons::messages::message_types::ServerWsMessageType;
 use kotc_commons::messages::ServerWsMessage;
-use crate::ws_structs::{ActionLog, Error, FinishGame, StartGame, Success, UpdateColumns, UpdateHand, UpdatePlayers, UpdateTokens, WsAction, YourId};
+use crate::ws_structs::{ActionLog, Error, FinishGame, StartGame, UpdateColumns, UpdateHand, UpdatePlayers, UpdateTokens, WsAction, YourId};
 
 fn get_server_message(msg: Result<Message, WebSocketError>) -> ServerWsMessage {
     match msg {
@@ -79,10 +79,6 @@ pub async fn onmessage(mut read: SplitStream<WebSocket>) {
             ServerWsMessageType::ActionLog => {
                 let action_log: ActionLog = get_deserialized(&server_message.content);
                 info!("action log {:?}", action_log);
-            }
-            ServerWsMessageType::Success => {
-                let success: Success = get_deserialized(&server_message.content);
-                info!("success {:?}", success);
             }
         };
     }
