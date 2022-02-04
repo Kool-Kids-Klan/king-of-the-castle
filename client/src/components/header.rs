@@ -1,11 +1,21 @@
-use crate::Route;
+use crate::{LoggedUser, Route, User};
 use yew::prelude::*;
 use yew_router::prelude::*;
+use yewdux::prelude::*;
+use yewdux_functional::*;
 
 #[function_component(Header)]
 pub fn header() -> Html {
-    let history = use_history().unwrap();
+    let store = use_store::<BasicStore<LoggedUser>>();
+    let mut logged = false;
+    let mut username = String::new();
+    let user = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default();
+    match user {
+        None => {}
+        Some(u) => {logged = true; username = u.username.clone()}
+    }
 
+    let history = use_history().unwrap();
     let home_button = {
         let history = history.clone();
         let onclick = Callback::once(move |_| history.push(Route::Home));
@@ -23,7 +33,9 @@ pub fn header() -> Html {
     };
     let logout_button = {
         let history = history.clone();
-        let onclick = Callback::once(move |_| history.push(Route::Home));
+        let onclick = Callback::once(move |_| {
+            store.dispatch().reduce(|s| s.logged_user = None);;
+            history.push(Route::Home)});
         html! {
             <button class="header__link" {onclick}>{"Logout"}</button>
         }
@@ -36,12 +48,11 @@ pub fn header() -> Html {
             <button class="header__link" {onclick}>{"Register"}</button>
         }
     };
-    let logged = false;
 
     let logged_links = {
         html! {
             <>
-                <span class="header__link">{"TMP_Player"}</span>
+                <span class="header__username">{username}</span>
                 { logout_button }
             </>
         }

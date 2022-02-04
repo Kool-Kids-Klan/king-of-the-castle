@@ -25,12 +25,13 @@ pub enum Route {
 }
 
 pub fn switch(routes: &Route) -> Html {
+    // let logged_user:UseStateHandle<Option<User>> = use_state(|| None);
     match routes {
         Route::Login => html! { <Login /> },
         Route::Register => html! { <Register /> },
         Route::Lobby => html! { <Lobby /> },
-        Route::Game => html! { <Game /> },
-        Route::Home => html! { <Home /> },
+        Route::Home => html! { <Home  /> },
         Route::NotFound => html! { <NotFound /> },
+        Route::Game => html! { <Game /> },
     }
 }
