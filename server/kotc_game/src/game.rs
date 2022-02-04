@@ -247,7 +247,7 @@ impl Game {
     }
 
     fn get_results(&self) -> (i32, String, HashMap<String, u8>) {
-        let mut results: HashMap<String, u8> = Rc::clone(&self.players)
+        let results: HashMap<String, u8> = Rc::clone(&self.players)
             .borrow()
             .iter()
             .map(|player| (player.clone().username, player.get_score()))
@@ -269,7 +269,8 @@ impl Game {
         (winner_id, winner_username, results)
     }
 
-    /// UTIL FUNCTIONS ///
+    /// UTIL MESSAGE FUNCTIONS ///
+
     fn message_update_players(&self) -> ServerMessage {
         let players: Vec<String> = Rc::clone(&self.players)
             .borrow()
@@ -305,11 +306,19 @@ impl Game {
     }
 
     fn message_update_columns(&self) -> ServerMessage {
+        let mut columns = Rc::clone(&self.columns)
+            .borrow_mut()
+            .to_vec();
+        columns
+            .iter_mut()
+            .for_each(|column| {
+                column.cards = column.get_concealed_cards();
+            });
         ServerMessage {
             message_type: ServerWsMessageType::UpdateColumns,
             recipient: MessageRecipient::AllUsers,
             content: serde_json::to_string(&UpdateColumns {
-                columns: Rc::clone(&self.columns).borrow().to_vec()
+                columns
             }).unwrap()
         }
     }

@@ -12,7 +12,7 @@ type ColumnResults = Vec<(String, f32)>;
 pub struct Column {
     pub token: Token,
     pub blocked: bool, // Boure
-    cards: Vec<Card>,
+    pub cards: Vec<Card>,
 }
 
 impl Column {
@@ -30,9 +30,9 @@ impl Column {
 
     pub fn reveal_previous_card(&mut self) -> Option<Character> {
         let number_of_cards = self.cards.len();
-        if let Some(last_card) = self.cards.get_mut(number_of_cards-2) {
-            last_card.revealed = true;
-            Some(last_card.character)
+        if let Some(previous_card) = self.cards.get_mut(number_of_cards-2) {
+            previous_card.revealed = true;
+            Some(previous_card.character)
         } else {
             None
         }
@@ -107,7 +107,7 @@ impl Column {
         self.get_winner(&mut self.get_results(), false)
     }
 
-    pub fn get_players_with_prince_squire_combo(&mut self) -> Vec<String> {
+    fn get_players_with_prince_squire_combo(&mut self) -> Vec<String> {
         // apply Romeo+Julia buff on the way
         // TODO drak debuff
 
@@ -185,6 +185,7 @@ impl Column {
             })
             .collect();
         println!("RESULTS:\n{:?}", result);
+        println!("Concealed cards: {:?}", self.get_concealed_cards());
         result
     }
 
@@ -239,10 +240,18 @@ impl Column {
             .collect::<Vec<(usize, &f32)>>()
             .sort_by(compare);
 
-        println!("WINNER:\n{:?}", results[0]);
         match results.get(0) {
             Some(result) => result.0.clone(),
-            None => panic!("Empty column. What a relief. Uff"),
+            None => panic!("Empty column."),
         }
+    }
+
+    pub fn get_concealed_cards(&self) -> Vec<Card> {
+        println!("{:?}", self.cards);
+        self.cards
+            .clone()
+            .into_iter()
+            .map(|card| if card.revealed { card } else { Card::dummy_card() })
+            .collect()
     }
 }
