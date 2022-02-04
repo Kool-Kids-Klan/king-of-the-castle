@@ -33,7 +33,7 @@ pub struct Player {
     pub hand: Vec<Card>,
     deck: Vec<Card>,
     tokens: Vec<Token>,
-    ready: bool,
+    pub ready: bool,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
