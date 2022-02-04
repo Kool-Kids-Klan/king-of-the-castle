@@ -1,10 +1,11 @@
 use std::cell::RefCell;
 use std::rc::Rc;
+use gloo_storage::{SessionStorage, Storage};
 use yew::prelude::*;
 use yewdux::prelude::BasicStore;
 use yewdux_functional::use_store;
 use kotc_reqwasm::{connect_websocket, KotcWebSocket, send_ready, send_join};
-use kotc_reqwasm::endpoints::LoggedUser;
+use kotc_reqwasm::endpoints::{LoggedUser, User};
 use crate::components::pages::headstone::Headstone;
 use crate::components::pages::home::{LobbyState};
 
@@ -49,24 +50,26 @@ pub fn lobby() -> Html {
     let tmp_username = "Username".to_string();
     let ready = false;
 
-    let store = use_store::<BasicStore<LoggedUser>>();
-    let lobby_info_store = use_store::<BasicStore<LobbyState>>();
-    let mut lobby_id = String::from("1234");
-    if let Some(lobby_info) = lobby_info_store.state().map(|s| s.lobby_id.to_string()) {
-        lobby_id = lobby_info;
-    }
+    // let store = use_store::<BasicStore<LoggedUser>>();
+    // let lobby_info_store = use_store::<BasicStore<LobbyState>>();
+    let lobby_id = SessionStorage::get("lobby_id").unwrap();
+    let logged_user: User = SessionStorage::get("user").unwrap();
+    // if let Some(lobby_info) = lobby_info_store.state().map(|s| s.lobby_id.to_string()) {
+    //     lobby_id = lobby_info;
+    // }
 
     log::info!("{:?}", lobby_id);
-    log::info!("{:?}", store.state());
+    // log::info!("{:?}", store.state());
+    log::info!("{:?}", logged_user);
     
-    let user_id = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default().unwrap().id;
-    let ws = use_state(|| KotcWebSocketState::new(lobby_id, user_id));
+    // let user_id = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default().unwrap().id;
+    let ws = use_state(|| KotcWebSocketState::new(lobby_id, logged_user.id));
 
     let on_ready_click = {
         Callback::from(move |_e: MouseEvent| {
-            let id = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default().unwrap().id;
+            // let id = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default().unwrap().id;
             let r = Rc::clone(&ws.websocket);
-            send_ready(id, r);
+            send_ready(logged_user.id, r);
         })
     };
 

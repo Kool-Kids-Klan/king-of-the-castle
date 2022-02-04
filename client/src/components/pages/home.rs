@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::fmt::format;
 use std::rc::Rc;
+use gloo_storage::{SessionStorage, Storage};
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlInputElement};
 use yew::prelude::*;
@@ -58,6 +59,7 @@ pub fn home() -> Html {
             let input: HtmlInputElement = e.target_unchecked_into();
             let mut info = (*lobby_info).clone();
             info.lobby_id = input.value();
+            SessionStorage::set("lobby_id", info.lobby_id.clone()).unwrap();
             lobby_info.set(info);
         })
     };
