@@ -4,11 +4,8 @@ use actix::prelude::{Actor, Context, Handler, Recipient};
 use kotc_commons::messages::message_types::{ClientWsMessageType, ServerWsMessageType};
 use kotc_commons::messages::{ClientWsMessage, Error, PlayCard, Ready, UnReady, UserJoined};
 use std::collections::{HashMap, HashSet};
-use std::future::Future;
 use actix::AsyncContext;
 use serde::de::DeserializeOwned;
-use kotc_game::game::card::{Card, Character};
-use kotc_game::game::Game;
 use kotc_game::game::ws_messages::{MessageRecipient, ServerMessage};
 
 pub type Socket = Recipient<ServerWsMessage>;
@@ -168,7 +165,7 @@ impl Handler<ClientMessage> for KotcWsServer {
             ClientWsMessageType::UserJoined => {
                 let user_joined: UserJoined = deserialize(&client_message.content);
                 let fut = async move {
-                    let messages = game.add_player(user_joined.user_id).await;
+                    let messages = game.connect_player(user_joined.user_id).await;
                     send_messages(&msg.session_id, messages, &sessions, &this);
                 };
                 let fut = actix::fut::wrap_future::<_, Self>(fut);
