@@ -1,11 +1,13 @@
+use std::rc::Rc;
 use kotc_reqwasm::endpoints::login_user;
 use yew::prelude::*;
-use web_sys::HtmlInputElement;
+use web_sys::{HtmlInputElement};
 use yew_router::prelude::*;
 use yewdux::prelude::*;
 use yewdux_functional::*;
-use crate::Route;
 use kotc_reqwasm::endpoints::{User, LoggedUser};
+use gloo_storage::{SessionStorage, Storage};
+use crate::Route;
 
 
 #[derive(Clone, Debug, Default)]
@@ -23,27 +25,7 @@ pub fn login() -> Html {
         Callback::from(move |i| store.dispatch().reduce(|state| state.logged_user = i))
     };
 
-    // let user_ctx = use_user_context();
     let login_info = use_state(LoginInfo::default);
-    // let user_login = {
-    //     let login_info = login_info.clone();
-    //     use_async(async move {
-    //         let request = LoginInfoWrapper {
-    //             user: (*login_info).clone(),
-    //         };
-    //         login(request).await
-    //     })
-    // };
-
-    // use_effect_with_deps(
-    //     move |user_login| {
-    //         if let Some(user_info) = &user_login.data {
-    //             user_ctx.login(user_info.user.clone());
-    //         }
-    //         || ()
-    //     },
-    //     user_login.clone(),
-    // );
 
     let onsubmit = {
         let login_info = login_info.clone();
@@ -52,6 +34,7 @@ pub fn login() -> Html {
             let info = (*login_info).clone();
             let x = set_user.clone();
             login_user(info.username, info.password, x);
+
             history.push(Route::Home);
         })
     };

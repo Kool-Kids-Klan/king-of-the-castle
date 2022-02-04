@@ -1,3 +1,4 @@
+use gloo_storage::{SessionStorage, Storage};
 use reqwasm::http::Request;
 use wasm_bindgen_futures::spawn_local;
 
@@ -61,6 +62,7 @@ pub fn login_user(username: String, password: String, store: Callback<Option<Use
         log::info!("{:?}", resp);
         let user: Option<User> = resp.json().await.unwrap();
         log::info!("{:?}", user);
+        SessionStorage::set("user", &user).unwrap();
         store.emit(user);
     })
 }

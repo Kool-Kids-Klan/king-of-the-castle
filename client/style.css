@@ -188,7 +188,7 @@ button {
 
 
 .lobby {
-    max-width: 60%;
+    max-width: 50%;
     margin: 0 auto auto auto;
     justify-content: flex-start;
 }
@@ -207,7 +207,7 @@ button {
 .lobby__headstones {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 1rem 6rem;
+    gap: 1rem 3rem;
 }
 
 .headstone {
@@ -218,10 +218,17 @@ button {
 }
 
 .headstone__img {
-    width: 80%;
+    width: 75%;
     margin: 0.5rem 0 1rem 0;
 }
 .headstone__name {
     font-size: 2rem;
 }
 
+
+
+@media screen and (max-width: 800px) {
+    html {
+        font-size: 12px;
+    }
+}
