@@ -183,20 +183,27 @@ impl Handler<ClientMessage> for KotcWsServer {
                     send_messages(&msg.session_id, messages, &sessions, &this);
                 };
                 let fut = actix::fut::wrap_future::<_, Self>(fut);
-                // ctx.spawn(fut);
                 ctx.wait(fut);
                 println!("Play card {:?}", play_card);
             },
             ClientWsMessageType::Ready => {
                 let ready: Ready = deserialize(&client_message.content);
-                let message = game.player_flip_ready(ready.user_id);
-                send_messages(&msg.session_id, vec![message], &sessions, &this);
+                let fut = async move {
+                    let messages = game.player_flip_ready(ready.user_id).await;
+                    send_messages(&msg.session_id, messages, &sessions, &this);
+                };
+                let fut = actix::fut::wrap_future::<_, Self>(fut);
+                ctx.wait(fut);
                 println!("user ready {:?}", ready);
             },
             ClientWsMessageType::Unready => {
                 let unready: UnReady = deserialize(&client_message.content);
-                let message = game.player_flip_ready(unready.user_id);
-                send_messages(&msg.session_id, vec![message], &sessions, &this);
+                let fut = async move {
+                    let messages = game.player_flip_ready(unready.user_id).await;
+                    send_messages(&msg.session_id, messages, &sessions, &this);
+                };
+                let fut = actix::fut::wrap_future::<_, Self>(fut);
+                ctx.wait(fut);
                 println!("user unready {:?}", unready);
             }
             ClientWsMessageType::Error => {

@@ -13,7 +13,7 @@ pub struct Player {
     pub hand: Vec<Card>,
     deck: Vec<Card>,
     pub tokens: Vec<Token>,
-    ready: bool,
+    pub ready: bool,
 }
 
 impl Player {

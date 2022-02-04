@@ -102,14 +102,28 @@ impl Game {
         Rc::clone(&self.players).borrow_mut().len()
     }
 
-    pub fn player_flip_ready (&mut self, user_id: i32) -> ServerMessage {
+    fn get_ready_count(&self) -> usize {
+        Rc::clone(&self.players).borrow().iter().filter(|player| player.ready).count()
+    }
+
+    pub async fn player_flip_ready (&mut self, user_id: i32) -> Vec<ServerMessage> {
+        let mut messages = vec![];
         match Rc::clone(&self.players).borrow_mut().iter_mut().find(|p| p.user_id == user_id) {
             Some(player) => {
                 player.flip_ready();
-                self.message_success()
+                messages.push(self.message_update_players());
+
+                if self.get_ready_count() >= 2 {
+                    self.start_game().await;
+                    messages.push(self.message_start_game());
+                    messages.push(self.message_update_columns());
+                }
             }
-            None => self.message_error("Error: Invalid player ID.".to_string())
+            None => messages.push(
+                self.message_error("Error: Invalid player ID.".to_string())
+            )
         }
+        messages
     }
 
     fn init_token_deck(&mut self) -> Vec<Token> {
@@ -131,13 +145,12 @@ impl Game {
         });
     }
 
-    pub async fn start_game (&mut self) -> Vec<ServerMessage> {
+    async fn start_game (&mut self) {
         let players: Vec<Player> = Rc::clone(&self.players).borrow().to_vec();
         self.id = utils::create_new_game_in_db(players).await;
         self.started = true;
         self.init_token_deck();
         self.draw_next_tokens();
-        vec![self.message_start_game(), self.message_update_columns()]
     }
 
     pub async fn make_action (&mut self,
