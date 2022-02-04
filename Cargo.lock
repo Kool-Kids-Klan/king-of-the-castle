@@ -580,10 +580,12 @@ name = "client"
 version = "0.1.0"
 dependencies = [
  "gloo-storage",
+ "kotc_commons",
  "kotc_reqwasm",
  "log",
  "serde",
  "serde_json",
+ "wasm-bindgen-futures",
  "wasm-logger",
  "web-sys",
  "yew",
