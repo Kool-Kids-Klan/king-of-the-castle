@@ -444,7 +444,7 @@ impl Game {
     fn message_start_game(&self) -> ServerMessage {
         ServerMessage {
             message_type: ServerWsMessageType::StartGame,
-            recipient: MessageRecipient::SingleUser,
+            recipient: MessageRecipient::AllUsers,
             content: serde_json::to_string(&StartGame {}).unwrap()
         }
     }
