@@ -48,7 +48,7 @@ impl Card {
         }
     }
 
-    pub fn dummy_card() -> Card {
-        Card::new("".to_string(), Character::Unknown, 0.0)
+    pub fn dummy_card(owner: String) -> Card {
+        Card::new(owner, Character::Unknown, 0.0)
     }
 }
