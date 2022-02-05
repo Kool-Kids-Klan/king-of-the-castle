@@ -211,7 +211,7 @@ impl Game {
                 )];
         }
 
-        let mut played_card: Card = Card::dummy_card();
+        let mut played_card: Card = Card::dummy_card("".to_string());
         match Rc::clone(&self.players).borrow().get(self.player_on_turn) {
             Some(player_on_turn) => {
                 if user_id != player_on_turn.user_id {
@@ -264,13 +264,22 @@ impl Game {
                 if let Some(character) = revealed_card {
                     messages.push(self.message_update_columns());
 
-                    if character == Character::Killer {
-                        Rc::clone(&self.columns).borrow_mut().get_mut(column_index).unwrap().pop_card();
-                        messages.push(self.message_update_columns());
-                        messages.push(self.log(
+                    match character {
+                        Character::Killer => {
+                            Rc::clone(&self.columns).borrow_mut().get_mut(column_index).unwrap().cards.pop();
+                            messages.push(self.message_update_columns());
+                            messages.push(self.log(
                             format!("{}'s played card has been removed by Killer!",
-                                    p.username)
-                        ));
+                            p.username)
+                            ));
+                        },
+                        Character::Storm => {
+                            Rc::clone(&self.columns).borrow_mut().get_mut(column_index).unwrap().is_blocked = true;
+                            messages.push(self.log(
+                                "From now on, this columns is blocked by Storm.".to_string()
+                            ));
+                        },
+                        _ => ()
                     }
                 }
 
@@ -372,6 +381,7 @@ impl Game {
         }
         (winner_id, winner_username, results)
     }
+
 
     /// UTIL MESSAGE FUNCTIONS ///
 
