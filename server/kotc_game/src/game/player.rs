@@ -44,7 +44,7 @@ impl Player {
             .into_iter()
             .map(|card| card.character)
             .collect();
-        let initial_deck = vec![
+        let refilled_deck = vec![
             Card::new(self.username.clone(), Character::King, 20.0),
             Card::new(self.username.clone(), Character::Queen, 16.0),
             Card::new(self.username.clone(), Character::Julia, 14.0),
@@ -75,7 +75,7 @@ impl Player {
         .filter(|card| !except.contains(&card.character))
         .collect();
         let mut rng = thread_rng();
-        self.deck = initial_deck;
+        self.deck = refilled_deck;
         self.deck.shuffle(&mut rng);
     }
 

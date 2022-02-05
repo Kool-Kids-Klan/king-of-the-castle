@@ -43,10 +43,6 @@ impl Column {
         self.cards.push(card);
     }
 
-    pub fn pop_card(&mut self) {
-        self.cards.pop();
-    }
-
     pub fn eval(&mut self) -> String {
         let bonus_character = match self.token.resource {
             Resource::Coins => Character::Merchant,
