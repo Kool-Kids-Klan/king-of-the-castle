@@ -54,7 +54,7 @@ impl Player {
             Card::new(self.username.clone(), Character::Merchant, 8.0),
             Card::new(self.username.clone(), Character::Cardinal, 8.0),
             Card::new(self.username.clone(), Character::Troubadour, 8.0),
-            // Card::new(self.username.clone(), Character::Explorer, 13.0),
+            Card::new(self.username.clone(), Character::Explorer, 13.0),
             Card::new(self.username.clone(), Character::Killer, 9.5),
             Card::new(self.username.clone(), Character::Storm, 9.0),
             // Card::new(self.username.clone(), Character::Prevlek, 0.0),

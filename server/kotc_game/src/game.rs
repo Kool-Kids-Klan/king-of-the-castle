@@ -66,7 +66,7 @@ pub struct Game {
     player_on_turn: usize,
     columns: Rc<RefCell<Vec<Column>>>,
     token_deck: Vec<Token>,
-    pub round: u8,
+    round: u8,
 }
 
 impl Game {

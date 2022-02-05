@@ -16,16 +16,6 @@ pub struct Token {
     pub points: u8,
 }
 
-#[derive(Clone)]
-pub struct Game {
-    id: i32,
-    players: Vec<Player>,
-    player_on_turn: usize,
-    columns: Vec<Column>,
-    token_deck: Vec<Token>,
-    started: bool,
-}
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Player {
     pub user_id: i32,
