@@ -1,11 +1,14 @@
 extern crate kotc_database;
 
-use kotc_database::{get_game_repo, get_participation_repo, get_user_repo};
+use std::rc::Rc;
 
+use kotc_database::{get_game_repo, get_participation_repo, get_user_repo};
 use kotc_database::repo::{
     game_repo::GameRepo, participation_repo::ParticipationRepo, user_repo::UserRepo,
 };
+use kotc_game::game::card::{Card, Character};
 use kotc_game::game::Game;
+use kotc_game::game::ws_messages::ServerMessage;
 
 #[actix_rt::test]
 async fn db_test() -> anyhow::Result<()> {
@@ -64,19 +67,38 @@ async fn db_test() -> anyhow::Result<()> {
     println!("{:?}", game.make_action(user_id, 0, 10).await);
     println!("{:?}", game.make_action(user_id, 20, 0).await);
 
-    println!("\n{:?}", game.make_action(user_id, 0, 0).await);
-    println!("{:?}", game.make_action(user2_id, 0, 0).await);
-    println!("{:?}", game.make_action(user_id, 0, 0).await);
-    println!("{:?}", game.make_action(user2_id, 0, 0).await);
-    println!("{:?}", game.make_action(user_id, 0, 0).await);
-    println!("{:?}", game.make_action(user2_id, 0, 0).await);
+    // for this to work, make columns in struct Game public
+    // Rc::clone(&game.columns)
+    //     .borrow_mut()
+    //     .get_mut(0)
+    //     .unwrap()
+    //     .cards
+    //     .push(Card::new("Irrelevant".to_string(), Character::Explorer, 13.0));
 
-    println!("{:?}", game.make_action(user2_id, 1, 0).await);
-    println!("{:?}", game.make_action(user_id, 1, 0).await);
-    println!("{:?}", game.make_action(user2_id, 1, 0).await);
-    println!("{:?}", game.make_action(user_id, 1, 0).await);
-    println!("{:?}", game.make_action(user2_id, 1, 0).await);
+    for _ in 0..6 {
+        print_messages(game.make_action(user_id, 0, 0).await);
+        print_messages(game.make_action(user2_id, 0, 0).await);
+        print_messages(game.make_action(user_id, 0, 0).await);
+        print_messages(game.make_action(user2_id, 0, 0).await);
+        print_messages(game.make_action(user_id, 0, 0).await);
+        print_messages(game.make_action(user2_id, 0, 0).await);
+        print_messages(game.make_action(user_id, 0, 0).await);
+        print_messages(game.make_action(user2_id, 0, 0).await);
 
-    println!("SUCCESS!");
+        print_messages(game.make_action(user_id, 1, 0).await);
+        print_messages(game.make_action(user2_id, 1, 0).await);
+        print_messages(game.make_action(user_id, 1, 0).await);
+        print_messages(game.make_action(user2_id, 1, 0).await);
+        print_messages(game.make_action(user_id, 1, 0).await);
+        print_messages(game.make_action(user2_id, 1, 0).await);
+        print_messages(game.make_action(user_id, 1, 0).await);
+        print_messages(game.make_action(user2_id, 1, 0).await);
+    }
+
     Ok(())
+}
+
+fn print_messages(messages: Vec<ServerMessage>) {
+    println!("---");
+    messages.iter().for_each(|message| println!("{:?}", message))
 }

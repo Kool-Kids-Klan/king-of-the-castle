@@ -62,6 +62,7 @@ pub struct Token {
 pub struct Game {
     id: i32,
     players: Rc<RefCell<Vec<Player>>>,
+    players_count: usize,
     player_on_turn: usize,
     columns: Rc<RefCell<Vec<Column>>>,
     token_deck: Vec<Token>,
@@ -73,6 +74,7 @@ impl Game {
         Game {
             id: 0,
             players: Rc::new(RefCell::new(vec![])),
+            players_count: 0,
             player_on_turn: 0,
             columns: Rc::new(RefCell::new(vec![])),
             token_deck: vec![],
@@ -95,6 +97,7 @@ impl Game {
 
                 let new_player = Player::new(user);
                 Rc::clone(&self.players).borrow_mut().push(new_player.clone());
+                self.players_count += 1;
 
                 messages.push(self.message_update_players());
                 messages.push(self.log(
@@ -110,26 +113,32 @@ impl Game {
     }
 
     pub fn disconnect_player(&mut self, user_id: i32) -> Vec<ServerMessage> {
-        let mut messages = vec![];
-        match Rc::clone(&self.players).borrow().iter().find(|player| player.user_id == user_id) {
+        let player = Rc::clone(&self.players)
+            .borrow()
+            .iter()
+            .find(|player| player.user_id == user_id)
+            .cloned();
+        match player {
             Some(player) => {
+                let mut messages = vec![];
+
+                Rc::clone(&self.players)
+                    .borrow_mut()
+                    .retain(|player| player.user_id != user_id);
+                self.players_count -= 1;
+
                 messages.push(self.log(
                     format!("Player {} left the lobby.", player.username)
                 ));
+                messages.push(self.message_update_players());
+                messages
             },
             None => {
-                messages.push(self.message_error(
+                vec![self.message_error(
                     format!("Error: User with ID {} not found.", user_id)
-                ));
+                )]
             }
-        };
-        Rc::clone(&self.players).borrow_mut().retain(|player| player.user_id != user_id);
-        messages.push(self.message_update_players());
-        messages
-    }
-
-    fn get_players_len(&self) -> usize {
-        Rc::clone(&self.players).borrow_mut().len()
+        }
     }
 
     fn get_ready_count(&self) -> usize {
@@ -171,20 +180,21 @@ impl Game {
             .borrow()
             .get(self.player_on_turn)  // always in range
             .unwrap()
-            .clone().username
+            .username
+            .clone()
     }
 
     fn init_token_deck(&mut self) {
         let mut rng = thread_rng();
         self.token_deck = iproduct!(get_all_resources(), [1, 2, 3, 3, 4, 5])
-            .choose_multiple(&mut rng, self.get_players_len() * NUMBER_OF_ROUNDS as usize)
+            .choose_multiple(&mut rng, self.players_count * NUMBER_OF_ROUNDS as usize)
             .into_iter()
             .map(|(resource, points)| Token { resource, points })
             .collect()
     }
 
     fn draw_next_tokens(&mut self) {
-        (0..self.get_players_len()).into_iter().for_each(|_| {
+        (0..self.players_count).into_iter().for_each(|_| {
             let token = match self.token_deck.pop() {
                 Some(token) => token,
                 None => panic!("Error: Bad number of tokens in token deck!")
@@ -204,6 +214,10 @@ impl Game {
                        user_id: i32,
                        column_index: usize,
                        card_index: usize) -> Vec<ServerMessage> {
+        if self.round > 6 {
+            return vec![self.message_error("Game already ended.".to_string())];
+        }
+
         if let Some(_) = Rc::clone(&self.players).borrow_mut().iter_mut().find(|p| p.user_id == user_id) {
         } else {
             return vec![self.message_error(
@@ -228,7 +242,7 @@ impl Game {
                 }
             }
             None => {} // This cannot happen, self.player_on_turn is always in range
-        };
+        }
 
         let mut messages = vec![];
         let blocked;
@@ -253,62 +267,34 @@ impl Game {
                 p.hand.remove(card_index);
                 messages.push(self.message_update_hand(p.hand.clone()));
 
-                Rc::clone(&self.columns).borrow_mut().get_mut(column_index).unwrap().add_card(played_card);
-                messages.push(self.message_update_columns());
-
-                let revealed_card = Rc::clone(&self.columns)
-                    .borrow_mut()
-                    .get_mut(column_index)
-                    .unwrap()
-                    .reveal_previous_card();
-                if let Some(character) = revealed_card {
-                    messages.push(self.message_update_columns());
-
-                    match character {
-                        Character::Killer => {
-                            Rc::clone(&self.columns).borrow_mut().get_mut(column_index).unwrap().cards.pop();
-                            messages.push(self.message_update_columns());
-                            messages.push(self.log(
-                            format!("{}'s played card has been removed by Killer!",
-                            p.username)
-                            ));
-                        },
-                        Character::Storm => {
-                            Rc::clone(&self.columns).borrow_mut().get_mut(column_index).unwrap().is_blocked = true;
-                            messages.push(self.log(
-                                "From now on, this columns is blocked by Storm.".to_string()
-                            ));
-                        },
-                        _ => ()
-                    }
-                }
+                self.push_card_to_column(column_index, played_card, &mut messages);
 
                 if p.draw_card() {
                     messages.push(self.log(
-                        format!("Player {} has refilled his deck.",
-                                self.get_player_on_turn_username())
+                        format!("Player {} has refilled his deck.", p.username)
                     ));
                 }
                 messages.push(self.message_update_hand(p.hand.clone()));
             }
         }
 
-        self.player_on_turn = (self.player_on_turn + 1) % self.get_players_len();
+        self.player_on_turn = (self.player_on_turn + 1) % self.players_count;
 
         if self.round_finished() {
             messages.push(self.log(
                 format!("All columns closed - round ended.")
             ));
             self.eval_columns(&mut messages);
+            self.round += 1;
             if self.token_deck.is_empty() {
                 let (winner_id, winner_username, results) = self.get_results();
 
                 messages.push(self.log(
                 results.iter().fold(
-                    "".to_string(),
+                    "Results:\n".to_string(),
                     |s, (username, score)| {
                         s + &format!("{}: {} points\n", username, score)
-                    }) + &format!("Winner: {}", winner_username)
+                    }) + &format!("Winner: {}\n", winner_username)
                 ));
 
                 messages.push(self.message_finish_game(winner_username, results));
@@ -317,7 +303,6 @@ impl Game {
             }
             self.columns = Rc::new(RefCell::new(vec![]));
             self.draw_next_tokens();
-            self.round += 1;
             messages.push(self.log(
                 format!("Round {}/{} has started.", self.round, NUMBER_OF_ROUNDS)
             ));
@@ -327,6 +312,54 @@ impl Game {
             format!("{} is on turn.", self.get_player_on_turn_username())
         ));
         messages
+    }
+
+    fn push_card_to_column(&self,
+                           column_index: usize,
+                           played_card: Card,
+                           messages: &mut Vec<ServerMessage>) {
+        Rc::clone(&self.columns)
+            .borrow_mut()
+            .get_mut(column_index)
+            .unwrap()
+            .add_card(played_card.clone());
+        messages.push(self.message_update_columns());
+
+        let revealed_card = Rc::clone(&self.columns)
+            .borrow_mut()
+            .get_mut(column_index)
+            .unwrap()
+            .reveal_previous_card();
+        if let Some(character) = revealed_card {
+            messages.push(self.message_update_columns());
+
+            match character {
+                Character::Killer => {
+                    Rc::clone(&self.columns).borrow_mut().get_mut(column_index).unwrap().cards.pop();
+                    messages.push(self.message_update_columns());
+                    messages.push(self.log(
+                        format!("{}'s card has been removed by Killer!",
+                                played_card.owner)
+                    ));
+                },
+                Character::Storm => {
+                    Rc::clone(&self.columns).borrow_mut().get_mut(column_index).unwrap().is_blocked = true;
+                    messages.push(self.log(
+                        format!("From now on, column {} is blocked by Storm.", column_index)
+                    ));
+                },
+                Character::Explorer => {
+                    let explorer_card = Rc::clone(&self.columns)
+                        .borrow_mut()
+                        .get_mut(column_index)
+                        .unwrap()
+                        .remove_revealed_explorer();
+                    let next_column_index = (column_index + 1) % self.players_count;
+                    self.push_card_to_column(next_column_index, explorer_card, messages);
+                }
+                _ => ()
+            }
+        }
     }
 
     fn round_finished(&self) -> bool {
