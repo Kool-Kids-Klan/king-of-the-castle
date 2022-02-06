@@ -4,6 +4,7 @@ use std::rc::Rc;
 use gloo_storage::{SessionStorage, Storage};
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlInputElement};
+use web_sys::console::log;
 use yew::prelude::*;
 use yew_router::history::History;
 use yew_router::hooks::use_history;

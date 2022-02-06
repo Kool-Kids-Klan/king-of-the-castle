@@ -11,12 +11,12 @@ pub struct HeadstoneProps {
 #[function_component(Headstone)]
 pub fn headstone(props: &HeadstoneProps) -> Html {
     let img_src = match props.color {
-        PlayerColor::White => "../../../assets/cards/backsides/backside_white.png",
-        PlayerColor::Black => "../../../assets/cards/backsides/backside_black.png",
-        PlayerColor::Green => "../../../assets/cards/backsides/backside_green.png",
-        PlayerColor::Yellow => "../../../assets/cards/backsides/backside_yellow.png",
-        PlayerColor::Blue => "../../../assets/cards/backsides/backside_blue.png",
-        PlayerColor::Red => "../../../assets/cards/backsides/backside_red.png",
+        PlayerColor::White => "../../../assets/cards/characters/unknown/unknown_white.png",
+        PlayerColor::Black => "../../../assets/cards/characters/unknown/unknown_black.png",
+        PlayerColor::Green => "../../../assets/cards/characters/unknown/unknown_green.png",
+        PlayerColor::Yellow => "../../../assets/cards/characters/unknown/unknown_yellow.png",
+        PlayerColor::Blue => "../../../assets/cards/characters/unknown/unknown_blue.png",
+        PlayerColor::Red => "../../../assets/cards/characters/unknown/unknown_red.png",
     };
 
     html! {

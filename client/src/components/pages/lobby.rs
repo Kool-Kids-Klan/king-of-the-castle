@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::ops::Deref;
 use std::rc::Rc;
 use gloo_storage::{SessionStorage, Storage};
 use kotc_reqwasm::server_structs::{Player, Column, Card};
@@ -26,7 +27,7 @@ pub enum PlayerColor {
 
 #[derive(Clone)]
 pub struct KotcWebSocketState {
-    websocket: Rc<RefCell<KotcWebSocket>>,
+    pub websocket: Rc<RefCell<KotcWebSocket>>,
 }
 
 impl KotcWebSocketState {
@@ -84,7 +85,7 @@ pub fn lobby() -> Html {
 
     // let store = use_store::<BasicStore<LoggedUser>>();
     // let lobby_info_store = use_store::<BasicStore<LobbyState>>();
-    let lobby_id = SessionStorage::get("lobby_id").unwrap();
+    let lobby_id: String = SessionStorage::get("lobby_id").unwrap();
     let logged_user: User = SessionStorage::get("user").unwrap();
     // if let Some(lobby_info) = lobby_info_store.state().map(|s| s.lobby_id.to_string()) {
     //     lobby_id = lobby_info;
@@ -103,10 +104,32 @@ pub fn lobby() -> Html {
     
     // let user_id = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default().unwrap().id;
     let setters = GameStateSetters { set_players, set_started, set_columns, set_hand, set_logs, set_tokens };
-    let ws = use_state(|| KotcWebSocketState::new(lobby_id, logged_user.id, setters));
+    let ws_store = use_store::<BasicStore<KotcWebSocketState>>();
+    // ws_store.dispatch().reduce(move |state| state.websocket = Rc::clone(&KotcWebSocketState::new(lobby_id, logged_user.id, setters).websocket));
+    // let x: Callback<Rc<RefCell<KotcWebSocket>>> = ws_store.dispatch().reduce_callback_with(|state, websocket| state.websocket = websocket);
+    // x.emit(KotcWebSocketState::new(lobby_id, logged_user.id, setters).websocket);
+
+
+    // let ws = use_state(|| KotcWebSocketState::new(lobby_id, logged_user.id, setters));
+    // let ws_store = use_store::<BasicStore<KotcWebSocketState>>();
+    let is_connected = use_state(|| false);
+    let ws_state;
+    if !*is_connected {
+        ws_state = Rc::new(KotcWebSocketState::new(lobby_id, logged_user.id, setters));
+        let set_ws: Callback<Rc<RefCell<KotcWebSocket>>> = ws_store.dispatch().reduce_callback_with(|state, websocket| state.websocket = websocket);
+        set_ws.emit(Rc::clone(&ws_state.websocket));
+        is_connected.set(true);
+    } else {
+        ws_state = Rc::clone(ws_store.state().unwrap());
+    }
+    let ws = match ws_store.state() {
+        Some(ws) => ws.as_ref(),
+        None => ws_state.as_ref(),
+    };
 
     let on_ready_click = {
         let ready = ready.clone();
+        let ws = ws.clone();
         Callback::from(move |_e: MouseEvent| {
             // let id = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default().unwrap().id;
             let r = Rc::clone(&ws.websocket);
