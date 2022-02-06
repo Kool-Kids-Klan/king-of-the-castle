@@ -27,6 +27,7 @@ fn serialize<T: Serialize>(object: T) -> String {
 pub struct KotcWebSocketReader {
     pub read: SplitStream<WebSocket>,
     pub set_players: Callback<Vec<Player>>,
+    pub set_started: Callback<bool>,
 }
 
 pub struct KotcWebSocket {
@@ -34,11 +35,11 @@ pub struct KotcWebSocket {
 }
 
 impl KotcWebSocket {
-    pub fn new(socket_url: &str, set_players: Callback<Vec<Player>>) -> KotcWebSocket {
+    pub fn new(socket_url: &str, set_players: Callback<Vec<Player>>, set_started: Callback<bool>) -> KotcWebSocket {
         let ws = WebSocket::open(socket_url).unwrap();
         let (write, read) = ws.split();
 
-        let listener = KotcWebSocketReader { read, set_players };
+        let listener = KotcWebSocketReader { read, set_players, set_started };
 
         spawn_local(async move {
             onmessage(listener).await;
@@ -56,9 +57,9 @@ impl KotcWebSocket {
     }
 }
 
-pub fn connect_websocket(lobby_id: String, set_players: Callback<Vec<Player>>) -> KotcWebSocket { // This method is meant to return KotcWebSocket, thus it would be possible to call ws.send_message from anywhere
+pub fn connect_websocket(lobby_id: String, set_players: Callback<Vec<Player>>, set_started: Callback<bool>) -> KotcWebSocket { // This method is meant to return KotcWebSocket, thus it would be possible to call ws.send_message from anywhere
     // console_log::init_with_level(Level::Debug).unwrap();
-    let ws = KotcWebSocket::new(&format!("ws://127.0.0.1:8081/lobby/{}", lobby_id), set_players);
+    let ws = KotcWebSocket::new(&format!("ws://127.0.0.1:8081/lobby/{}", lobby_id), set_players, set_started);
     // spawn_local(async move {
     //     ws.send_message(user_joined(19)).await;
     //     ws.send_message(ready(19)).await;

@@ -3,12 +3,15 @@ use std::rc::Rc;
 use gloo_storage::{SessionStorage, Storage};
 use kotc_reqwasm::server_structs::Player;
 use yew::prelude::*;
+use yew_router::history::History;
+use yew_router::hooks::use_history;
 use yewdux::prelude::BasicStore;
 use yewdux_functional::use_store;
 use kotc_reqwasm::{connect_websocket, KotcWebSocket, send_ready, send_join};
 use kotc_reqwasm::endpoints::{LoggedUser, User};
 use crate::components::pages::headstone::{HeadstoneList, HeadstoneProps};
 use crate::components::pages::home::{LobbyState};
+use crate::router::Route;
 
 
 #[derive(PartialEq, Debug, Clone)]
@@ -27,8 +30,8 @@ pub struct KotcWebSocketState {
 }
 
 impl KotcWebSocketState {
-    pub fn new(lobby_id: String, user_id: i32, set_players: Callback<Vec<Player>>) -> Self {
-        let ws = Rc::new(RefCell::new(connect_websocket(lobby_id, set_players)));
+    pub fn new(lobby_id: String, user_id: i32, set_players: Callback<Vec<Player>>, set_started: Callback<bool>) -> Self {
+        let ws = Rc::new(RefCell::new(connect_websocket(lobby_id, set_players, set_started)));
         send_join(user_id, Rc::clone(&ws));
 
         KotcWebSocketState {
@@ -43,6 +46,7 @@ impl Default for KotcWebSocketState {
             websocket: Rc::new(RefCell::new(connect_websocket(
                 String::from("1234"), 
                 Callback::from(|_| print!("")),
+                Callback::from(|_| print!("")),
             ))),
         }
     }
@@ -51,6 +55,14 @@ impl Default for KotcWebSocketState {
 #[function_component(Lobby)]
 pub fn lobby() -> Html {
     let ready = use_state(|| false);
+    let game_started = use_state(|| false);
+
+    let set_started = {
+        let started = game_started.clone();
+        Callback::from(move |is_started| {
+            started.set(is_started);
+        })
+    };
 
     // let store = use_store::<BasicStore<LoggedUser>>();
     // let lobby_info_store = use_store::<BasicStore<LobbyState>>();
@@ -72,7 +84,7 @@ pub fn lobby() -> Html {
     log::info!("{:?}", logged_user);
     
     // let user_id = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default().unwrap().id;
-    let ws = use_state(|| KotcWebSocketState::new(lobby_id, logged_user.id, set_players));
+    let ws = use_state(|| KotcWebSocketState::new(lobby_id, logged_user.id, set_players, set_started));
 
     let on_ready_click = {
         let ready = ready.clone();
@@ -89,6 +101,11 @@ pub fn lobby() -> Html {
         player_name: p.username.clone(),
         ready: p.ready,
     }).collect::<Vec<HeadstoneProps>>();
+
+    if *game_started {
+        let history = use_history().unwrap();
+        history.push(Route::Game);
+    }
 
     html! {
          <div class="lobby" >

@@ -33,6 +33,7 @@ fn get_deserialized<T: de::DeserializeOwned>(content: &String) -> T {
 pub async fn onmessage(ws: KotcWebSocketReader) {
     let mut read = ws.read;
     let set_players = ws.set_players;
+    let set_started = ws.set_started;
     while let Some(msg) = read.next().await {
         let server_message = get_server_message(msg);
 
@@ -73,10 +74,12 @@ pub async fn onmessage(ws: KotcWebSocketReader) {
             ServerWsMessageType::StartGame => {
                 let start_game: StartGame = get_deserialized(&server_message.content);
                 info!("start game {:?}", start_game);
+                set_started.emit(true);
             },
             ServerWsMessageType::FinishGame => {
                 let finish_game: FinishGame = get_deserialized(&server_message.content);
                 info!("finish game {:?}", finish_game);
+                set_started.emit(false);
             }
             ServerWsMessageType::ActionLog => {
                 let action_log: ActionLog = get_deserialized(&server_message.content);
