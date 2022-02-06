@@ -290,7 +290,6 @@ impl Game {
                 format!("All columns closed - round ended.")
             ));
             self.eval_columns(&mut messages);
-            messages.push(self.message_update_tokens());
 
             self.round += 1;
             if self.token_deck.is_empty() {
@@ -403,7 +402,7 @@ impl Game {
                     }
                 }
             });
-        messages.push(self.message_update_players());
+        messages.push(self.message_update_tokens());
     }
 
     fn get_results(&self) -> (i32, String, HashMap<String, u8>) {
