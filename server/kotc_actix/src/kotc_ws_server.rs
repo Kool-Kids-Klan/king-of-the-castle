@@ -4,6 +4,7 @@ use actix::prelude::{Actor, Context, Handler, Recipient};
 use kotc_commons::messages::message_types::{ClientWsMessageType, ServerWsMessageType};
 use kotc_commons::messages::{ClientWsMessage, Error, PlayCard, Ready, UnReady, UserJoined};
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 use actix::AsyncContext;
 use serde::de::DeserializeOwned;
 use kotc_game::game::ws_messages::{MessageRecipient, ServerMessage};
@@ -158,7 +159,7 @@ impl Handler<ClientMessage> for KotcWsServer {
     fn handle(&mut self, msg: ClientMessage, ctx: &mut Self::Context) -> Self::Result {
         let client_message: ClientWsMessage = deserialize(&msg.msg);
         let lobby = self.lobbies.get(&msg.lobby_id).unwrap();
-        let mut game = lobby.game.clone();
+        let mut game = Rc::clone(&lobby.game);
         let sessions = lobby.sessions.clone();
         let this = self.clone();
 
@@ -166,7 +167,7 @@ impl Handler<ClientMessage> for KotcWsServer {
             ClientWsMessageType::UserJoined => {
                 let user_joined: UserJoined = deserialize(&client_message.content);
                 let fut = async move {
-                    let messages = game.connect_player(user_joined.user_id).await;
+                    let messages = Rc::clone(&game).borrow_mut().connect_player(user_joined.user_id).await;
                     send_messages(&msg.session_id, messages, &sessions, &this);
                 };
                 let fut = actix::fut::wrap_future::<_, Self>(fut);
@@ -177,7 +178,7 @@ impl Handler<ClientMessage> for KotcWsServer {
             ClientWsMessageType::PlayCard => {
                 let play_card: PlayCard = deserialize(&client_message.content);
                 let fut = async move {
-                    let messages = game.make_action(play_card.user_id, play_card.column_index, play_card.card_index).await;
+                    let messages = Rc::clone(&game).borrow_mut().make_action(play_card.user_id, play_card.column_index, play_card.card_index).await;
                     send_messages(&msg.session_id, messages, &sessions, &this);
                 };
                 let fut = actix::fut::wrap_future::<_, Self>(fut);
@@ -187,7 +188,7 @@ impl Handler<ClientMessage> for KotcWsServer {
             ClientWsMessageType::Ready => {
                 let ready: Ready = deserialize(&client_message.content);
                 let fut = async move {
-                    let messages = game.player_flip_ready(ready.user_id).await;
+                    let messages = Rc::clone(&game).borrow_mut().player_flip_ready(ready.user_id).await;
                     send_messages(&msg.session_id, messages, &sessions, &this);
                 };
                 let fut = actix::fut::wrap_future::<_, Self>(fut);
@@ -197,7 +198,7 @@ impl Handler<ClientMessage> for KotcWsServer {
             ClientWsMessageType::Unready => {
                 let unready: UnReady = deserialize(&client_message.content);
                 let fut = async move {
-                    let messages = game.player_flip_ready(unready.user_id).await;
+                    let messages = Rc::clone(&game).borrow_mut().player_flip_ready(unready.user_id).await;
                     send_messages(&msg.session_id, messages, &sessions, &this);
                 };
                 let fut = actix::fut::wrap_future::<_, Self>(fut);
