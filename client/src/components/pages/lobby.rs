@@ -14,17 +14,6 @@ use crate::components::pages::headstone::{HeadstoneList, HeadstoneProps};
 use crate::components::pages::home::{LobbyState};
 use crate::router::Route;
 
-
-#[derive(PartialEq, Debug, Clone)]
-pub enum PlayerColor {
-    White,
-    Black,
-    Green,
-    Yellow,
-    Blue,
-    Red,
-}
-
 #[derive(Clone)]
 pub struct KotcWebSocketState {
     pub websocket: Rc<RefCell<KotcWebSocket>>,
@@ -139,7 +128,7 @@ pub fn lobby() -> Html {
     };
 
     let headstone_props = players.iter().map(|p| HeadstoneProps {
-        color: PlayerColor::Black,
+        color: p.color.clone(),
         player_name: p.username.clone(),
         ready: p.ready,
     }).collect::<Vec<HeadstoneProps>>();

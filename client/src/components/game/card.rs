@@ -10,7 +10,8 @@ pub struct Card {
 impl Card {
     pub fn new(card: &ServerCard) -> Card {
         let name = format!("{:?}", card.character).to_lowercase();
-        let path = format!("assets/cards/characters/{}/{}_black.png", name, name);
+        let color = format!("{:?}", card.color).to_lowercase();
+        let path = format!("assets/cards/characters/{}/{}_{}.png", name, name, color);
 
         Card { name, path }
     }
