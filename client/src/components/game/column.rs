@@ -2,6 +2,7 @@ use std::rc::Rc;
 use gloo_storage::{SessionStorage, Storage};
 use wasm_bindgen_futures::spawn_local;
 use super::card::{Card, CardsList};
+use super::token::Token;
 use kotc_reqwasm::{server_structs::Resource, endpoints::CardStore};
 use yew::prelude::*;
 use yewdux::prelude::{BasicStore, Dispatcher};
@@ -10,35 +11,6 @@ use kotc_commons::messages::PlayCard;
 use kotc_reqwasm::endpoints::User;
 use kotc_reqwasm::ws_send::play_card;
 use crate::components::pages::lobby::KotcWebSocketState;
-
-#[derive(Clone, PartialEq)]
-pub struct Token {
-    pub name: String,
-    pub path: String,
-}
-
-impl Token {
-    pub fn new(resource: &Resource, points: u8) -> Token {
-        let name = format!("{:?}", resource).to_lowercase();
-        let path = format!("assets/cards/points/{}_{}.png", name, points);
-
-        Token { name, path }
-    }
-}
-
-#[derive(Clone, Properties, PartialEq)]
-pub struct TokenListProps {
-    pub tokens: Vec<Token>,
-}
-
-#[function_component(TokenList)]
-pub fn token_list(TokenListProps { tokens }: &TokenListProps) -> Html {
-    tokens.iter().map(|token| {
-        html! {
-            <img name={ token.name.clone() } src={ token.path.clone() } />
-        }
-    }).collect()
-}
 
 #[derive(Clone, PartialEq)]
 pub struct Column {

@@ -1,6 +1,7 @@
 pub mod card;
 pub mod column;
 pub mod logs;
+pub mod token;
 
 use std::collections::HashMap;
 
@@ -8,7 +9,8 @@ use kotc_reqwasm::{endpoints::{ColumnsStore, HandStore, LogStore, TokenStore, Ca
 use yew::prelude::*;
 
 use card::{Card, Hand};
-use column::{Column as OtherColumn, ColumnsList, Token, TokenList};
+use column::{Column as OtherColumn, ColumnsList};
+use token::{Token, Stats};
 use logs::Logs;
 use yewdux::prelude::{BasicStore, Dispatcher};
 use yewdux_functional::use_store;
@@ -61,19 +63,7 @@ pub fn game() -> Html {
             <ColumnsList columns={ columns } />
             <Hand cards={ hand } on_click={ on_card_select } />
             <Logs {logs} />
-
-            <div class={"game__tokens"}>
-                { for player_tokens.iter().map(|(key, value)| html! {
-                    <>
-                        <p>{key.clone()}</p>
-                        {
-                            html! {
-                                <TokenList tokens={value.iter().map(|token| Token::new(&token.resource, token.points)).collect::<Vec<Token>>()} />
-                            }
-                        }
-                    </>
-                }) }
-            </div>
+            <Stats stats={player_tokens} />
         </div>
     }
 }

@@ -180,12 +180,19 @@ button {
 }
 
 .game__tokens {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
     overflow: scroll;
     scrollbar-width: none;
 
     grid-area: tokens;
 }
 
+.token {
+    width: 100%;
+}
 
 .lobby {
     max-width: 50%;
