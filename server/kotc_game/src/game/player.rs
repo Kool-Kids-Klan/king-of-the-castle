@@ -103,7 +103,7 @@ impl Player {
     fn get_obtained_resources(&self) -> Vec<Resource> {
         self.tokens
             .iter()
-            .map(|token| token.clone().resource)
+            .map(|token| token.resource.clone())
             .collect()
     }
 
@@ -116,7 +116,7 @@ impl Player {
         get_all_resources()
             .map(|resource| my_resources.contains(&resource))
             .iter()
-            .any(|&x| x)
+            .all(|&x| x)
     }
 
     pub fn get_score(&self) -> u8 {
