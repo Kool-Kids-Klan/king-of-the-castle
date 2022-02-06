@@ -65,7 +65,7 @@ impl Column {
             Resource::Coins => Character::Merchant,
             Resource::Corn => Character::Landlord,
             Resource::Hat => Character::Cardinal,
-            Resource::Fiddle => Character::Troubadour,
+            Resource::Lute => Character::Troubadour,
             Resource::Swords => Character::Swordsman,
             Resource::Flask => Character::Alchemist,
         };

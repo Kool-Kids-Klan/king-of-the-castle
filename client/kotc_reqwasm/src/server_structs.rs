@@ -5,7 +5,7 @@ pub enum Resource {
     Coins,
     Corn,
     Hat,
-    Fiddle,
+    Lute,
     Swords,
     Flask,
 }
@@ -29,7 +29,7 @@ pub struct Player {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Column {
     pub token: Token,
-    pub is_blocked: bool, // Boure
+    pub is_blocked: bool,
     pub cards: Vec<Card>,
 }
 

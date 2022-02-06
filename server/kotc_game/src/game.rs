@@ -36,7 +36,7 @@ pub enum Resource {
     Coins,
     Corn,
     Hat,
-    Fiddle,
+    Lute,
     Swords,
     Flask,
 }
@@ -46,7 +46,7 @@ fn get_all_resources() -> [Resource; 6] {
         Resource::Coins,
         Resource::Corn,
         Resource::Hat,
-        Resource::Fiddle,
+        Resource::Lute,
         Resource::Swords,
         Resource::Flask,
     ]
@@ -98,6 +98,7 @@ impl Game {
                 let new_player = Player::new(user);
                 Rc::clone(&self.players).borrow_mut().push(new_player.clone());
                 self.players_count += 1;
+                println!("players count {}", self.players_count);
 
                 messages.push(self.message_update_players());
                 messages.push(self.log(
@@ -149,6 +150,7 @@ impl Game {
         let mut messages = vec![];
         match Rc::clone(&self.players).borrow_mut().iter_mut().find(|p| p.user_id == user_id) {
             Some(player) => {
+                println!("pplayers count {}", self.players_count);
                 player.flip_ready();
             }
             None => {
@@ -164,7 +166,9 @@ impl Game {
         messages.push(self.message_update_players());
 
         if self.get_ready_count() >= 2 {
+            println!("first {:?}", Rc::clone(&self.columns).borrow().to_vec());
             self.start_game().await;
+            println!("second {:?}", Rc::clone(&self.columns).borrow().to_vec());
             messages.push(self.message_start_game());
             messages.push(self.log(
                 format!("Game has started.\nRound {}/{} has started.\n{} is on turn.",
