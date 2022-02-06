@@ -7,6 +7,11 @@ pub struct UpdateHand {
     pub hand: Vec<Card>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UpdateTokens {
+    pub tokens: HashMap<String, Vec<Token>>,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateColumns {
     pub columns: Vec<Column>,

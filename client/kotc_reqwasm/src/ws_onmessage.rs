@@ -7,7 +7,7 @@ use serde::de;
 use kotc_commons::messages::message_types::ServerWsMessageType;
 use kotc_commons::messages::ServerWsMessage;
 use crate::GameStateSetters;
-use crate::ws_structs::{ActionLog, Error, FinishGame, StartGame, UpdateColumns, UpdateHand, UpdatePlayers, WsAction, YourId};
+use crate::ws_structs::{ActionLog, Error, FinishGame, StartGame, UpdateColumns, UpdateHand, UpdatePlayers, UpdateTokens, WsAction, YourId};
 
 fn get_server_message(msg: Result<Message, WebSocketError>) -> ServerWsMessage {
     match msg {
@@ -35,6 +35,7 @@ pub async fn onmessage(read: SplitStream<WebSocket>, ws: GameStateSetters) {
     let set_columns = ws.set_columns;
     let set_hand = ws.set_hand;
     let set_logs = ws.set_logs;
+    let set_tokens = ws.set_tokens;
 
     while let Some(msg) = read.next().await {
         let server_message = get_server_message(msg);
@@ -70,6 +71,11 @@ pub async fn onmessage(read: SplitStream<WebSocket>, ws: GameStateSetters) {
                 let update_players: UpdatePlayers = get_deserialized(&server_message.content);
                 info!("update players {:?}", update_players);
                 set_players.emit(update_players.players);
+            }
+            ServerWsMessageType::UpdateTokens => {
+                let update_tokens: UpdateTokens = get_deserialized(&server_message.content);
+                info!("update tokens {:?}", update_tokens);
+                set_tokens.emit(update_tokens.tokens);
             }
             ServerWsMessageType::WsAction => {
                 let ws_action: WsAction = get_deserialized(&server_message.content);
