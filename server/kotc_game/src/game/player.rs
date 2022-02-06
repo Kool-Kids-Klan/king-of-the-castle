@@ -111,15 +111,18 @@ impl Player {
         self.tokens.iter().map(|token| token.points).sum()
     }
 
-    pub fn get_score(&self) -> u8 {
-        let points = self.get_token_points();
+    pub fn has_all_resource_types(&self) -> bool {
         let my_resources = self.get_obtained_resources();
-        let has_all = get_all_resources()
+        get_all_resources()
             .map(|resource| my_resources.contains(&resource))
             .iter()
-            .any(|&x| x);
+            .any(|&x| x)
+    }
+
+    pub fn get_score(&self) -> u8 {
+        let points = self.get_token_points();
         // TODO ak ma double, tak za kazdu extra kartu -1 bod
-        if has_all {
+        if self.has_all_resource_types() {
             points * 2
         } else {
             points

@@ -5,6 +5,7 @@ use serde::{Serialize, Deserialize};
 use crate::game::card::Card;
 use crate::game::column::Column;
 use crate::game::player::Player;
+use crate::game::Token;
 
 #[derive(Debug)]
 pub enum MessageRecipient {
@@ -26,6 +27,11 @@ pub struct UpdateHand {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateColumns {
     pub columns: Vec<Column>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UpdateTokens {
+    pub tokens: HashMap<String, Vec<Token>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
