@@ -28,7 +28,7 @@ impl Column {
         self.cards.len() as u8 >= self.token.points || self.is_blocked
     }
 
-    pub fn reveal_previous_card(&mut self) -> Option<Character> {
+    pub fn reveal_previous_card(&mut self) -> Option<Card> {
         let number_of_cards = self.cards.len();
         if self.cards.len() >= 2 {
             let mut previous_card = self.cards.get_mut(number_of_cards-2).unwrap();
@@ -36,7 +36,7 @@ impl Column {
                 None
             } else {
                 previous_card.revealed = true;
-                Some(previous_card.character)
+                Some(previous_card.clone())
             }
         } else {
             None
