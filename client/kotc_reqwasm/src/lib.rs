@@ -5,11 +5,12 @@ pub mod ws_onmessage;
 pub mod ws_send;
 
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 use futures::{SinkExt, StreamExt};
 use log::{info, Level};
 use reqwasm::websocket::{futures::WebSocket, Message};
-use server_structs::{Player, Column, Card};
+use server_structs::{Player, Column, Card, Token};
 use wasm_bindgen_futures::spawn_local;
 use futures::stream::{SplitSink, SplitStream};
 use serde::Serialize;
@@ -29,6 +30,8 @@ pub struct GameStateSetters {
     pub set_started: Callback<bool>,
     pub set_columns: Callback<Vec<Column>>,
     pub set_hand: Callback<Vec<Card>>,
+    pub set_logs: Callback<String>,
+    pub set_tokens: Callback<HashMap<String, Vec<Token>>>
 }
 
 pub struct KotcWebSocket {

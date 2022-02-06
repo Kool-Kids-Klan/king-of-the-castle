@@ -6,9 +6,7 @@ use reqwasm::websocket::{Message, WebSocketError};
 use serde::de;
 use kotc_commons::messages::message_types::ServerWsMessageType;
 use kotc_commons::messages::ServerWsMessage;
-use yew::Callback;
 use crate::GameStateSetters;
-use crate::server_structs::Player;
 use crate::ws_structs::{ActionLog, Error, FinishGame, StartGame, UpdateColumns, UpdateHand, UpdatePlayers, WsAction, YourId};
 
 fn get_server_message(msg: Result<Message, WebSocketError>) -> ServerWsMessage {
@@ -36,6 +34,8 @@ pub async fn onmessage(read: SplitStream<WebSocket>, ws: GameStateSetters) {
     let set_started = ws.set_started;
     let set_columns = ws.set_columns;
     let set_hand = ws.set_hand;
+    let set_logs = ws.set_logs;
+
     while let Some(msg) = read.next().await {
         let server_message = get_server_message(msg);
 
@@ -88,6 +88,7 @@ pub async fn onmessage(read: SplitStream<WebSocket>, ws: GameStateSetters) {
             ServerWsMessageType::ActionLog => {
                 let action_log: ActionLog = get_deserialized(&server_message.content);
                 info!("action log {:?}", action_log);
+                set_logs.emit(action_log.detail);
             }
         };
     }
