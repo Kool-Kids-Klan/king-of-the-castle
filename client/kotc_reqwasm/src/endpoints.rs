@@ -6,6 +6,8 @@ use serde::{Serialize, Deserialize};
 use chrono::NaiveDateTime;
 use yew::Callback;
 
+use crate::server_structs::{Column, Card};
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct User {
     pub id: i32,
@@ -24,8 +26,47 @@ pub struct LoggedUser{
 
 impl Default for LoggedUser {
     fn default() -> Self {
-        LoggedUser {
+        Self {
             logged_user: None,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct GameStarted {
+    pub game_started: bool,
+}
+
+impl Default for GameStarted {
+    fn default() -> Self {
+        Self {
+            game_started: false,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct ColumnsStore {
+    pub columns: Vec<Column>,
+}
+
+impl Default for ColumnsStore {
+    fn default() -> Self {
+        Self {
+            columns: vec![],
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct HandStore {
+    pub hand: Vec<Card>,
+}
+
+impl Default for HandStore {
+    fn default() -> Self {
+        Self {
+            hand: vec![],
         }
     }
 }

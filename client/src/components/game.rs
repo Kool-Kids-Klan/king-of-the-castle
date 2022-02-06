@@ -4,14 +4,19 @@ pub mod logs;
 
 use std::collections::HashMap;
 
+use kotc_reqwasm::{endpoints::{ColumnsStore, HandStore}};
 use yew::prelude::*;
 
-use card::{Card, CardsList, Hand};
-use column::{Column, ColumnsList, Token, TokenList};
+use card::{Card, Hand};
+use column::{Column as OtherColumn, ColumnsList, Token, TokenList};
 use logs::Logs;
+use yewdux::prelude::BasicStore;
+use yewdux_functional::use_store;
 
 #[function_component(Game)]
 pub fn game() -> Html {
+    let columns_store = use_store::<BasicStore<ColumnsStore>>();
+    let hand_store = use_store::<BasicStore<HandStore>>();
     let selected_card = use_state(|| None);
     let on_card_select = {
         let selected_card = selected_card.clone();
@@ -28,33 +33,33 @@ pub fn game() -> Html {
 
     let player_tokens: UseStateHandle<HashMap<String, Vec<Token>>> = use_state(|| HashMap::new());
 
-    let hand = vec![Card::new("king/king_black"), Card::new("king/king_black"), Card::new("king/king_black")];
-    let columns = vec![
-        Column::new(
-            Token::new("coins_1"),
-            hand.clone(),
-        ),
-        Column::new(
-            Token::new("coins_1"),
-            hand.clone(),
-        ),
-        Column::new(
-            Token::new("coins_1"),
-            hand.clone(),
-        ),
-        Column::new(
-            Token::new("coins_1"),
-            hand.clone(),
-        ),
-        Column::new(
-            Token::new("coins_1"),
-            hand.clone(),
-        ),
-        Column::new(
-            Token::new("coins_1"),
-            hand.clone(),
-        ),
-    ];
+    // let hand = vec![Card::new("king/king_black"), Card::new("king/king_black"), Card::new("king/king_black")];
+    // let columns = vec![
+    //     OtherColumn::new(
+    //         Token::new("coins_1"),
+    //         hand.clone(),
+    //     ),
+    //     OtherColumn::new(
+    //         Token::new("coins_1"),
+    //         hand.clone(),
+    //     ),
+    //     OtherColumn::new(
+    //         Token::new("coins_1"),
+    //         hand.clone(),
+    //     ),
+    //     OtherColumn::new(
+    //         Token::new("coins_1"),
+    //         hand.clone(),
+    //     ),
+    //     OtherColumn::new(
+    //         Token::new("coins_1"),
+    //         hand.clone(),
+    //     ),
+    //     OtherColumn::new(
+    //         Token::new("coins_1"),
+    //         hand.clone(),
+    //     ),
+    // ];
 
     // LOG ADDING
     // let update = {
@@ -71,23 +76,44 @@ pub fn game() -> Html {
     // };
 
     // TOKENS UPDATING
-    let update = {
-        let player_tokens = player_tokens.clone();
-        Callback::from(move |_| 
-            player_tokens.set(
-                player_tokens
-                    .iter()
-                    .map(|(key, value)| (key.clone(), value.clone()))
-                    .chain(vec![("AAA".to_string(), vec![Token::new("beggar"), Token::new("beggar"), Token::new("king"),])])
-                    .chain(vec![("BBB".to_string(), vec![Token::new("beggar"), Token::new("king"),])])
-                    .chain(vec![("CCC".to_string(), vec![Token::new("beggar"),])])
-                    .collect()
-            )
-        )
+    // let update = {
+    //     let player_tokens = player_tokens.clone();
+    //     Callback::from(move |_| 
+    //         player_tokens.set(
+    //             player_tokens
+    //                 .iter()
+    //                 .map(|(key, value)| (key.clone(), value.clone()))
+    //                 .chain(vec![("AAA".to_string(), vec![Token::new(&Resource::Coins, 3), Token::new(&Resource::Coins, 2), Token::new(&Resource::Coins, 1),])])
+    //                 .chain(vec![("BBB".to_string(), vec![Token::new(&Resource::Coins, 3), Token::new(&Resource::Coins, 2),])])
+    //                 .chain(vec![("CCC".to_string(), vec![Token::new(&Resource::Coins, 5),])])
+    //                 .collect()
+    //         )
+    //     )
+    // };
+
+    let columns = match columns_store.state() {
+        None => vec![],
+        Some(state) => {
+            state.columns.iter()
+                .map(|col| OtherColumn::new(
+                    Token::new(&col.token.resource, col.token.points),
+                    col.cards.iter().map(|card| Card::new(card)).collect::<Vec<Card>>(),
+                ))
+                .collect::<Vec<OtherColumn>>()
+        }
+    };
+
+    let hand = match hand_store.state() {
+        None => vec![],
+        Some(state) => {
+            state.hand.iter()
+                .map(|card| Card::new(card))
+                .collect::<Vec<Card>>()
+        }
     };
 
     html! {
-        <div class="game" onclick={ update }>
+        <div class="game">
             <ColumnsList columns={ columns } />
             <Hand cards={ hand } on_click={ on_card_select } />
             { for details }

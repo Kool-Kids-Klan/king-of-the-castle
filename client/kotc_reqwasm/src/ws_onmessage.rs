@@ -7,7 +7,7 @@ use serde::de;
 use kotc_commons::messages::message_types::ServerWsMessageType;
 use kotc_commons::messages::ServerWsMessage;
 use yew::Callback;
-use crate::{KotcWebSocketReader};
+use crate::GameStateSetters;
 use crate::server_structs::Player;
 use crate::ws_structs::{ActionLog, Error, FinishGame, StartGame, UpdateColumns, UpdateHand, UpdatePlayers, WsAction, YourId};
 
@@ -30,10 +30,12 @@ fn get_deserialized<T: de::DeserializeOwned>(content: &String) -> T {
     serde_json::from_str::<T>(content).unwrap()
 }
 
-pub async fn onmessage(ws: KotcWebSocketReader) {
-    let mut read = ws.read;
+pub async fn onmessage(read: SplitStream<WebSocket>, ws: GameStateSetters) {
+    let mut read = read;
     let set_players = ws.set_players;
     let set_started = ws.set_started;
+    let set_columns = ws.set_columns;
+    let set_hand = ws.set_hand;
     while let Some(msg) = read.next().await {
         let server_message = get_server_message(msg);
 
@@ -41,10 +43,12 @@ pub async fn onmessage(ws: KotcWebSocketReader) {
             ServerWsMessageType::UpdateColumns => {
                 let update_board: UpdateColumns = get_deserialized(&server_message.content);
                 info!("update board {:?}", update_board);
+                set_columns.emit(update_board.columns);
             },
             ServerWsMessageType::UpdateHand => {
                 let update_hand: UpdateHand = get_deserialized(&server_message.content);
                 info!("update hand {:?}", update_hand);
+                set_hand.emit(update_hand.hand);
             },
             ServerWsMessageType::Error => {
                 let error: Error = get_deserialized(&server_message.content);
