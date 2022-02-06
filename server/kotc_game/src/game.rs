@@ -1,4 +1,4 @@
-use std::{panic};
+use std::panic;
 use std::collections::HashMap;
 use itertools::{iproduct};
 use rand::{seq::IteratorRandom, thread_rng};
@@ -15,6 +15,7 @@ use ws_messages::{
     MessageRecipient,
     ServerMessage,
     UpdatePlayers,
+    UpdateTokens,
     UpdateColumns,
     UpdateHand,
     FinishGame,
@@ -289,6 +290,8 @@ impl Game {
                 format!("All columns closed - round ended.")
             ));
             self.eval_columns(&mut messages);
+            messages.push(self.message_update_tokens());
+
             self.round += 1;
             if self.token_deck.is_empty() {
                 let (winner_id, winner_username, results) = self.get_results();
@@ -390,7 +393,14 @@ impl Game {
                     .borrow_mut()
                     .iter_mut()
                     .find(|player| player.username == winner_username) {
-                    winner.add_token(column.token.clone())
+                    let had_all = winner.has_all_resource_types();
+                    winner.add_token(column.token.clone());
+                    if !had_all && winner.has_all_resource_types() {
+                        messages.push(self.log(
+                            format!("{} obtained all resource types, therefore his points \
+                             will be doubled. Who can stop this guy?", winner.username)
+                        ));
+                    }
                 }
             });
         messages.push(self.message_update_players());
@@ -459,6 +469,19 @@ impl Game {
             content: serde_json::to_string(&UpdateColumns {
                 columns
             }).unwrap()
+        }
+    }
+
+    fn message_update_tokens(&self) -> ServerMessage {
+        let tokens: HashMap<String, Vec<Token>> = Rc::clone(&self.players)
+            .borrow()
+            .iter()
+            .map(|player| (player.username.clone(), player.tokens.clone()))
+            .collect();
+        ServerMessage {
+            message_type: ServerWsMessageType::UpdateTokens,
+            recipient: MessageRecipient::AllUsers,
+            content: serde_json::to_string(&UpdateTokens { tokens }).unwrap()
         }
     }
 
