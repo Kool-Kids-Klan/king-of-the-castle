@@ -1,4 +1,5 @@
 use super::card::{Card, CardsList};
+use kotc_reqwasm::server_structs::Resource;
 use yew::prelude::*;
 
 #[derive(Clone, PartialEq)]
@@ -8,9 +9,9 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn new(name: &str) -> Token {
-        let name = name.to_string();
-        let path = format!("assets/cards/points/{}.png", name);
+    pub fn new(resource: &Resource, points: u8) -> Token {
+        let name = format!("{:?}", resource).to_lowercase();
+        let path = format!("assets/cards/points/{}_{}.png", name, points);
 
         Token { name, path }
     }

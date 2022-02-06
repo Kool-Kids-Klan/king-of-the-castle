@@ -10,7 +10,7 @@ pub enum Resource {
     Flask,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Token {
     pub resource: Resource,
     pub points: u8,
@@ -26,14 +26,14 @@ pub struct Player {
     pub ready: bool,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Column {
     pub token: Token,
     pub is_blocked: bool, // Boure
-    cards: Vec<Card>,
+    pub cards: Vec<Card>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Card {
     pub owner: String,
     pub character: Character,

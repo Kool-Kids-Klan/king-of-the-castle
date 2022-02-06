@@ -1,3 +1,4 @@
+use kotc_reqwasm::server_structs::Card as ServerCard;
 use yew::prelude::*;
 
 #[derive(Clone, PartialEq)]
@@ -7,16 +8,16 @@ pub struct Card {
 }
 
 impl Card {
-    pub fn new(name: &str) -> Card {
-        let name = name.to_string();
-        let path = format!("assets/cards/characters/{}.png", name);
+    pub fn new(card: &ServerCard) -> Card {
+        let name = format!("{:?}", card.character).to_lowercase();
+        let path = format!("assets/cards/characters/{}/{}_black.png", name, name);
 
         Card { name, path }
     }
 }
 
 fn def_on_click() -> Callback<Card> {
-    Callback::from(move |card: Card| println!("card selected"))
+    Callback::from(move |_: Card| println!("card selected"))
 }
 
 #[derive(Clone, Properties, PartialEq)]

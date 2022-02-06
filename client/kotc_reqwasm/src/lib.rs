@@ -9,7 +9,7 @@ use std::rc::Rc;
 use futures::{SinkExt, StreamExt};
 use log::{info, Level};
 use reqwasm::websocket::{futures::WebSocket, Message};
-use server_structs::Player;
+use server_structs::{Player, Column, Card};
 use wasm_bindgen_futures::spawn_local;
 use futures::stream::{SplitSink, SplitStream};
 use serde::Serialize;
@@ -24,10 +24,11 @@ fn serialize<T: Serialize>(object: T) -> String {
     serde_json::to_string(&object).unwrap()
 }
 
-pub struct KotcWebSocketReader {
-    pub read: SplitStream<WebSocket>,
+pub struct GameStateSetters {
     pub set_players: Callback<Vec<Player>>,
     pub set_started: Callback<bool>,
+    pub set_columns: Callback<Vec<Column>>,
+    pub set_hand: Callback<Vec<Card>>,
 }
 
 pub struct KotcWebSocket {
@@ -35,14 +36,12 @@ pub struct KotcWebSocket {
 }
 
 impl KotcWebSocket {
-    pub fn new(socket_url: &str, set_players: Callback<Vec<Player>>, set_started: Callback<bool>) -> KotcWebSocket {
+    pub fn new(socket_url: &str, setters: GameStateSetters) -> KotcWebSocket {
         let ws = WebSocket::open(socket_url).unwrap();
         let (write, read) = ws.split();
 
-        let listener = KotcWebSocketReader { read, set_players, set_started };
-
         spawn_local(async move {
-            onmessage(listener).await;
+            onmessage(read, setters).await;
         });
 
         KotcWebSocket { write }
@@ -57,9 +56,9 @@ impl KotcWebSocket {
     }
 }
 
-pub fn connect_websocket(lobby_id: String, set_players: Callback<Vec<Player>>, set_started: Callback<bool>) -> KotcWebSocket { // This method is meant to return KotcWebSocket, thus it would be possible to call ws.send_message from anywhere
+pub fn connect_websocket(lobby_id: String, setters: GameStateSetters) -> KotcWebSocket { // This method is meant to return KotcWebSocket, thus it would be possible to call ws.send_message from anywhere
     // console_log::init_with_level(Level::Debug).unwrap();
-    let ws = KotcWebSocket::new(&format!("ws://127.0.0.1:8081/lobby/{}", lobby_id), set_players, set_started);
+    let ws = KotcWebSocket::new(&format!("ws://127.0.0.1:8081/lobby/{}", lobby_id), setters);
     // spawn_local(async move {
     //     ws.send_message(user_joined(19)).await;
     //     ws.send_message(ready(19)).await;
