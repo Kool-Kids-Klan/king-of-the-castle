@@ -4,13 +4,13 @@ pub mod logs;
 
 use std::collections::HashMap;
 
-use kotc_reqwasm::{endpoints::{ColumnsStore, HandStore, LogStore, TokenStore}};
+use kotc_reqwasm::{endpoints::{ColumnsStore, HandStore, LogStore, TokenStore, CardStore}};
 use yew::prelude::*;
 
 use card::{Card, Hand};
 use column::{Column as OtherColumn, ColumnsList, Token, TokenList};
 use logs::Logs;
-use yewdux::prelude::BasicStore;
+use yewdux::prelude::{BasicStore, Dispatcher};
 use yewdux_functional::use_store;
 
 #[function_component(Game)]
@@ -19,18 +19,11 @@ pub fn game() -> Html {
     let hand_store = use_store::<BasicStore<HandStore>>();
     let log_store = use_store::<BasicStore<LogStore>>();
     let token_store = use_store::<BasicStore<TokenStore>>();
+    let card_store = use_store::<BasicStore<CardStore>>();
 
-    let selected_card = use_state(|| None);
     let on_card_select = {
-        let selected_card = selected_card.clone();
-        Callback::from(move |card: Card| selected_card.set(Some(card)))
+        card_store.dispatch().reduce_callback_with(|store, i| store.card = i)
     };
-
-    let details = selected_card.as_ref().map(|card| {
-        html! {
-           <p>{ card.name.clone() }</p>
-        }
-    });
 
     let columns = match columns_store.state() {
         None => vec![],
@@ -67,7 +60,6 @@ pub fn game() -> Html {
         <div class="game">
             <ColumnsList columns={ columns } />
             <Hand cards={ hand } on_click={ on_card_select } />
-            { for details }
             <Logs {logs} />
 
             <div class={"game__tokens"}>
