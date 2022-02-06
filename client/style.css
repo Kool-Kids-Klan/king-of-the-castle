@@ -232,7 +232,21 @@ button {
     font-size: 2rem;
 }
 
+.card {
+    transition: transform .1s;
+}
 
+.card:hover {
+    -ms-transform: scale(1.5); /* IE 9 */
+    -webkit-transform: scale(1.5); /* Safari 3-8 */
+    transform: scale(2);
+    padding-bottom: 2em;
+}
+
+.card__selected {
+    border: 3px solid red;
+    border-radius: 3em;
+}
 
 @media screen and (max-width: 800px) {
     html {
