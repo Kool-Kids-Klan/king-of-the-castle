@@ -1,9 +1,9 @@
+use kotc_reqwasm::server_structs::Color;
 use yew::prelude::*;
-use crate::components::pages::lobby::PlayerColor;
 
 #[derive(Properties, PartialEq)]
 pub struct HeadstoneProps {
-    pub color: PlayerColor,
+    pub color: Color,
     pub player_name: String,
     pub ready: bool,
 }
@@ -11,12 +11,12 @@ pub struct HeadstoneProps {
 #[function_component(Headstone)]
 pub fn headstone(props: &HeadstoneProps) -> Html {
     let img_src = match props.color {
-        PlayerColor::White => "../../../assets/cards/characters/unknown/unknown_white.png",
-        PlayerColor::Black => "../../../assets/cards/characters/unknown/unknown_black.png",
-        PlayerColor::Green => "../../../assets/cards/characters/unknown/unknown_green.png",
-        PlayerColor::Yellow => "../../../assets/cards/characters/unknown/unknown_yellow.png",
-        PlayerColor::Blue => "../../../assets/cards/characters/unknown/unknown_blue.png",
-        PlayerColor::Red => "../../../assets/cards/characters/unknown/unknown_red.png",
+        Color::White => "../../../assets/cards/characters/unknown/unknown_white.png",
+        Color::Black => "../../../assets/cards/characters/unknown/unknown_black.png",
+        Color::Green => "../../../assets/cards/characters/unknown/unknown_green.png",
+        Color::Yellow => "../../../assets/cards/characters/unknown/unknown_yellow.png",
+        Color::Blue => "../../../assets/cards/characters/unknown/unknown_blue.png",
+        Color::Red => "../../../assets/cards/characters/unknown/unknown_red.png",
     };
 
     html! {
@@ -40,7 +40,7 @@ pub fn headstone_list(HeadstoneListProps { players }: &HeadstoneListProps) -> Ht
         {
             players.iter().map(|headstone| {
                 html! {
-                    <Headstone color={PlayerColor::Black} player_name={headstone.player_name.clone()} ready={headstone.ready} />
+                    <Headstone color={headstone.color.clone()} player_name={headstone.player_name.clone()} ready={headstone.ready} />
                 }
             }).collect::<Vec<Html>>()
         }

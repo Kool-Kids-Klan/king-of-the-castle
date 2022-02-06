@@ -24,6 +24,8 @@ use ws_messages::{
     StartGame,
 };
 
+use crate::game::player::Color;
+
 pub mod card;
 pub mod column;
 pub mod player;
@@ -68,6 +70,7 @@ pub struct Game {
     columns: Rc<RefCell<Vec<Column>>>,
     token_deck: Vec<Token>,
     round: u8,
+    available_colors: Vec<Color>,
 }
 
 impl Game {
@@ -80,6 +83,7 @@ impl Game {
             columns: Rc::new(RefCell::new(vec![])),
             token_deck: vec![],
             round: 1,
+            available_colors: vec![Color::Black, Color::White, Color::Red, Color::Yellow, Color::Green, Color::Blue], // TODO shuffle?
         }
     }
 
@@ -96,7 +100,7 @@ impl Game {
             Ok(user) => {
                 let mut messages = vec![];
 
-                let new_player = Player::new(user);
+                let new_player = Player::new(user, self.available_colors.pop().unwrap()); // TODO unwrap
                 Rc::clone(&self.players).borrow_mut().push(new_player.clone());
                 self.players_count += 1;
 
@@ -226,7 +230,7 @@ impl Game {
                 )];
         }
 
-        let mut played_card: Card = Card::dummy_card("".to_string());
+        let mut played_card: Card = Card::dummy_card("".to_string(), Color::Black);
         match Rc::clone(&self.players).borrow().get(self.player_on_turn) {
             Some(player_on_turn) => {
                 if user_id != player_on_turn.user_id {

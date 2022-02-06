@@ -16,10 +16,21 @@ pub struct Token {
     pub points: u8,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub enum Color {
+    Black,
+    White,
+    Yellow,
+    Red,
+    Green,
+    Blue,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Player {
     pub user_id: i32,
     pub username: String,
+    pub color: Color,
     pub hand: Vec<Card>,
     deck: Vec<Card>,
     tokens: Vec<Token>,
@@ -36,6 +47,7 @@ pub struct Column {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Card {
     pub owner: String,
+    pub color: Color,
     pub character: Character,
     pub strength: f32,
     pub revealed: bool,

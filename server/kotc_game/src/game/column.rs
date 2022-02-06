@@ -261,7 +261,7 @@ impl Column {
         self.cards
             .clone()
             .into_iter()
-            .map(|card| if card.revealed { card } else { Card::dummy_card(card.owner) })
+            .map(|card| if card.revealed { card } else { Card::dummy_card(card.owner, card.color) })
             .collect()
     }
 }
