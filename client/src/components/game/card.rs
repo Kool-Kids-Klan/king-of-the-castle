@@ -16,25 +16,24 @@ impl Card {
     }
 }
 
-fn def_on_click() -> Callback<Card> {
-    Callback::from(move |_: Card| println!("card selected"))
+fn def_on_click() -> Callback<Option<usize>> {
+    Callback::from(move |_: Option<usize>| println!("card selected"))
 }
 
 #[derive(Clone, Properties, PartialEq)]
 pub struct CardsListProps {
     pub cards: Vec<Card>,
     #[prop_or_else(def_on_click)]
-    pub on_click: Callback<Card>,
+    pub on_click: Callback<Option<usize>>,
 }
 
 #[function_component(CardsList)]
 pub fn cards_list(CardsListProps { cards, on_click }: &CardsListProps) -> Html {
-    cards.iter().map(|card| {
+    cards.iter().enumerate().map(|(i, card)| {
         let on_card_select = {
             let on_click = on_click.clone();
-            let card = card.clone();
             Callback::from(move |_| {
-                on_click.emit(card.clone())
+                on_click.emit(Some(i));
             })
         };
 

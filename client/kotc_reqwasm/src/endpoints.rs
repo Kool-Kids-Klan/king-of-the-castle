@@ -99,6 +99,19 @@ impl Default for TokenStore {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct CardStore {
+    pub card: Option<usize>,
+}
+
+impl Default for CardStore {
+    fn default() -> Self {
+        Self {
+            card: None,
+        }
+    }
+}
+
 pub fn get_user(id: i32, store: Callback<Option<User>>) {
     spawn_local(async move {
         let resp = Request::get(&format!("http://127.0.0.1:8081/users/{}", id))
