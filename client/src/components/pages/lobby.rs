@@ -8,7 +8,7 @@ use yew_router::hooks::use_history;
 use yewdux::prelude::{BasicStore, WithDispatchProps, Dispatcher};
 use yewdux_functional::use_store;
 use kotc_reqwasm::{connect_websocket, KotcWebSocket, send_ready, send_join, GameStateSetters};
-use kotc_reqwasm::endpoints::{LoggedUser, User, GameStarted, ColumnsStore, HandStore};
+use kotc_reqwasm::endpoints::{LoggedUser, User, GameStarted, ColumnsStore, HandStore, LogStore, TokenStore};
 use crate::components::pages::headstone::{HeadstoneList, HeadstoneProps};
 use crate::components::pages::home::{LobbyState};
 use crate::router::Route;
@@ -30,8 +30,7 @@ pub struct KotcWebSocketState {
 }
 
 impl KotcWebSocketState {
-    pub fn new(lobby_id: String, user_id: i32, set_players: Callback<Vec<Player>>, set_started: Callback<bool>, set_columns: Callback<Vec<Column>>, set_hand: Callback<Vec<Card>>) -> Self {
-        let setters = GameStateSetters { set_players, set_started, set_columns, set_hand };
+    pub fn new(lobby_id: String, user_id: i32, setters: GameStateSetters) -> Self {
         let ws = Rc::new(RefCell::new(connect_websocket(lobby_id, setters)));
         send_join(user_id, Rc::clone(&ws));
 
@@ -51,6 +50,8 @@ impl Default for KotcWebSocketState {
                     set_started: Callback::from(|_| print!("")),
                     set_columns: Callback::from(|_| print!("")),
                     set_hand: Callback::from(|_| print!("")),
+                    set_logs: Callback::from(|_| print!("")),
+                    set_tokens: Callback::from(|_| print!("")),
                 }
             ))),
         }
@@ -63,6 +64,8 @@ pub fn lobby() -> Html {
     let game_started = use_store::<BasicStore<GameStarted>>();
     let columns_store = use_store::<BasicStore<ColumnsStore>>();
     let hand_store = use_store::<BasicStore<HandStore>>();
+    let log_store = use_store::<BasicStore<LogStore>>();
+    let token_store = use_store::<BasicStore<TokenStore>>();
 
     let set_started = 
         game_started.dispatch().reduce_callback_with(|state, i| state.game_started = i);
@@ -72,6 +75,12 @@ pub fn lobby() -> Html {
 
     let set_hand = 
         hand_store.dispatch().reduce_callback_with(|state, cards| state.hand = cards);
+
+    let set_logs = 
+        log_store.dispatch().reduce_callback_with(|state, log_detail| state.logs.push(log_detail));
+
+    let set_tokens = 
+        token_store.dispatch().reduce_callback_with(|state, players_tokens| state.tokens = players_tokens);
 
     // let store = use_store::<BasicStore<LoggedUser>>();
     // let lobby_info_store = use_store::<BasicStore<LobbyState>>();
@@ -93,7 +102,8 @@ pub fn lobby() -> Html {
     log::info!("{:?}", logged_user);
     
     // let user_id = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default().unwrap().id;
-    let ws = use_state(|| KotcWebSocketState::new(lobby_id, logged_user.id, set_players, set_started, set_columns, set_hand));
+    let setters = GameStateSetters { set_players, set_started, set_columns, set_hand, set_logs, set_tokens };
+    let ws = use_state(|| KotcWebSocketState::new(lobby_id, logged_user.id, setters));
 
     let on_ready_click = {
         let ready = ready.clone();

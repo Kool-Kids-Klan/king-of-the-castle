@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use gloo_storage::{SessionStorage, Storage};
 use reqwasm::http::Request;
 use wasm_bindgen_futures::spawn_local;
@@ -6,7 +8,7 @@ use serde::{Serialize, Deserialize};
 use chrono::NaiveDateTime;
 use yew::Callback;
 
-use crate::server_structs::{Column, Card};
+use crate::server_structs::{Column, Card, Token};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct User {
@@ -67,6 +69,32 @@ impl Default for HandStore {
     fn default() -> Self {
         Self {
             hand: vec![],
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct LogStore {
+    pub logs: Vec<String>,
+}
+
+impl Default for LogStore {
+    fn default() -> Self {
+        Self {
+            logs: vec![],
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct TokenStore {
+    pub tokens: HashMap<String, Vec<Token>>,
+}
+
+impl Default for TokenStore {
+    fn default() -> Self {
+        Self {
+            tokens: HashMap::new(),
         }
     }
 }
