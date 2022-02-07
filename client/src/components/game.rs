@@ -61,7 +61,7 @@ pub fn game() -> Html {
     html! {
         <div class="game">
             <ColumnsList columns={ columns } />
-            <Hand cards={ hand } on_click={ on_card_select } />
+            <Hand cards={ hand } on_click={ on_card_select } class={ "" } />
             <Logs {logs} />
             <Stats stats={player_tokens} />
         </div>
