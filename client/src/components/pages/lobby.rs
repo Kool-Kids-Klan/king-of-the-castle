@@ -16,12 +16,12 @@ use crate::router::Route;
 
 #[derive(Clone)]
 pub struct KotcWebSocketState {
-    pub websocket: Rc<RefCell<KotcWebSocket>>,
+    pub websocket: Rc<RefCell<Option<KotcWebSocket>>>,
 }
 
 impl KotcWebSocketState {
     pub fn new(lobby_id: String, user_id: i32, setters: GameStateSetters) -> Self {
-        let ws = Rc::new(RefCell::new(connect_websocket(lobby_id, setters)));
+        let ws = Rc::new(RefCell::new(Some(connect_websocket(lobby_id, setters))));
         send_join(user_id, Rc::clone(&ws));
 
         KotcWebSocketState {
@@ -33,17 +33,7 @@ impl KotcWebSocketState {
 impl Default for KotcWebSocketState {
     fn default() -> Self {
         KotcWebSocketState {
-            websocket: Rc::new(RefCell::new(connect_websocket(
-                String::from("1234"),
-                GameStateSetters {
-                    set_players: Callback::from(|_| print!("")),
-                    set_started: Callback::from(|_| print!("")),
-                    set_columns: Callback::from(|_| print!("")),
-                    set_hand: Callback::from(|_| print!("")),
-                    set_logs: Callback::from(|_| print!("")),
-                    set_tokens: Callback::from(|_| print!("")),
-                }
-            ))),
+            websocket: Rc::new(RefCell::new(None)),
         }
     }
 }
@@ -105,11 +95,12 @@ pub fn lobby() -> Html {
     let ws_state;
     if !*is_connected {
         ws_state = Rc::new(KotcWebSocketState::new(lobby_id, logged_user.id, setters));
-        let set_ws: Callback<Rc<RefCell<KotcWebSocket>>> = ws_store.dispatch().reduce_callback_with(|state, websocket| state.websocket = websocket);
+        let set_ws: Callback<Rc<RefCell<Option<KotcWebSocket>>>> = ws_store.dispatch().reduce_callback_with(|state, websocket| {state.websocket = websocket; log::info!("SETTINGS WS STORE")});
         set_ws.emit(Rc::clone(&ws_state.websocket));
         is_connected.set(true);
     } else {
         ws_state = Rc::clone(ws_store.state().unwrap());
+        // ws_state = ws_store.state().unwrap().to_owned();
     }
     let ws = match ws_store.state() {
         Some(ws) => ws.as_ref(),

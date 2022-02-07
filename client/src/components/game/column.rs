@@ -66,7 +66,10 @@ pub fn columns_list(ColumnsListProps { columns }: &ColumnsListProps) -> Html {
                 if let Some(ws) = ws_store.state().map(|s| Rc::clone(&s.websocket)) {
                     let client_message = play_card(logged_user.id, card_index, i);
                     spawn_local(async move {
-                        Rc::clone(&ws).borrow_mut().send_message(client_message).await;
+                        match Rc::clone(&ws).borrow_mut().as_mut() {
+                            Some(ws) => ws.send_message(client_message).await,
+                            None => log::warn!("Websocket was not initialized"),
+                        }
                     })
                 };
             }
