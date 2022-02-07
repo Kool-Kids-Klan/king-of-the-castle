@@ -70,14 +70,21 @@ pub fn connect_websocket(lobby_id: String, setters: GameStateSetters) -> KotcWeb
     ws
 }
 
-pub fn send_ready(id: i32, ws: Rc<RefCell<KotcWebSocket>>) {
+pub fn send_ready(id: i32, ws: Rc<RefCell<Option<KotcWebSocket>>>) {
     spawn_local(async move {
-        Rc::clone(&ws).borrow_mut().send_message(ready(id)).await;
+        match Rc::clone(&ws).borrow_mut().as_mut() {
+            Some(ws) => ws.send_message(ready(id)).await,
+            None => log::warn!("Websocket was not initialized"),
+        }
     });
 }
 
-pub fn send_join(id: i32, ws: Rc<RefCell<KotcWebSocket>>) {
+pub fn send_join(id: i32, ws: Rc<RefCell<Option<KotcWebSocket>>>) {
     spawn_local(async move {
-        Rc::clone(&ws).borrow_mut().send_message(user_joined(id)).await;
+        // Rc::clone(&ws).borrow_mut().send_message(user_joined(id)).await;
+        match Rc::clone(&ws).borrow_mut().as_mut() {
+            Some(ws) => ws.send_message(user_joined(id)).await,
+            None => log::warn!("Websocket was not initialized"),
+        }
     });
 }
