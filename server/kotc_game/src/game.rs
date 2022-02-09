@@ -24,7 +24,7 @@ pub mod player;
 mod utils;
 pub mod ws_messages;
 
-const NUMBER_OF_ROUNDS: u8 = 1;
+const NUMBER_OF_ROUNDS: u8 = 6;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Resource {
@@ -480,10 +480,16 @@ impl Game {
             player.deck = vec![];
         });
 
+        let player_on_turn_username = self.get_player_on_turn_username();
+        let player_on_turn = players.iter().find(|player| *player.username == player_on_turn_username).unwrap();
+
         ServerMessage {
             message_type: ServerWsMessageType::UpdatePlayers,
             recipient: MessageRecipient::AllUsers,
-            content: serde_json::to_string(&UpdatePlayers { players }).unwrap(),
+            content: serde_json::to_string(&UpdatePlayers {
+                players: players.clone(),
+                player_on_turn: (*player_on_turn).clone(),
+            }).unwrap()
         }
     }
 
