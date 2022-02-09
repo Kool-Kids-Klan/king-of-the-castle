@@ -4,10 +4,10 @@ use gloo_storage::{SessionStorage, Storage};
 use reqwasm::http::Request;
 use wasm_bindgen_futures::spawn_local;
 
+use crate::{Color, Player};
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use yew::Callback;
-use crate::Color;
 
 use crate::server_structs::{Card, Column, Token};
 
@@ -100,6 +100,32 @@ pub struct CardStore {
 impl Default for CardStore {
     fn default() -> Self {
         Self { card: None }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct PlayerOnTurnStore {
+    pub player: Option<Player>,
+}
+
+impl Default for PlayerOnTurnStore {
+    fn default() -> Self {
+        Self { player: None }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct FinalResultsStore {
+    pub game_ended: bool,
+    pub results: HashMap<String, (Color, u8)>,
+}
+
+impl Default for FinalResultsStore {
+    fn default() -> Self {
+        Self {
+            game_ended: false,
+            results: HashMap::new(),
+        }
     }
 }
 

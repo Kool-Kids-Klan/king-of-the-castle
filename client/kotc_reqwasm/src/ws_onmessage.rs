@@ -37,6 +37,9 @@ pub async fn onmessage(read: SplitStream<WebSocket>, ws: GameStateSetters) {
     let set_hand = ws.set_hand;
     let set_logs = ws.set_logs;
     let set_tokens = ws.set_tokens;
+    let set_player_on_turn = ws.set_player_on_turn;
+    let set_final_results = ws.set_final_results;
+
 
     while let Some(msg) = read.next().await {
         let server_message = get_server_message(msg);
@@ -69,9 +72,10 @@ pub async fn onmessage(read: SplitStream<WebSocket>, ws: GameStateSetters) {
             //     info!("user disconnected {:?}", user_disconnected);
             // },
             ServerWsMessageType::UpdatePlayers => {
-                let update_players: UpdatePlayers = get_deserialized(&server_message.content);
-                info!("update players {:?}", update_players);
-                set_players.emit(update_players.players);
+                let UpdatePlayers { players, player_on_turn } = get_deserialized(&server_message.content);
+                info!("update players {:?} {:?}", players, player_on_turn);
+                set_players.emit(players);
+                set_player_on_turn.emit(player_on_turn);
             }
             ServerWsMessageType::UpdateTokens => {
                 let update_tokens: UpdateTokens = get_deserialized(&server_message.content);
@@ -88,9 +92,10 @@ pub async fn onmessage(read: SplitStream<WebSocket>, ws: GameStateSetters) {
                 set_started.emit(true);
             }
             ServerWsMessageType::FinishGame => {
-                let finish_game: FinishGame = get_deserialized(&server_message.content);
-                info!("finish game {:?}", finish_game);
+                let FinishGame { winner, results } = get_deserialized(&server_message.content);
+                info!("finish game {:?}", results);
                 set_started.emit(false);
+                set_final_results.emit(results);
             }
             ServerWsMessageType::ActionLog => {
                 let action_log: ActionLog = get_deserialized(&server_message.content);

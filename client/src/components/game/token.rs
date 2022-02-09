@@ -47,7 +47,7 @@ pub fn player_stats(StatsProps { stats }: &StatsProps) -> Html {
             <span class="players-stats__title">{"Player's tokens"}</span>
             {
                 for stats.iter().map(|(name, (color, value))| {
-                let color_class = format!("player-tokens__name--{:?}", color).to_lowercase();
+                let color_class = format!("player--{:?}", color).to_lowercase();
                 html! {
                     <div class="player-tokens">
                         <span class={classes!("player-tokens__name", color_class.clone())}>{ name.clone() }</span>

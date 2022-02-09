@@ -1,9 +1,7 @@
 use crate::components::pages::headstone::{HeadstoneList, HeadstoneProps};
 use crate::router::Route;
 use gloo_storage::{SessionStorage, Storage};
-use kotc_reqwasm::endpoints::{
-    ColumnsStore, GameStarted, HandStore, LogStore, TokenStore, User,
-};
+use kotc_reqwasm::endpoints::{ColumnsStore, FinalResultsStore, GameStarted, HandStore, LogStore, PlayerOnTurnStore, TokenStore, User};
 use kotc_reqwasm::server_structs:: Player;
 use kotc_reqwasm::{connect_websocket, send_join, send_ready, GameStateSetters, KotcWebSocket};
 use std::cell::RefCell;
@@ -44,6 +42,8 @@ pub fn lobby() -> Html {
     let hand_store = use_store::<BasicStore<HandStore>>();
     let log_store = use_store::<BasicStore<LogStore>>();
     let token_store = use_store::<BasicStore<TokenStore>>();
+    let player_on_turn_store = use_store::<BasicStore<PlayerOnTurnStore>>();
+    let final_results_store = use_store::<BasicStore<FinalResultsStore>>();
 
     let set_started = game_started
         .dispatch()
@@ -65,6 +65,17 @@ pub fn lobby() -> Html {
         .dispatch()
         .reduce_callback_with(|state, players_tokens| state.tokens = players_tokens);
 
+    let set_player_on_turn = player_on_turn_store
+        .dispatch()
+        .reduce_callback_with(|state, player_on_turn| state.player = Some(player_on_turn));
+
+    let set_final_results = final_results_store
+        .dispatch()
+        .reduce_callback_with(|state, final_results| {
+            state.results = final_results;
+            state.game_ended = true
+        });
+
     let lobby_id: String = SessionStorage::get("lobby_id").unwrap();
     let logged_user: User = SessionStorage::get("user").unwrap();
 
@@ -85,6 +96,8 @@ pub fn lobby() -> Html {
         set_hand,
         set_logs,
         set_tokens,
+        set_player_on_turn,
+        set_final_results,
     };
     let ws_store = use_store::<BasicStore<KotcWebSocketState>>();
     let is_connected = use_state(|| false);

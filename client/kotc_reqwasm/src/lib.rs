@@ -31,6 +31,8 @@ pub struct GameStateSetters {
     pub set_hand: Callback<Vec<Card>>,
     pub set_logs: Callback<String>,
     pub set_tokens: Callback<HashMap<String, (Color, Vec<Token>)>>,
+    pub set_player_on_turn: Callback<Player>,
+    pub set_final_results: Callback<HashMap<String, (Color, u8)>>,
 }
 
 pub struct KotcWebSocket {
