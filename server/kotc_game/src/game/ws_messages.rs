@@ -16,6 +16,7 @@ pub enum MessageRecipient {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdatePlayers {
     pub players: Vec<Player>,
+    pub player_on_turn: Player,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
