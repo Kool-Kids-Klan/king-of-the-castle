@@ -11,8 +11,6 @@ use repo::participation_repo::PostgresParticipationRepo;
 use repo::user_repo::PostgresUserRepo;
 
 use diesel::prelude::*;
-use dotenv::dotenv;
-use std::env;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -33,9 +31,7 @@ pub async unsafe fn establish_connection() {
     match VAL {
         Some(_) => (),
         None => {
-            dotenv().ok();
-
-            let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+            let database_url = "postgres://postgres:password@db/kotc".to_string();
 
             PgConnection::establish(&database_url)
                 .expect(&format!("Error connecting to {}", database_url));

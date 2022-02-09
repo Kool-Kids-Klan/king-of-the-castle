@@ -4,6 +4,7 @@ pub mod ws_onmessage;
 pub mod ws_send;
 pub mod ws_structs;
 
+use endpoints::get_server_url;
 use futures::stream::SplitSink;
 use futures::{SinkExt, StreamExt};
 use reqwasm::websocket::{futures::WebSocket, Message};
@@ -63,7 +64,7 @@ impl KotcWebSocket {
 pub fn connect_websocket(lobby_id: String, setters: GameStateSetters) -> KotcWebSocket {
     // This method is meant to return KotcWebSocket, thus it would be possible to call ws.send_message from anywhere
     // console_log::init_with_level(Level::Debug).unwrap();
-    let ws = KotcWebSocket::new(&format!("ws://127.0.0.1:8081/lobby/{}", lobby_id), setters);
+    let ws = KotcWebSocket::new(&format!("ws://{}/lobby/{}", get_server_url(), lobby_id), setters);
     // spawn_local(async move {
     //     ws.send_message(user_joined(19)).await;
     //     ws.send_message(ready(19)).await;
