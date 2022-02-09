@@ -8,6 +8,7 @@ use std::rc::Rc;
 use actix::AsyncContext;
 use serde::de::DeserializeOwned;
 use kotc_game::game::ws_messages::{MessageRecipient, ServerMessage};
+use std::{thread, time};
 
 pub type Socket = Recipient<ServerWsMessage>;
 
@@ -31,7 +32,7 @@ impl KotcWsServer {
         println!("Sending message: {:?} - {:?}", message_type, content);
         if let Some(recipient) = self.sessions.get(id_to) {
             let _ = recipient.do_send(ServerWsMessage {
-                message_type,
+                message_type: message_type.clone(),
                 content: content.clone(),
             });
         } else {
@@ -40,6 +41,11 @@ impl KotcWsServer {
                 id_to
             );
         };
+        match message_type {
+            ServerWsMessageType::UpdateColumns => thread::sleep(time::Duration::from_millis(200)),
+            _ => {},
+        }
+
     }
 }
 
