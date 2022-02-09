@@ -24,7 +24,7 @@ pub mod player;
 mod utils;
 pub mod ws_messages;
 
-const NUMBER_OF_ROUNDS: u8 = 6;
+const NUMBER_OF_ROUNDS: u8 = 1;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Resource {
