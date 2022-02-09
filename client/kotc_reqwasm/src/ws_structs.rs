@@ -54,5 +54,5 @@ pub struct ActionLog {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FinishGame {
     pub winner: String,
-    pub results: HashMap<String, u8>, // (username, score)
+    pub results: HashMap<String, (Color, u8)>, // (username, score)
 }

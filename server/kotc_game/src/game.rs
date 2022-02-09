@@ -312,7 +312,7 @@ impl Game {
                     self.log(
                         results
                             .iter()
-                            .fold("Results:\n".to_string(), |s, (username, score)| {
+                            .fold("Results:\n".to_string(), |s, (username, (_, score))| {
                                 s + &format!("{}: {} points\n", username, score)
                             })
                             + &format!("Winner: {}\n", winner_username),
@@ -450,15 +450,15 @@ impl Game {
         messages.push(self.message_update_tokens());
     }
 
-    fn get_results(&self) -> (i32, String, HashMap<String, u8>) {
-        let results: HashMap<String, u8> = Rc::clone(&self.players)
+    fn get_results(&self) -> (i32, String, HashMap<String, (Color, u8)>) {
+        let results: HashMap<String, (Color, u8)> = Rc::clone(&self.players)
             .borrow()
             .iter()
-            .map(|player| (player.clone().username, player.get_score()))
+            .map(|player| (player.clone().username, (player.color.clone(), player.get_score())))
             .collect();
         let mut winner_id = 0;
         let mut winner_username = "Unknown".to_string();
-        if let Some((username, _)) = results.iter().max_by_key(|(_, &score)| score) {
+        if let Some((username, _)) = results.iter().max_by_key(|(_, (_, score))| score) {
             winner_username = username.clone();
         }
         if let Some(p) = Rc::clone(&self.players)
@@ -536,7 +536,7 @@ impl Game {
         }
     }
 
-    fn message_finish_game(&self, winner: String, results: HashMap<String, u8>) -> ServerMessage {
+    fn message_finish_game(&self, winner: String, results: HashMap<String, (Color, u8)>) -> ServerMessage {
         ServerMessage {
             message_type: ServerWsMessageType::FinishGame,
             recipient: MessageRecipient::AllUsers,
