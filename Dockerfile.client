@@ -1,0 +1,6 @@
+FROM rust:latest
+WORKDIR /usr/src/client
+COPY . .
+RUN rustup target add wasm32-unknown-unknown
+RUN cargo install --locked trunk
+ENTRYPOINT ["trunk", "serve", "./client/index.html", "--port=8080"]

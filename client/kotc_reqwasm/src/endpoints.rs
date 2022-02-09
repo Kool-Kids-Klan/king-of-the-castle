@@ -129,9 +129,16 @@ impl Default for FinalResultsStore {
     }
 }
 
+pub fn get_server_url() -> String {
+    match option_env!("SERVER_URL") {
+        Some(url) => url.to_string(),
+        _ => "127.0.0.1:8081".to_string()
+    }
+}
+
 pub fn get_user(id: i32, store: Callback<Option<User>>) {
     spawn_local(async move {
-        let resp = Request::get(&format!("http://127.0.0.1:8081/users/{}", id))
+        let resp = Request::get(&format!("http://{}/users/{}", get_server_url(), id))
             .send()
             .await
             .unwrap();
@@ -153,7 +160,7 @@ pub fn login_user(username: String, password: String, store: Callback<Option<Use
         let login_data = LoginData { username, password };
         let body = serde_json::to_string(&login_data).unwrap();
         log::info!("{:?}", body);
-        let resp = Request::post(&format!("http://127.0.0.1:8081/users/login"))
+        let resp = Request::post(&format!("http://{}/users/login", get_server_url()))
             .body(body)
             .send()
             .await
@@ -182,7 +189,7 @@ pub fn register_user(username: String, email: String, password: String) {
         };
         let body = serde_json::to_string(&register_data).unwrap();
         log::info!("{:?}", body);
-        let resp = Request::post(&format!("http://127.0.0.1:8081/users"))
+        let resp = Request::post(&format!("http://{}/users", get_server_url()))
             .body(body)
             .send()
             .await

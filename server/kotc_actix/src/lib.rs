@@ -29,7 +29,7 @@ pub async fn start_actix_server() -> std::io::Result<()> {
             .service(handlers::create_user)
             .service(handlers::join_lobby)
     })
-    .bind("127.0.0.1:8081")?
+    .bind("0.0.0.0:8081")?
     .run()
     .await
 }
