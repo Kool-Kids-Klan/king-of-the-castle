@@ -64,7 +64,9 @@ impl UserRepo for PostgresUserRepo {
     }
 
     async fn get_user(&self, user_id: i32) -> Result<User> {
-        Ok(table::users.filter(table::id.eq(user_id)).first(&self.pg_pool.get()?)?)
+        Ok(table::users
+            .filter(table::id.eq(user_id))
+            .first(&self.pg_pool.get()?)?)
     }
 
     async fn delete_user(&self, user_id: i32) -> Result<()> {

@@ -2,13 +2,13 @@ extern crate kotc_database;
 
 use std::rc::Rc;
 
-use kotc_database::{get_game_repo, get_participation_repo, get_user_repo};
 use kotc_database::repo::{
     game_repo::GameRepo, participation_repo::ParticipationRepo, user_repo::UserRepo,
 };
+use kotc_database::{get_game_repo, get_participation_repo, get_user_repo};
 use kotc_game::game::card::{Card, Character};
-use kotc_game::game::Game;
 use kotc_game::game::ws_messages::ServerMessage;
+use kotc_game::game::Game;
 
 #[actix_rt::test]
 async fn db_test() -> anyhow::Result<()> {
@@ -100,5 +100,7 @@ async fn db_test() -> anyhow::Result<()> {
 
 fn print_messages(messages: Vec<ServerMessage>) {
     println!("---");
-    messages.iter().for_each(|message| println!("{:?}", message))
+    messages
+        .iter()
+        .for_each(|message| println!("{:?}", message))
 }

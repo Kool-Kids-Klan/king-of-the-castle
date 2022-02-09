@@ -3,14 +3,25 @@ extern crate kotc_game;
 use kotc_game::game::{
     card::{Card, Character},
     column::Column,
-    Resource, Token, player::Color,
+    player::Color,
+    Resource, Token,
 };
 
 #[test]
 fn test_column_eval() {
     let cards = vec![
-        Card::new(String::from("ccc"), Color::Black, Character::Doppelganger, 0.0),
-        Card::new(String::from("bbb"), Color::Black, Character::Doppelganger, 0.0),
+        Card::new(
+            String::from("ccc"),
+            Color::Black,
+            Character::Doppelganger,
+            0.0,
+        ),
+        Card::new(
+            String::from("bbb"),
+            Color::Black,
+            Character::Doppelganger,
+            0.0,
+        ),
         Card::new(String::from("aaa"), Color::Black, Character::King, 20.0),
         Card::new(String::from("aaa"), Color::Black, Character::Queen, 16.0),
         Card::new(String::from("aaa"), Color::Black, Character::Julia, 14.0),
@@ -19,7 +30,12 @@ fn test_column_eval() {
         Card::new(String::from("bbb"), Color::Black, Character::Landlord, 8.0),
         Card::new(String::from("bbb"), Color::Black, Character::Merchant, 8.0),
         Card::new(String::from("aaa"), Color::Black, Character::Cardinal, 8.0),
-        Card::new(String::from("bbb"), Color::Black, Character::Troubadour, 8.0),
+        Card::new(
+            String::from("bbb"),
+            Color::Black,
+            Character::Troubadour,
+            8.0,
+        ),
         Card::new(String::from("aaa"), Color::Black, Character::Explorer, 13.0),
         Card::new(String::from("aaa"), Color::Black, Character::Killer, 9.5),
         Card::new(String::from("aaa"), Color::Black, Character::Storm, 9.0),

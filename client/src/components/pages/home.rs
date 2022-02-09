@@ -1,20 +1,12 @@
-use std::cell::RefCell;
-use std::fmt::format;
-use std::rc::Rc;
+use crate::Route;
 use gloo_storage::{SessionStorage, Storage};
-use wasm_bindgen_futures::spawn_local;
-use web_sys::{HtmlInputElement};
-use web_sys::console::log;
+use kotc_reqwasm::endpoints::LoggedUser;
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yew_router::history::History;
 use yew_router::hooks::use_history;
 use yewdux::prelude::BasicStore;
 use yewdux_functional::use_store;
-use kotc_reqwasm::endpoints::LoggedUser;
-use kotc_commons::messages::{ClientWsMessage, Error};
-use kotc_commons::messages::message_types::ClientWsMessageType;
-use kotc_reqwasm::{connect_websocket, KotcWebSocket};
-use crate::Route;
 
 #[derive(Clone, Debug, Default)]
 pub struct LobbyState {
@@ -27,7 +19,11 @@ pub fn home() -> Html {
     let store = use_store::<BasicStore<LoggedUser>>();
     let lobby_info = use_state(LobbyState::default);
     let mut logged = false;
-    if let Some(user) = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default() {
+    if let Some(_) = store
+        .state()
+        .map(|s| s.logged_user.as_ref())
+        .unwrap_or_default()
+    {
         logged = true;
     }
 
@@ -84,5 +80,5 @@ pub fn home() -> Html {
                  }
              }}
          </div>
-    }
+    };
 }

@@ -16,7 +16,7 @@ pub struct Token {
     pub points: u8,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Hash, Eq)]
 pub enum Color {
     Black,
     White,

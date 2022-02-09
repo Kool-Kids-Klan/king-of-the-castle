@@ -1,7 +1,6 @@
-use std::cell::{Ref, RefCell};
 use kotc_game::game::Game;
+use std::cell::RefCell;
 use std::collections::HashSet;
-use std::ops::Deref;
 use std::rc::Rc;
 
 #[derive(Clone)]

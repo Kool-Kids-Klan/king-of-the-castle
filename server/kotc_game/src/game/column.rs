@@ -31,7 +31,7 @@ impl Column {
     pub fn reveal_previous_card(&mut self) -> Option<Card> {
         let number_of_cards = self.cards.len();
         if self.cards.len() >= 2 {
-            let mut previous_card = self.cards.get_mut(number_of_cards-2).unwrap();
+            let mut previous_card = self.cards.get_mut(number_of_cards - 2).unwrap();
             if previous_card.revealed {
                 None
             } else {
@@ -48,15 +48,17 @@ impl Column {
     }
 
     pub fn remove_revealed_explorer(&mut self) -> Card {
-        let mut explorer = match self.cards
+        let mut explorer = match self
+            .cards
             .iter()
-            .find(|card| card.character == Character::Explorer && card.revealed) {
+            .find(|card| card.character == Character::Explorer && card.revealed)
+        {
             Some(explorer) => explorer.clone(),
-            None => panic!("There is not a revealed explorer in the column.")
+            None => panic!("There is not a revealed explorer in the column."),
         };
         explorer.revealed = false;
-        self.cards.retain(|card|
-            card.character != Character::Explorer || card.owner != explorer.owner);
+        self.cards
+            .retain(|card| card.character != Character::Explorer || card.owner != explorer.owner);
         explorer
     }
 
@@ -261,7 +263,13 @@ impl Column {
         self.cards
             .clone()
             .into_iter()
-            .map(|card| if card.revealed { card } else { Card::dummy_card(card.owner, card.color) })
+            .map(|card| {
+                if card.revealed {
+                    card
+                } else {
+                    Card::dummy_card(card.owner, card.color)
+                }
+            })
             .collect()
     }
 }

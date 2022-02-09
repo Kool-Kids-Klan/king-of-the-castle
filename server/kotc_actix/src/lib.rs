@@ -5,8 +5,8 @@ mod kots_ws_session;
 mod lobby;
 
 use actix::Actor;
-use actix_web::{web, App, HttpServer};
 use actix_cors::Cors;
+use actix_web::{web, App, HttpServer};
 
 use crate::kotc_ws_server::KotcWsServer;
 use kotc_database::get_user_repo;
