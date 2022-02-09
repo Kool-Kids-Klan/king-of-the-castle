@@ -2,19 +2,32 @@
     --color-primary: #fbe796;
     --color-secondary: #76342c;
     --color-hover: black;
+
+    --color-player-green: #399e3f;
+    --color-player-blue: #386f91;
+    --color-player-red: #b83831;
+    --color-player-yellow: #f8dc46;
+    --color-player-black: #453b31;
+    --color-player-white: #fffff8;
 }
+
 html {
     font-size: 16px;
 }
 
 html, body, .container {
-    height: 100vh;
     width: 100vw;
+    height: 100vh;
 }
 
-h1, h2, h3, span, button, label, a {
+h1, h2, h3, span, button, label, a, p {
     color: var(--color-secondary);
     font-family: 'MedievalSharp', cursive;
+    text-align: center;
+}
+
+.header__link, .header__username, .players-stats__title, .player-tokens__name, .lobby__button {
+    font-weight: bold;
 }
 
 body {
@@ -38,9 +51,9 @@ button {
 }
 
 .header__link {
+    margin: 0 1rem;
     background: none;
     border: none;
-    margin: 0 1rem;
     font-size: 2rem;
 }
 
@@ -54,21 +67,22 @@ button {
 }
 
 .home, .login, .register, .not-found, .lobby {
-    margin: 0 0 auto 0;
     display: flex;
-    flex-grow: 1;
     flex-direction: column;
-    align-items: center;
+    flex-grow: 1;
     justify-content: center;
+    align-items: center;
+    margin: 0 0 auto 0;
 }
 
 .home__title {
+    margin: .5rem 0;
     font-size: 4rem;
-    margin: .5rem 0 ;
 }
+
 .home__subscription {
-    font-size: 1.5rem;
     margin-top: 1rem;
+    font-size: 1.5rem;
 }
 
 .form {
@@ -79,23 +93,27 @@ button {
 }
 
 .form__label {
-    font-size: 1.5rem;
     align-self: start;
+    font-size: 1.5rem;
+}
+
+.form__input:focus {
+    outline: .15rem solid var(--color-hover);
 }
 
 .form__input {
-    color: var(--color-primary);
-    background-color: var(--color-secondary);
-    border: none;
     padding: .5rem;
     margin: .5rem 0;
+    background-color: var(--color-secondary);
+    border: none;
+    color: var(--color-primary);
 }
 
 .form__button {
-    border: none;
-    background: none;
-    font-size: 1.5rem;
     align-self: end;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
 }
 
 .form__button:hover, .header__link:hover, .lobby__button:hover {
@@ -115,36 +133,32 @@ button {
 }
 
 .game {
-    height: 100%;
-    width: 100%;
 
-    overflow: hidden;
-    
     display: grid;
-    gap: 1rem;
-    grid-template-columns: 10% auto 10%;
-    grid-template-rows: auto 20%;
     grid-template-areas: 
         "tokens columns logs"
         "tokens hand logs";
+    grid-template-columns: 10% auto 10%;
+    grid-template-rows: auto 20%;
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+    gap: 1rem;
 }
 
 #game__hand {
     display: flex;
-
     justify-content: center;
     grid-area: hand;
 }
 
 #game__columns {
-    margin-bottom: 20px;
-
     display: flex;
-
-    overflow: hidden;
-
-    justify-content: space-evenly;
+    justify-content: center;
     grid-area: columns;
+    margin-bottom: 20px;
+    overflow: hidden;
 }
 
 .game__column::-webkit-scrollbar {
@@ -152,12 +166,12 @@ button {
 }
 
 .game__column {
-    overflow: scroll;
-    scrollbar-width: none;
-
     display: flex;
     flex-direction: column;
+    max-width: 10%;
     margin: 0 .5rem;
+    overflow: scroll;
+    scrollbar-width: none;
 }
 
 .game__token {
@@ -169,25 +183,59 @@ button {
 }
 
 .game__logs {
-    overflow: scroll;
-    scrollbar-width: none;
 
     grid-area: logs;
+    overflow: scroll;
+    scrollbar-width: none;
 }
 
-.game__tokens::-webkit-scrollbar {
+.players-stats::-webkit-scrollbar {
     display: none;
 }
 
-.game__tokens {
+.players-stats {
     display: flex;
     flex-direction: column;
     align-items: center;
 
+    grid-area: tokens;
+
     overflow: scroll;
     scrollbar-width: none;
+}
 
-    grid-area: tokens;
+.player-tokens {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.player-tokens__name {
+    margin-bottom: 0.5rem;
+}
+
+.player-tokens__name--blue {
+    color: var(--color-player-blue);
+}
+
+.player-tokens__name--red {
+    color: var(--color-player-red);
+}
+
+.player-tokens__name--green {
+    color: var(--color-player-green);
+}
+
+.player-tokens__name--yellow {
+    color: var(--color-player-yellow);
+}
+
+.player-tokens__name--white {
+    color: var(--color-player-white);
+}
+.player-tokens__name--black {
+    color: var(--color-player-black);
 }
 
 .token {
@@ -195,9 +243,9 @@ button {
 }
 
 .lobby {
+    justify-content: flex-start;
     max-width: 50%;
     margin: 0 auto auto auto;
-    justify-content: flex-start;
 }
 
 .lobby__title {
@@ -205,10 +253,10 @@ button {
 }
 
 .lobby__button {
+    margin: auto 0;
     background: none;
     border: none;
     font-size: 2rem;
-    margin: auto 0;
 }
 
 .lobby__headstones {
@@ -228,6 +276,7 @@ button {
     width: 75%;
     margin: 0.5rem 0 1rem 0;
 }
+
 .headstone__name {
     font-size: 2rem;
 }
@@ -239,8 +288,8 @@ button {
 .card:hover {
     -ms-transform: scale(1.5); /* IE 9 */
     -webkit-transform: scale(1.5); /* Safari 3-8 */
-    transform: scale(2);
     padding-bottom: 2em;
+    transform: scale(2);
 }
 
 .card__selected {

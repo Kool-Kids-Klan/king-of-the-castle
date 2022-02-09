@@ -9,7 +9,7 @@ use pwhash::sha512_crypt::{hash, verify};
 
 use crate::kotc_ws_server::KotcWsServer;
 use crate::kots_ws_session::KotcWsSession;
-use kotc_database::repo::user_repo::{UserRepo, PostgresUserRepo};
+use kotc_database::repo::user_repo::{PostgresUserRepo, UserRepo};
 
 #[derive(Debug, Deserialize)]
 pub struct UserData {
@@ -56,10 +56,7 @@ pub async fn join_lobby(
 }
 
 #[post("/users/login")]
-pub async fn verify_user(
-    data: Data<Arc<PostgresUserRepo>>,
-    body: String,
-) -> impl Responder {
+pub async fn verify_user(data: Data<Arc<PostgresUserRepo>>, body: String) -> impl Responder {
     let result = data.list_users().await;
 
     println!("{:?}", body);
@@ -68,7 +65,13 @@ pub async fn verify_user(
 
     match result {
         Ok(user) => {
-            let verified = user.iter().filter(|user| user.username == login_body.username && verify(&login_body.password, &user.passhash)).last();
+            let verified = user
+                .iter()
+                .filter(|user| {
+                    user.username == login_body.username
+                        && verify(&login_body.password, &user.passhash)
+                })
+                .last();
             HttpResponse::Ok().json(verified)
         }
         Err(_) => HttpResponse::NotFound().json(""),
@@ -76,10 +79,7 @@ pub async fn verify_user(
 }
 
 #[post("/users")]
-pub async fn create_user(
-    data: Data<Arc<PostgresUserRepo>>,
-    body: String,
-) -> impl Responder {
+pub async fn create_user(data: Data<Arc<PostgresUserRepo>>, body: String) -> impl Responder {
     println!("{:?}", body);
     let user_body: UserData = serde_json::from_str(&body).unwrap();
     println!("{:?}", user_body);

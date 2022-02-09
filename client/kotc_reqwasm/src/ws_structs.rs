@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-use crate::server_structs::{Card, Column, Player, Token};
+use crate::server_structs::{Card, Color, Column, Player, Token};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateHand {
@@ -9,7 +9,7 @@ pub struct UpdateHand {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateTokens {
-    pub tokens: HashMap<String, Vec<Token>>,
+    pub tokens: HashMap<String, (Color, Vec<Token>)>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -53,5 +53,5 @@ pub struct ActionLog {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FinishGame {
     pub winner: String,
-    pub results: HashMap<String, u8>  // (username, score)
+    pub results: HashMap<String, u8>, // (username, score)
 }

@@ -1,18 +1,17 @@
-use std::collections::HashMap;
 use kotc_commons::messages::message_types::ServerWsMessageType;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use crate::game::card::Card;
 use crate::game::column::Column;
-use crate::game::player::Player;
+use crate::game::player::{Color, Player};
 use crate::game::Token;
 
 #[derive(Debug)]
 pub enum MessageRecipient {
     SingleUser,
-    AllUsers
+    AllUsers,
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdatePlayers {
@@ -31,13 +30,13 @@ pub struct UpdateColumns {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateTokens {
-    pub tokens: HashMap<String, Vec<Token>>,
+    pub tokens: HashMap<String, (Color, Vec<Token>)>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FinishGame {
     pub winner: String,
-    pub results: HashMap<String, u8>  // (username, score)
+    pub results: HashMap<String, u8>, // (username, score)
 }
 
 #[derive(Serialize, Deserialize, Debug)]

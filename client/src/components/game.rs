@@ -5,13 +5,13 @@ pub mod token;
 
 use std::collections::HashMap;
 
-use kotc_reqwasm::{endpoints::{ColumnsStore, HandStore, LogStore, TokenStore, CardStore}};
+use kotc_reqwasm::endpoints::{CardStore, ColumnsStore, HandStore, LogStore, TokenStore};
 use yew::prelude::*;
 
 use card::{Card, Hand};
 use column::{Column as OtherColumn, ColumnsList};
-use token::{Token, Stats};
 use logs::Logs;
+use token::{Stats, Token};
 use yewdux::prelude::{BasicStore, Dispatcher};
 use yewdux_functional::use_store;
 
@@ -24,34 +24,42 @@ pub fn game() -> Html {
     let card_store = use_store::<BasicStore<CardStore>>();
 
     let on_card_select = {
-        card_store.dispatch().reduce_callback_with(|store, i| store.card = i)
+        card_store
+            .dispatch()
+            .reduce_callback_with(|store, i| store.card = i)
     };
 
     let columns = match columns_store.state() {
         None => vec![],
-        Some(state) => {
-            state.columns.iter()
-                .map(|col| OtherColumn::new(
+        Some(state) => state
+            .columns
+            .iter()
+            .map(|col| {
+                OtherColumn::new(
                     Token::new(&col.token.resource, col.token.points),
-                    col.cards.iter().map(|card| Card::new(card)).collect::<Vec<Card>>(),
-                ))
-                .collect::<Vec<OtherColumn>>()
-        }
+                    col.cards
+                        .iter()
+                        .map(|card| Card::new(card))
+                        .collect::<Vec<Card>>(),
+                )
+            })
+            .collect::<Vec<OtherColumn>>(),
     };
 
     let hand = match hand_store.state() {
         None => vec![],
-        Some(state) => {
-            state.hand.iter()
-                .map(|card| Card::new(card))
-                .collect::<Vec<Card>>()
-        }
+        Some(state) => state
+            .hand
+            .iter()
+            .map(|card| Card::new(card))
+            .collect::<Vec<Card>>(),
     };
 
-    let logs = match log_store.state() {
+    let mut logs = match log_store.state() {
         None => vec![],
         Some(state) => state.logs.clone(),
     };
+    logs.reverse();
 
     let player_tokens = match token_store.state() {
         None => HashMap::new(),

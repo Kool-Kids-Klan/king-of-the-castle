@@ -1,5 +1,5 @@
-use gloo_storage::{SessionStorage, Storage};
 use crate::{LoggedUser, Route};
+use gloo_storage::{SessionStorage, Storage};
 use yew::prelude::*;
 use yew_router::prelude::*;
 use yewdux::prelude::*;
@@ -10,10 +10,16 @@ pub fn header() -> Html {
     let store = use_store::<BasicStore<LoggedUser>>();
     let mut logged = false;
     let mut username = String::new();
-    let user = store.state().map(|s| s.logged_user.as_ref()).unwrap_or_default();
+    let user = store
+        .state()
+        .map(|s| s.logged_user.as_ref())
+        .unwrap_or_default();
     match user {
         None => {}
-        Some(u) => {logged = true; username = u.username.clone()}
+        Some(u) => {
+            logged = true;
+            username = u.username.clone()
+        }
     }
 
     let history = use_history().unwrap();
@@ -36,8 +42,9 @@ pub fn header() -> Html {
         let history = history.clone();
         let onclick = Callback::once(move |_| {
             SessionStorage::delete("user");
-            store.dispatch().reduce(|s| s.logged_user = None);;
-            history.push(Route::Home)});
+            store.dispatch().reduce(|s| s.logged_user = None);
+            history.push(Route::Home)
+        });
         html! {
             <button class="header__link" {onclick}>{"Logout"}</button>
         }

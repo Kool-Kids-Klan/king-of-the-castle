@@ -1,14 +1,11 @@
-use std::rc::Rc;
+use crate::Route;
 use kotc_reqwasm::endpoints::login_user;
+use kotc_reqwasm::endpoints::{LoggedUser, User};
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
-use web_sys::{HtmlInputElement};
 use yew_router::prelude::*;
 use yewdux::prelude::*;
 use yewdux_functional::*;
-use kotc_reqwasm::endpoints::{User, LoggedUser};
-use gloo_storage::{SessionStorage, Storage};
-use crate::Route;
-
 
 #[derive(Clone, Debug, Default)]
 pub struct LoginInfo {
@@ -21,9 +18,8 @@ pub fn login() -> Html {
     let history = use_history().unwrap();
     let store = use_store::<BasicStore<LoggedUser>>();
 
-    let set_user: Callback<Option<User>> = {
-        Callback::from(move |i| store.dispatch().reduce(|state| state.logged_user = i))
-    };
+    let set_user: Callback<Option<User>> =
+        { Callback::from(move |i| store.dispatch().reduce(|state| state.logged_user = i)) };
 
     let login_info = use_state(LoginInfo::default);
 

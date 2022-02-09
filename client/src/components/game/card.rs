@@ -30,7 +30,13 @@ pub struct CardsListProps {
 }
 
 #[function_component(CardsList)]
-pub fn cards_list(CardsListProps { cards, on_click, class }: &CardsListProps) -> Html {
+pub fn cards_list(
+    CardsListProps {
+        cards,
+        on_click,
+        class,
+    }: &CardsListProps,
+) -> Html {
     cards.iter().enumerate().map(|(i, card)| {
         let on_card_select = {
             let on_click = on_click.clone();
@@ -53,7 +59,13 @@ pub fn cards_list(CardsListProps { cards, on_click, class }: &CardsListProps) ->
 }
 
 #[function_component(Hand)]
-pub fn hand(CardsListProps { cards, on_click, class: _ }: &CardsListProps) -> Html {
+pub fn hand(
+    CardsListProps {
+        cards,
+        on_click,
+        class: _,
+    }: &CardsListProps,
+) -> Html {
     html! {
         <div id={"game__hand"}>
             <CardsList cards={ cards.clone() } { on_click } class={ "card" } />

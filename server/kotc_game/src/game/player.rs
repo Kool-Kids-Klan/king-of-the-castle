@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use super::card::{Card, Character};
 use super::{Token, User};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub enum Color {
     Black,
     White,
@@ -57,31 +57,146 @@ impl Player {
             .map(|card| card.character)
             .collect();
         let refilled_deck = vec![
-            Card::new(self.username.clone(), self.color.clone(), Character::King, 20.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Queen, 16.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Julia, 14.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Alchemist, 8.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Swordsman, 8.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Landlord, 8.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Merchant, 8.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Cardinal, 8.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Troubadour, 8.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Explorer, 13.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Killer, 9.5),
-            Card::new(self.username.clone(), self.color.clone(), Character::Storm, 9.0),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::King,
+                20.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Queen,
+                16.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Julia,
+                14.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Alchemist,
+                8.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Swordsman,
+                8.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Landlord,
+                8.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Merchant,
+                8.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Cardinal,
+                8.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Troubadour,
+                8.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Explorer,
+                13.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Killer,
+                9.5,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Storm,
+                9.0,
+            ),
             // Card::new(self.username.clone(), self.color.clone(), Character::Prevlek, 0.0),
             // Card::new(self.username.clone(), self.color.clone(), Character::Zradca, 10.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Musketeers, 11.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Mage, 7.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Witch, 1.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Prince, 14.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Squire, 2.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Hermit, 12.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Thumb, 2.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Doppelganger, 0.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Dragon, 11.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Romeo, 5.0),
-            Card::new(self.username.clone(), self.color.clone(), Character::Beggar, 4.0),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Musketeers,
+                11.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Mage,
+                7.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Witch,
+                1.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Prince,
+                14.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Squire,
+                2.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Hermit,
+                12.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Thumb,
+                2.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Doppelganger,
+                0.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Dragon,
+                11.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Romeo,
+                5.0,
+            ),
+            Card::new(
+                self.username.clone(),
+                self.color.clone(),
+                Character::Beggar,
+                4.0,
+            ),
         ]
         .into_iter()
         .filter(|card| !except.contains(&card.character))

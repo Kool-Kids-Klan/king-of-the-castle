@@ -4,11 +4,12 @@ use gloo_storage::{SessionStorage, Storage};
 use reqwasm::http::Request;
 use wasm_bindgen_futures::spawn_local;
 
-use serde::{Serialize, Deserialize};
 use chrono::NaiveDateTime;
+use serde::{Deserialize, Serialize};
 use yew::Callback;
+use crate::Color;
 
-use crate::server_structs::{Column, Card, Token};
+use crate::server_structs::{Card, Column, Token};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct User {
@@ -22,15 +23,13 @@ pub struct User {
 }
 
 #[derive(Clone, Debug)]
-pub struct LoggedUser{
+pub struct LoggedUser {
     pub logged_user: Option<User>,
 }
 
 impl Default for LoggedUser {
     fn default() -> Self {
-        Self {
-            logged_user: None,
-        }
+        Self { logged_user: None }
     }
 }
 
@@ -54,9 +53,7 @@ pub struct ColumnsStore {
 
 impl Default for ColumnsStore {
     fn default() -> Self {
-        Self {
-            columns: vec![],
-        }
+        Self { columns: vec![] }
     }
 }
 
@@ -67,9 +64,7 @@ pub struct HandStore {
 
 impl Default for HandStore {
     fn default() -> Self {
-        Self {
-            hand: vec![],
-        }
+        Self { hand: vec![] }
     }
 }
 
@@ -80,15 +75,13 @@ pub struct LogStore {
 
 impl Default for LogStore {
     fn default() -> Self {
-        Self {
-            logs: vec![],
-        }
+        Self { logs: vec![] }
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct TokenStore {
-    pub tokens: HashMap<String, Vec<Token>>,
+    pub tokens: HashMap<String, (Color, Vec<Token>)>,
 }
 
 impl Default for TokenStore {
@@ -106,9 +99,7 @@ pub struct CardStore {
 
 impl Default for CardStore {
     fn default() -> Self {
-        Self {
-            card: None,
-        }
+        Self { card: None }
     }
 }
 
@@ -133,7 +124,7 @@ pub struct LoginData {
 
 pub fn login_user(username: String, password: String, store: Callback<Option<User>>) {
     spawn_local(async move {
-        let login_data = LoginData {username, password};
+        let login_data = LoginData { username, password };
         let body = serde_json::to_string(&login_data).unwrap();
         log::info!("{:?}", body);
         let resp = Request::post(&format!("http://127.0.0.1:8081/users/login"))
@@ -158,7 +149,11 @@ pub struct RegisterData {
 
 pub fn register_user(username: String, email: String, password: String) {
     spawn_local(async move {
-        let register_data = RegisterData {username, email, password};
+        let register_data = RegisterData {
+            username,
+            email,
+            password,
+        };
         let body = serde_json::to_string(&register_data).unwrap();
         log::info!("{:?}", body);
         let resp = Request::post(&format!("http://127.0.0.1:8081/users"))

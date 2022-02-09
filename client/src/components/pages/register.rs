@@ -1,7 +1,7 @@
 use kotc_reqwasm::endpoints::register_user;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
-use yew_router::{hooks::use_history, history::History};
+use yew_router::{history::History, hooks::use_history};
 
 use crate::router::Route;
 
