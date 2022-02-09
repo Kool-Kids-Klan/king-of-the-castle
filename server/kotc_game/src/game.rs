@@ -1,4 +1,4 @@
-use itertools::iproduct;
+use itertools::{iproduct, Itertools};
 use rand::{seq::IteratorRandom, thread_rng};
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -482,7 +482,10 @@ impl Game {
         });
 
         let player_on_turn_username = self.get_player_on_turn_username();
-        let player_on_turn = players.iter().find(|player| *player.username == player_on_turn_username).unwrap();
+        let player_on_turn = players
+            .iter()
+            .find(|player| *player.username == player_on_turn_username)
+            .unwrap();
 
         ServerMessage {
             message_type: ServerWsMessageType::UpdatePlayers,
@@ -490,7 +493,8 @@ impl Game {
             content: serde_json::to_string(&UpdatePlayers {
                 players: players.clone(),
                 player_on_turn: (*player_on_turn).clone(),
-            }).unwrap()
+            })
+            .unwrap(),
         }
     }
 
@@ -518,7 +522,12 @@ impl Game {
         let tokens: HashMap<String, (Color, Vec<Token>)> = Rc::clone(&self.players)
             .borrow()
             .iter()
-            .map(|player| (player.username.clone(), (player.color.clone() , player.tokens.clone())))
+            .map(|player| {
+                (
+                    player.username.clone(),
+                    (player.color.clone(), player.tokens.clone()),
+                )
+            })
             .collect();
         ServerMessage {
             message_type: ServerWsMessageType::UpdateTokens,
