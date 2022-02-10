@@ -1,0 +1,255 @@
+:root {
+    --color-primary: #fbe796;
+    --color-secondary: #76342c;
+    --color-hover: black;
+}
+html {
+    font-size: 16px;
+}
+
+html, body, .container {
+    height: 100vh;
+    width: 100vw;
+}
+
+h1, h2, h3, span, button, label, a {
+    color: var(--color-secondary);
+    font-family: 'MedievalSharp', cursive;
+}
+
+body {
+    background-color: var(--color-primary);
+}
+
+button {
+    cursor: pointer;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem;
+}
+
+.header__link {
+    background: none;
+    border: none;
+    margin: 0 1rem;
+    font-size: 2rem;
+}
+
+.header__username {
+    margin: 0 1rem;
+    font-size: 2rem;
+}
+
+.header__link--left-aligned {
+    margin-right: auto;
+}
+
+.home, .login, .register, .not-found, .lobby {
+    margin: 0 0 auto 0;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.home__title {
+    font-size: 4rem;
+    margin: .5rem 0 ;
+}
+.home__subscription {
+    font-size: 1.5rem;
+    margin-top: 1rem;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2rem 0;
+}
+
+.form__label {
+    font-size: 1.5rem;
+    align-self: start;
+}
+
+.form__input {
+    color: var(--color-primary);
+    background-color: var(--color-secondary);
+    border: none;
+    padding: .5rem;
+    margin: .5rem 0;
+}
+
+.form__button {
+    border: none;
+    background: none;
+    font-size: 1.5rem;
+    align-self: end;
+}
+
+.form__button:hover, .header__link:hover, .lobby__button:hover {
+    color: var(--color-hover);
+}
+
+.center-aligned {
+    align-self: center;
+}
+
+.not-found__title {
+    font-size: 4rem;
+}
+
+.not-found__subscription {
+    font-size: 2rem;
+}
+
+.game {
+    height: 100%;
+    width: 100%;
+
+    overflow: hidden;
+    
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 10% auto 10%;
+    grid-template-rows: auto 20%;
+    grid-template-areas: 
+        "tokens columns logs"
+        "tokens hand logs";
+}
+
+#game__hand {
+    display: flex;
+
+    justify-content: center;
+    grid-area: hand;
+}
+
+#game__columns {
+    margin-bottom: 20px;
+
+    display: flex;
+
+    overflow: hidden;
+
+    justify-content: space-evenly;
+    grid-area: columns;
+}
+
+.game__column::-webkit-scrollbar {
+    display: none;
+}
+
+.game__column {
+    overflow: scroll;
+    scrollbar-width: none;
+
+    display: flex;
+    flex-direction: column;
+    margin: 0 .5rem;
+}
+
+.game__token {
+    margin-bottom: 10px;
+}
+
+.game__logs::-webkit-scrollbar {
+    display: none;
+}
+
+.game__logs {
+    overflow: scroll;
+    scrollbar-width: none;
+
+    grid-area: logs;
+}
+
+.game__tokens::-webkit-scrollbar {
+    display: none;
+}
+
+.game__tokens {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    overflow: scroll;
+    scrollbar-width: none;
+
+    grid-area: tokens;
+}
+
+.token {
+    width: 100%;
+}
+
+.lobby {
+    max-width: 50%;
+    margin: 0 auto auto auto;
+    justify-content: flex-start;
+}
+
+.lobby__title {
+    font-size: 4rem;
+}
+
+.lobby__button {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    margin: auto 0;
+}
+
+.lobby__headstones {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem 3rem;
+}
+
+.headstone {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.headstone__img {
+    width: 75%;
+    margin: 0.5rem 0 1rem 0;
+}
+.headstone__name {
+    font-size: 2rem;
+}
+
+.card {
+    transition: transform .1s;
+}
+
+.card:hover {
+    -ms-transform: scale(1.5); /* IE 9 */
+    -webkit-transform: scale(1.5); /* Safari 3-8 */
+    transform: scale(2);
+    padding-bottom: 2em;
+}
+
+.card__selected {
+    border: 3px solid red;
+    border-radius: 3em;
+}
+
+@media screen and (max-width: 800px) {
+    html {
+        font-size: 12px;
+    }
+}
