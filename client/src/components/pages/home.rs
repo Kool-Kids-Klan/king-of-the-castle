@@ -74,7 +74,7 @@ pub fn home() -> Html {
                  html! {
                      <form class="form" {onsubmit}>
                          <label class="form__label center-aligned" for="lobby">{"Join/Create room:"}</label>
-                         <input class="form__input" type="text" id="lobby" name="lobby" oninput={oninput_lobby_id}/>
+                         <input class="form__input" pattern="[0-9]{3,}" title="Lobby must be at least 3 long numeric." type="text" id="lobby" name="lobby" oninput={oninput_lobby_id}/>
                          <button class="form__button center-aligned" type="submit">{"Enter"}</button>
                      </form>
                  }

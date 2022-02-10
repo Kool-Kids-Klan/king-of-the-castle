@@ -298,7 +298,7 @@ impl Game {
         }
 
         self.player_on_turn = (self.player_on_turn + 1) % self.players_count;
-        self.message_update_players();
+        messages.push(self.message_update_players());
 
         if self.round_finished() {
             messages.push(self.log(format!("All columns closed - round ended.")));

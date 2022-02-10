@@ -20,6 +20,12 @@ html, body, .container {
     height: 100vh;
 }
 
+button {
+    background: none;
+    border: none;
+    font-weight: bold;
+}
+
 h1, h2, h3, span, button, label, a, p {
     color: var(--color-secondary);
     font-family: 'MedievalSharp', cursive;
@@ -52,8 +58,6 @@ button {
 
 .header__link {
     margin: 0 1rem;
-    background: none;
-    border: none;
     font-size: 2rem;
 }
 
@@ -116,7 +120,7 @@ button {
     font-size: 1.5rem;
 }
 
-.form__button:hover, .header__link:hover, .lobby__button:hover {
+button:hover, .header__link:hover {
     color: var(--color-hover);
 }
 
@@ -303,6 +307,29 @@ button {
 .card__selected {
     border: 3px solid red;
     border-radius: 3em;
+}
+
+.end-popup {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.end-popup__title {
+    font-size: 4rem;
+}
+
+.end-popup__rows {
+    display: flex;
+    flex-direction: column;
+}
+
+.end-popup__row, .end-popup__button {
+    font-size: 2rem;
+}
+
+.end-popup__button {
+    margin-top: 2rem;
 }
 
 @media screen and (max-width: 800px) {
