@@ -78,7 +78,7 @@ pub fn game() -> Html {
             None => html! {},
             Some(player_on_turn) => {
                 let color_class = format!("player--{:?}", player_on_turn.color).to_lowercase();
-                let players_turn = format!("{:?}'", player_on_turn.username);
+                let players_turn = format!("{}", player_on_turn.username);
                 html! {
                     <span class="game__turn-head">
                         <span class={classes!("game__turn-head", color_class.clone())}>
