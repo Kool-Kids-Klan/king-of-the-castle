@@ -178,10 +178,9 @@ impl Game {
             self.start_game().await;
             messages.push(self.message_start_game());
             messages.push(self.log(format!(
-                "Game has started.\nRound {}/{} has started.\n{} is on turn.",
+                "Game has started.\nRound {}/{} has started.",
                 self.round,
                 NUMBER_OF_ROUNDS,
-                self.get_player_on_turn_username()
             )));
             messages.push(self.message_update_columns());
         };
@@ -331,10 +330,10 @@ impl Game {
             )));
             messages.push(self.message_update_columns());
         }
-        messages.push(self.log(format!(
-            "{} is on turn.",
-            self.get_player_on_turn_username()
-        )));
+        // messages.push(self.log(format!(
+        //     "{} is on turn.",
+        //     self.get_player_on_turn_username()
+        // )));
         messages
     }
 

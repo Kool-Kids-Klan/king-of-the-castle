@@ -12,7 +12,7 @@ pub fn logs(LogsProps { logs }: &LogsProps) -> Html {
             {
                 logs.iter().map(|log| {
                     html! {
-                        <p>{ log }</p>
+                        <span class="log-msg">{ log }</span>
                     }
                 }).collect::<Vec<Html>>()
             }
