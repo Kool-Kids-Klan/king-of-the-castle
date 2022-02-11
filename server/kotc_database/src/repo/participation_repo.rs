@@ -26,7 +26,7 @@ pub struct PostgresParticipationRepo {
 
 impl PostgresParticipationRepo {
     pub fn new(pg_pool: Arc<PgPool>) -> Self {
-        Self { pg_pool: pg_pool }
+        Self { pg_pool }
     }
 }
 

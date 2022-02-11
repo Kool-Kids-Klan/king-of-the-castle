@@ -43,10 +43,7 @@ pub fn game() -> Html {
             .map(|col| {
                 OtherColumn::new(
                     Token::new(&col.token.resource, col.token.points),
-                    col.cards
-                        .iter()
-                        .map(|card| Card::new(card))
-                        .collect::<Vec<Card>>(),
+                    col.cards.iter().map(Card::new).collect::<Vec<Card>>(),
                 )
             })
             .collect::<Vec<OtherColumn>>(),
@@ -54,11 +51,7 @@ pub fn game() -> Html {
 
     let hand = match hand_store.state() {
         None => vec![],
-        Some(state) => state
-            .hand
-            .iter()
-            .map(|card| Card::new(card))
-            .collect::<Vec<Card>>(),
+        Some(state) => state.hand.iter().map(Card::new).collect::<Vec<Card>>(),
     };
 
     let mut logs = match log_store.state() {
@@ -78,7 +71,7 @@ pub fn game() -> Html {
             None => html! {},
             Some(player_on_turn) => {
                 let color_class = format!("player--{:?}", player_on_turn.color).to_lowercase();
-                let players_turn = format!("{}", player_on_turn.username);
+                let players_turn = player_on_turn.username;
                 html! {
                     <span class="game__turn-head">
                         <span class={classes!("game__turn-head", color_class.clone())}>
@@ -90,7 +83,6 @@ pub fn game() -> Html {
             }
         },
     };
-
 
     let game = html! {
         <div class="game">
@@ -108,10 +100,9 @@ pub fn game() -> Html {
             if state.game_ended {
                 return html! {
                     <EndPopup results={state.results.clone()} />
-                }
+                };
             }
-            return game
+            game
         }
     }
 }
-

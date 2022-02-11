@@ -1,12 +1,10 @@
 extern crate kotc_database;
 
-use std::rc::Rc;
-
 use kotc_database::repo::{
     game_repo::GameRepo, participation_repo::ParticipationRepo, user_repo::UserRepo,
 };
 use kotc_database::{get_game_repo, get_participation_repo, get_user_repo};
-use kotc_game::game::card::{Card, Character};
+
 use kotc_game::game::ws_messages::ServerMessage;
 use kotc_game::game::Game;
 
@@ -66,14 +64,6 @@ async fn db_test() -> anyhow::Result<()> {
     println!("{:?}", game.make_action(user2_id, 0, 1).await);
     println!("{:?}", game.make_action(user_id, 0, 10).await);
     println!("{:?}", game.make_action(user_id, 20, 0).await);
-
-    // for this to work, make columns in struct Game public
-    // Rc::clone(&game.columns)
-    //     .borrow_mut()
-    //     .get_mut(0)
-    //     .unwrap()
-    //     .cards
-    //     .push(Card::new("Irrelevant".to_string(), Character::Explorer, 13.0));
 
     for _ in 0..6 {
         print_messages(game.make_action(user_id, 0, 0).await);

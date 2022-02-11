@@ -22,117 +22,56 @@ pub struct User {
     pub created_at: NaiveDateTime,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct LoggedUser {
     pub logged_user: Option<User>,
 }
 
-impl Default for LoggedUser {
-    fn default() -> Self {
-        Self { logged_user: None }
-    }
-}
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct GameStarted {
     pub game_started: bool,
 }
 
-impl Default for GameStarted {
-    fn default() -> Self {
-        Self {
-            game_started: false,
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ColumnsStore {
     pub columns: Vec<Column>,
 }
 
-impl Default for ColumnsStore {
-    fn default() -> Self {
-        Self { columns: vec![] }
-    }
-}
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct HandStore {
     pub hand: Vec<Card>,
 }
 
-impl Default for HandStore {
-    fn default() -> Self {
-        Self { hand: vec![] }
-    }
-}
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct LogStore {
     pub logs: Vec<String>,
 }
 
-impl Default for LogStore {
-    fn default() -> Self {
-        Self { logs: vec![] }
-    }
-}
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct TokenStore {
     pub tokens: HashMap<String, (Color, Vec<Token>)>,
 }
 
-impl Default for TokenStore {
-    fn default() -> Self {
-        Self {
-            tokens: HashMap::new(),
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct CardStore {
     pub card: Option<usize>,
 }
 
-impl Default for CardStore {
-    fn default() -> Self {
-        Self { card: None }
-    }
-}
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct PlayerOnTurnStore {
     pub player: Option<Player>,
 }
 
-impl Default for PlayerOnTurnStore {
-    fn default() -> Self {
-        Self { player: None }
-    }
-}
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct FinalResultsStore {
     pub game_ended: bool,
     pub results: HashMap<String, (Color, u8)>,
 }
 
-impl Default for FinalResultsStore {
-    fn default() -> Self {
-        Self {
-            game_ended: false,
-            results: HashMap::new(),
-        }
-    }
-}
-
 pub fn get_server_url() -> String {
     match option_env!("SERVER_URL") {
         Some(url) => url.to_string(),
-        _ => "127.0.0.1:8081".to_string()
+        _ => "127.0.0.1:8081".to_string(),
     }
 }
 

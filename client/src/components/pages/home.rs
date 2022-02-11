@@ -19,39 +19,24 @@ pub fn home() -> Html {
     let store = use_store::<BasicStore<LoggedUser>>();
     let lobby_info = use_state(LobbyState::default);
     let mut logged = false;
-    if let Some(_) = store
+    if store
         .state()
         .map(|s| s.logged_user.as_ref())
         .unwrap_or_default()
+        .is_some()
     {
         logged = true;
     }
 
-    // let store = use_store::<BasicStore<KotcWebSocketState>>();
-    // if let Some(ws) = store.state().map(|s| Rc::clone(&s.websocket)) {
-    //     let error = Error {
-    //         detail: format!("test error"),
-    //     };
-    //     let error_serialized = serde_json::to_string(&error).unwrap();
-    //     spawn_local(async move {
-    //         Rc::clone(&ws).borrow_mut().send_message(ClientWsMessage {
-    //             message_type: ClientWsMessageType::Error,
-    //             content: error_serialized,
-    //         }).await;
-    //     })
-    // };
-
     let onsubmit = {
-        let lobby_info = lobby_info.clone();
         Callback::from(move |e: FocusEvent| {
             e.prevent_default();
-            let info = (*lobby_info).clone();
             history.push(Route::Lobby);
         })
     };
 
     let oninput_lobby_id = {
-        let lobby_info = lobby_info.clone();
+        let lobby_info = lobby_info;
         Callback::from(move |e: InputEvent| {
             let input: HtmlInputElement = e.target_unchecked_into();
             let mut info = (*lobby_info).clone();

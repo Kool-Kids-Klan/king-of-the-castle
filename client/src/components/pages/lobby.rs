@@ -1,8 +1,11 @@
 use crate::components::pages::headstone::{HeadstoneList, HeadstoneProps};
 use crate::router::Route;
 use gloo_storage::{SessionStorage, Storage};
-use kotc_reqwasm::endpoints::{ColumnsStore, FinalResultsStore, GameStarted, HandStore, LogStore, PlayerOnTurnStore, TokenStore, User};
-use kotc_reqwasm::server_structs:: Player;
+use kotc_reqwasm::endpoints::{
+    ColumnsStore, FinalResultsStore, GameStarted, HandStore, LogStore, PlayerOnTurnStore,
+    TokenStore, User,
+};
+use kotc_reqwasm::server_structs::Player;
 use kotc_reqwasm::{connect_websocket, send_join, send_ready, GameStateSetters, KotcWebSocket};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -69,17 +72,18 @@ pub fn lobby() -> Html {
         .dispatch()
         .reduce_callback_with(|state, player_on_turn| state.player = Some(player_on_turn));
 
-    let set_final_results = final_results_store
-        .dispatch()
-        .reduce_callback_with(|state, final_results| {
-            state.results = final_results;
-            state.game_ended = true
-        });
+    let set_final_results =
+        final_results_store
+            .dispatch()
+            .reduce_callback_with(|state, final_results| {
+                state.results = final_results;
+                state.game_ended = true
+            });
 
     let lobby_id: String = SessionStorage::get("lobby_id").unwrap();
     let logged_user: User = SessionStorage::get("user").unwrap();
 
-    let players = use_state(|| vec![]);
+    let players = use_state(std::vec::Vec::new);
 
     let set_players: Callback<Vec<Player>> = {
         let players = players.clone();

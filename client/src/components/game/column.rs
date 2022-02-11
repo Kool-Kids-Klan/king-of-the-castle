@@ -26,22 +26,15 @@ impl Column {
 #[derive(Properties, PartialEq)]
 pub struct ColumnProps {
     pub column: Column,
-    pub on_click: Callback<MouseEvent>,
     pub on_drop: Callback<DragEvent>,
 }
 
 #[function_component(ColumnComponent)]
-pub fn column(
-    ColumnProps {
-        column,
-        on_click,
-        on_drop,
-    }: &ColumnProps,
-) -> Html {
+pub fn column(ColumnProps { column, on_drop }: &ColumnProps) -> Html {
     let allow_drop = Callback::from(|e: DragEvent| e.prevent_default());
 
     html! {
-        <div class={"game__column"} onclick={on_click} ondrop={on_drop} ondragover={allow_drop} >
+        <div class={"game__column"} ondrop={on_drop} ondragover={allow_drop} >
             <img class={"game__token"} name={ column.token.name.clone() } src={ column.token.path.clone() } />
             <CardsList cards={column.cards.clone()} class={""} />
         </div>
@@ -86,24 +79,16 @@ pub fn columns_list(ColumnsListProps { columns }: &ColumnsListProps) -> Html {
                 .iter()
                 .enumerate()
                 .map(|(i, column)| {
-                    let on_column_click = { // TODO remove if we want drag
-                        // let send_card_to_col = send_card_to_col.clone();
-                        let send_card_to_col = Callback::from(|_| println!(""));
-                        Callback::from(move |_| {
-                            send_card_to_col.emit(i);
-                        })
-                    };
                     let on_drop = {
                         let on_drag_drop = send_card_to_col.clone();
                         Callback::from(move |e: DragEvent| {
                             e.prevent_default();
-                            log::info!("DROPPED");
                             on_drag_drop.emit(i);
                         })
                     };
 
                     html! {
-                        <ColumnComponent column={column.clone()} on_click={on_column_click} on_drop={on_drop} />
+                        <ColumnComponent column={column.clone()} on_drop={on_drop} />
                     }
                 })
                 .collect::<Vec<Html>>()

@@ -219,7 +219,7 @@ impl Player {
 
     pub fn draw_card(&mut self) -> bool {
         let (card, refilled) = self.next_card();
-        self.hand.push(card.clone());
+        self.hand.push(card);
         refilled
     }
 

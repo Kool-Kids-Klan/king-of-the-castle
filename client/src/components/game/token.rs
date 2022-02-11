@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use kotc_reqwasm::server_structs::{Color, Resource};
-use yew::{function_component, html, Properties, classes};
+use yew::{classes, function_component, html, Properties};
 
 #[derive(Clone, PartialEq)]
 pub struct Token {

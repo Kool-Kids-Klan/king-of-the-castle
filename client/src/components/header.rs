@@ -51,7 +51,7 @@ pub fn header() -> Html {
     };
 
     let register_button = {
-        let history = history.clone();
+        let history = history;
         let onclick = Callback::once(move |_| history.push(Route::Register));
         html! {
             <button class="header__link" {onclick}>{"Register"}</button>

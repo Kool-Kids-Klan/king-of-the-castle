@@ -6,7 +6,7 @@ use super::card::{Card, Character};
 use super::Resource;
 use crate::game::Token;
 
-type ColumnResults = Vec<(String, f32)>;
+type ColumnResult = (String, f32);
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Column {
@@ -91,7 +91,7 @@ impl Column {
             == 1;
 
         if musketeers {
-            return self.get_winner(&mut self.get_results(), true);
+            return self.get_winner(&self.get_results(), true);
         }
 
         if mages {
@@ -114,13 +114,12 @@ impl Column {
         });
 
         let all_with_combo = self.get_players_with_prince_squire_combo();
-        match self.get_player_with_highest_prince_squire_combo(all_with_combo) {
-            Some(player) => return player,
-            None => (),
+        if let Some(player) = self.get_player_with_highest_prince_squire_combo(all_with_combo) {
+            return player;
         }
 
         self.set_mirrorer_points();
-        self.get_winner(&mut self.get_results(), false)
+        self.get_winner(&self.get_results(), false)
     }
 
     fn get_players_with_prince_squire_combo(&mut self) -> Vec<String> {
@@ -158,10 +157,7 @@ impl Column {
             all_with_combo.contains(&card.owner)
                 && [Character::Prince, Character::Squire].contains(&card.character)
         });
-        match winner {
-            Some(card) => Some(card.clone().owner),
-            None => None,
-        }
+        winner.map(|card| card.clone().owner)
     }
 
     fn get_player_highest_card_index(&self, player: String) -> usize {
@@ -175,24 +171,21 @@ impl Column {
     fn set_mirrorer_points(&mut self) {
         let mut iterator = self.cards.iter_mut().rev().peekable();
         while let Some(card) = iterator.next() {
-            match iterator.peek_mut() {
-                Some(next) => {
-                    if next.character == Character::Doppelganger {
-                        next.strength = card.strength;
-                    }
+            if let Some(next) = iterator.peek_mut() {
+                if next.character == Character::Doppelganger {
+                    next.strength = card.strength;
                 }
-                None => (),
             }
         }
     }
 
-    fn get_results(&self) -> ColumnResults {
+    fn get_results(&self) -> Vec<ColumnResult> {
         let cards_by_owners = self
             .cards
             .iter()
             .map(|card| (card.owner.clone(), card))
             .into_group_map();
-        let result: ColumnResults = cards_by_owners
+        let result: Vec<ColumnResult> = cards_by_owners
             .iter()
             .map(|(owner, cards)| {
                 let strength = cards.iter().map(|card| card.strength).sum();
@@ -209,20 +202,18 @@ impl Column {
     ) -> Option<Ordering> {
         if score_a != score_b {
             if beggar_activated {
-                score_a.partial_cmp(&score_b)
+                score_a.partial_cmp(score_b)
             } else {
-                score_b.partial_cmp(&score_a)
+                score_b.partial_cmp(score_a)
             }
+        } else if beggar_activated {
+            highest_b.partial_cmp(highest_a)
         } else {
-            if beggar_activated {
-                highest_b.partial_cmp(&highest_a)
-            } else {
-                highest_a.partial_cmp(&highest_b)
-            }
+            highest_a.partial_cmp(highest_b)
         }
     }
 
-    fn get_winner(&self, results: &ColumnResults, musketeers: bool) -> String {
+    fn get_winner(&self, results: &[ColumnResult], musketeers: bool) -> String {
         let characters: Vec<Character> = self.cards.iter().map(|card| card.character).collect();
         let beggar = characters
             .iter()
@@ -243,7 +234,7 @@ impl Column {
         };
 
         results
-            .into_iter()
+            .iter()
             .map(|(player, score)| {
                 (
                     self.get_player_highest_card_index(player.to_string()),

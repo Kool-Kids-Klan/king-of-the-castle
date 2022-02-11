@@ -27,6 +27,8 @@ async fn init_pool(database_url: &str) -> Result<PgPool, PoolError> {
     Pool::builder().build(manager)
 }
 
+/// # Safety
+/// Is unsafe so only one DB connection is made
 pub async unsafe fn establish_connection() {
     match VAL {
         Some(_) => (),
@@ -34,7 +36,7 @@ pub async unsafe fn establish_connection() {
             let database_url = "postgres://postgres:password@db/kotc".to_string();
 
             PgConnection::establish(&database_url)
-                .expect(&format!("Error connecting to {}", database_url));
+                .unwrap_or_else(|_| panic!("Error connecting to {}", database_url));
 
             VAL = Some(Arc::new(
                 init_pool(&database_url)

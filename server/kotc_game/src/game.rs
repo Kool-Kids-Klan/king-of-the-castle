@@ -1,4 +1,4 @@
-use itertools::{iproduct, Itertools};
+use itertools::iproduct;
 use rand::{seq::IteratorRandom, thread_rng};
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -65,6 +65,12 @@ pub struct Game {
     available_colors: Vec<Color>,
 }
 
+impl Default for Game {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Game {
     pub fn new() -> Game {
         Game {
@@ -87,10 +93,10 @@ impl Game {
     }
 
     pub async fn connect_player(&mut self, user_id: i32) -> Vec<ServerMessage> {
-        if let Some(_) = Rc::clone(&self.players)
+        if Rc::clone(&self.players)
             .borrow()
             .iter()
-            .find(|player| player.user_id == user_id)
+            .any(|player| player.user_id == user_id)
         {
             return vec![self.message_error(format!(
                 "Error: User with ID {} is already in the lobby.",
@@ -179,8 +185,7 @@ impl Game {
             messages.push(self.message_start_game());
             messages.push(self.log(format!(
                 "Game has started.\nRound {}/{} has started.",
-                self.round,
-                NUMBER_OF_ROUNDS,
+                self.round, NUMBER_OF_ROUNDS,
             )));
             messages.push(self.message_update_columns());
         };
@@ -234,32 +239,30 @@ impl Game {
             return vec![self.message_error("Game already ended.".to_string())];
         }
 
-        if let Some(_) = Rc::clone(&self.players)
+        if Rc::clone(&self.players)
             .borrow_mut()
             .iter_mut()
-            .find(|p| p.user_id == user_id)
+            .any(|p| p.user_id == user_id)
         {
         } else {
             return vec![self.message_error(format!("Error: User with ID {} not found.", user_id))];
         }
 
         let mut played_card: Card = Card::dummy_card("".to_string(), Color::Black);
-        match Rc::clone(&self.players).borrow().get(self.player_on_turn) {
-            Some(player_on_turn) => {
-                if user_id != player_on_turn.user_id {
-                    return vec![self.message_error("Error: It's not your turn.".to_string())];
+        if let Some(player_on_turn) = Rc::clone(&self.players).borrow().get(self.player_on_turn) {
+            if user_id != player_on_turn.user_id {
+                return vec![self.message_error("Error: It's not your turn.".to_string())];
+            }
+            match player_on_turn.hand.get(card_index) {
+                Some(c) => {
+                    played_card = c.clone();
                 }
-                match player_on_turn.hand.get(card_index) {
-                    Some(c) => {
-                        played_card = c.clone();
-                    }
-                    None => {
-                        return vec![self
-                            .message_error(format!("Error: Invalid card index: {}", card_index))];
-                    }
+                None => {
+                    return vec![
+                        self.message_error(format!("Error: Invalid card index: {}", card_index))
+                    ];
                 }
             }
-            None => {} // This cannot happen, self.player_on_turn is always in range
         }
 
         let mut messages = vec![];
@@ -276,31 +279,28 @@ impl Game {
         }
         if blocked {
             return vec![self.message_error("Error: Column is blocked by Storm.".to_string())];
-        } else {
-            if let Some(p) = Rc::clone(&self.players)
-                .borrow_mut()
-                .iter_mut()
-                .find(|p| p.user_id == user_id)
-            {
-                // always true
-                p.hand.remove(card_index);
-                messages.push(self.message_update_hand(p.hand.clone()));
+        } else if let Some(p) = Rc::clone(&self.players)
+            .borrow_mut()
+            .iter_mut()
+            .find(|p| p.user_id == user_id)
+        {
+            // always true
+            p.hand.remove(card_index);
+            messages.push(self.message_update_hand(p.hand.clone()));
 
-                self.push_card_to_column(column_index, played_card, &mut messages);
+            self.push_card_to_column(column_index, played_card, &mut messages);
 
-                if p.draw_card() {
-                    messages
-                        .push(self.log(format!("Player {} has refilled his deck.", p.username)));
-                }
-                messages.push(self.message_update_hand(p.hand.clone()));
+            if p.draw_card() {
+                messages.push(self.log(format!("Player {} has refilled his deck.", p.username)));
             }
+            messages.push(self.message_update_hand(p.hand.clone()));
         }
 
         self.player_on_turn = (self.player_on_turn + 1) % self.players_count;
         messages.push(self.message_update_players());
 
         if self.round_finished() {
-            messages.push(self.log(format!("All columns closed - round ended.")));
+            messages.push(self.log("All columns closed - round ended.".to_string()));
             self.eval_columns(&mut messages);
 
             self.round += 1;
@@ -309,12 +309,12 @@ impl Game {
 
                 messages.push(
                     self.log(
-                        results
-                            .iter()
-                            .fold("Results:\n".to_string(), |s, (username, (_, score))| {
+                        results.iter().fold(
+                            "Results:\n".to_string(),
+                            |s, (username, (_, score))| {
                                 s + &format!("{}: {} points\n", username, score)
-                            })
-                            + &format!("Winner: {}\n", winner_username),
+                            },
+                        ) + &format!("Winner: {}\n", winner_username),
                     ),
                 );
 
@@ -453,7 +453,12 @@ impl Game {
         let results: HashMap<String, (Color, u8)> = Rc::clone(&self.players)
             .borrow()
             .iter()
-            .map(|player| (player.clone().username, (player.color.clone(), player.get_score())))
+            .map(|player| {
+                (
+                    player.clone().username,
+                    (player.color.clone(), player.get_score()),
+                )
+            })
             .collect();
         let mut winner_id = 0;
         let mut winner_username = "Unknown".to_string();
@@ -474,7 +479,7 @@ impl Game {
     /// UTIL MESSAGE FUNCTIONS ///
 
     fn message_update_players(&self) -> ServerMessage {
-        let mut players: Vec<Player> = Rc::clone(&self.players).borrow().to_vec().clone();
+        let mut players: Vec<Player> = Rc::clone(&self.players).borrow().to_vec();
         players.iter_mut().for_each(|player| {
             player.hand = vec![];
             player.deck = vec![];
@@ -535,7 +540,11 @@ impl Game {
         }
     }
 
-    fn message_finish_game(&self, winner: String, results: HashMap<String, (Color, u8)>) -> ServerMessage {
+    fn message_finish_game(
+        &self,
+        winner: String,
+        results: HashMap<String, (Color, u8)>,
+    ) -> ServerMessage {
         ServerMessage {
             message_type: ServerWsMessageType::FinishGame,
             recipient: MessageRecipient::AllUsers,
