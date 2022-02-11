@@ -12,28 +12,19 @@ use std::{thread, time};
 
 pub type Socket = Recipient<ServerWsMessage>;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct KotcWsServer {
     sessions: HashMap<usize, Socket>, // map of all sockets
     lobbies: HashMap<usize, Lobby>,   // map of all lobbies
 }
 
-impl Default for KotcWsServer {
-    fn default() -> Self {
-        KotcWsServer {
-            sessions: HashMap::new(),
-            lobbies: HashMap::new(),
-        }
-    }
-}
-
 impl KotcWsServer {
-    fn send_message(&self, message_type: ServerWsMessageType, content: &String, id_to: &usize) {
+    fn send_message(&self, message_type: ServerWsMessageType, content: &str, id_to: &usize) {
         println!("Sending message: {:?} - {:?}", message_type, content);
         if let Some(recipient) = self.sessions.get(id_to) {
             let _ = recipient.do_send(ServerWsMessage {
                 message_type: message_type.clone(),
-                content: content.clone(),
+                content: content.to_string(),
             });
         } else {
             println!(
@@ -41,11 +32,10 @@ impl KotcWsServer {
                 id_to
             );
         };
-        match message_type {
-            ServerWsMessageType::UpdateColumns => thread::sleep(time::Duration::from_millis(200)),
-            _ => {},
-        }
 
+        if let ServerWsMessageType::UpdateColumns = message_type {
+            thread::sleep(time::Duration::from_millis(200))
+        }
     }
 }
 
@@ -128,7 +118,7 @@ impl Handler<Disconnect> for KotcWsServer {
     }
 }
 
-fn deserialize<T: DeserializeOwned>(serialized: &String) -> T {
+fn deserialize<T: DeserializeOwned>(serialized: &str) -> T {
     serde_json::from_str(serialized).unwrap()
 }
 

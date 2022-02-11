@@ -25,7 +25,7 @@ fn get_server_message(msg: Result<Message, WebSocketError>) -> ServerWsMessage {
     }
 }
 
-fn get_deserialized<T: de::DeserializeOwned>(content: &String) -> T {
+fn get_deserialized<T: de::DeserializeOwned>(content: &str) -> T {
     serde_json::from_str::<T>(content).unwrap()
 }
 
@@ -39,7 +39,6 @@ pub async fn onmessage(read: SplitStream<WebSocket>, ws: GameStateSetters) {
     let set_tokens = ws.set_tokens;
     let set_player_on_turn = ws.set_player_on_turn;
     let set_final_results = ws.set_final_results;
-
 
     while let Some(msg) = read.next().await {
         let server_message = get_server_message(msg);
@@ -72,7 +71,10 @@ pub async fn onmessage(read: SplitStream<WebSocket>, ws: GameStateSetters) {
             //     info!("user disconnected {:?}", user_disconnected);
             // },
             ServerWsMessageType::UpdatePlayers => {
-                let UpdatePlayers { players, player_on_turn } = get_deserialized(&server_message.content);
+                let UpdatePlayers {
+                    players,
+                    player_on_turn,
+                } = get_deserialized(&server_message.content);
                 info!("update players {:?} {:?}", players, player_on_turn);
                 set_players.emit(players);
                 set_player_on_turn.emit(player_on_turn);
@@ -92,7 +94,7 @@ pub async fn onmessage(read: SplitStream<WebSocket>, ws: GameStateSetters) {
                 set_started.emit(true);
             }
             ServerWsMessageType::FinishGame => {
-                let FinishGame { winner, results } = get_deserialized(&server_message.content);
+                let FinishGame { winner: _, results } = get_deserialized(&server_message.content);
                 info!("finish game {:?}", results);
                 set_started.emit(false);
                 set_final_results.emit(results);

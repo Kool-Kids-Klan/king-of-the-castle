@@ -24,7 +24,7 @@ services:
     command: ["./wait-for-it.sh", "db:5432"]
 
   db:
-    image: postgres
+    image: postgres:10-alpine
     restart: always
     ports:
       - "5432:5432"

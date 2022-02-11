@@ -18,18 +18,29 @@ pub async fn create_new_game_in_db(players: Vec<Player>) -> i32 {
         Err(_) => panic!("Game creation failed."),
     };
     for player in players {
-        get_participation_repo()
+        let result = get_participation_repo()
             .await
             .create_participation(game_id, player.user_id)
             .await;
+
+        if let Err(e) = result {
+            panic!(
+                "Adding player {} to game {} failed on: {}",
+                player.user_id, game_id, e
+            )
+        }
     }
     game_id
 }
 
 // call when finishing the game
 pub async fn update_game_result_in_db(game_id: i32, winner_id: i32) {
-    get_game_repo()
+    let result = get_game_repo()
         .await
         .update_game_winner(game_id, winner_id)
         .await;
+
+    if let Err(e) = result {
+        panic!("Updating winner of game {} failed on: {}", game_id, e)
+    }
 }
