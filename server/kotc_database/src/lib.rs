@@ -1,6 +1,5 @@
 #[macro_use]
 extern crate diesel;
-extern crate dotenv;
 
 pub mod models;
 pub mod repo;
@@ -33,7 +32,10 @@ pub async unsafe fn establish_connection() {
     match VAL {
         Some(_) => (),
         None => {
-            let database_url = "postgres://postgres:password@db/kotc".to_string();
+            let database_url = match option_env!("DATABASE_URL") {
+                Some(url) => url.to_string(),
+                _ => "postgres://postgres:password@db/kotc".to_string(),
+            };
 
             PgConnection::establish(&database_url)
                 .unwrap_or_else(|_| panic!("Error connecting to {}", database_url));
