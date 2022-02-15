@@ -33,8 +33,14 @@ pub async unsafe fn establish_connection() {
         Some(_) => (),
         None => {
             let database_url = match option_env!("DATABASE_URL") {
+                
+                
                 Some(url) => url.to_string(),
-                _ => "postgres://postgres:password@db/kotc".to_string(),
+                _ => "
+                postgres://postgres:password@db/kotc".
+                to_string(
+                    
+                ),
             };
 
             PgConnection::establish(&database_url)
