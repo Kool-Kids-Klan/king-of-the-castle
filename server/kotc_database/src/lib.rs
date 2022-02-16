@@ -43,7 +43,7 @@ pub async unsafe fn establish_connection() {
                 ),
             };
 
-            PgConnection::establish(&database_url)
+            PgConnection::establish(&&database_url)
                 .unwrap_or_else(|_| panic!("Error connecting to {}", database_url));
 
             VAL = Some(Arc::new(
