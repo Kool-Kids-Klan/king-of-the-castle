@@ -32,16 +32,14 @@ pub async unsafe fn establish_connection() {
     match VAL {
         Some(_) => (),
         None => {
-            let database_url = match option_env!("DATABASE_URL") {
-                Some(url) => url.to_string(),
-                _ => "postgres://postgres:password@db/kotc".to_string(),
-            };
+            let database_url =
+                option_env!("DATABASE_URL").unwrap_or_else(|| panic!("DATABASE_URL not defined!"));
 
-            PgConnection::establish(&database_url)
+            PgConnection::establish(database_url)
                 .unwrap_or_else(|_| panic!("Error connecting to {}", database_url));
 
             VAL = Some(Arc::new(
-                init_pool(&database_url)
+                init_pool(database_url)
                     .await
                     .expect("Failed to create pool"),
             ));

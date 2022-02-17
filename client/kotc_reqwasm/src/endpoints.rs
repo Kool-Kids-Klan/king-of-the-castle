@@ -69,10 +69,9 @@ pub struct FinalResultsStore {
 }
 
 pub fn get_server_url() -> String {
-    match option_env!("SERVER_URL") {
-        Some(url) => url.to_string(),
-        _ => "127.0.0.1:8081".to_string(),
-    }
+    option_env!("SERVER_URL")
+        .unwrap_or_else(|| panic!("SERVER_URL was not defined!"))
+        .to_string()
 }
 
 pub fn get_user(id: i32, store: Callback<Option<User>>) {
